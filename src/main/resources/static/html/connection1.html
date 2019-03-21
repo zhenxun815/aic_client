@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<style type="text/css">
+
+	</style>
+	<!--<script type="text/javascript" src="/js/jquery-3.3.1.js"/>-->
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function () {
+
+			let serializableNum = ''
+			$('#submit_btn').click(() => {
+				$('#log').html('click... submit_btn')
+				//$('#log').text(window.location.href)
+				let serverIp = $('#server_ip').val()
+				//serializableNum = tqClient.testIP(serverIp)
+				serializableNum = testIP(serverIp)
+			})
+
+			$('#next_btn').click(() => {
+				$('#log').html('click... next_btn')
+				tqClient.nextStep(serializableNum)
+			})
+		})
+
+		function testIP(serverIp) {
+			$('#log').text(serverIp)
+			let data = {serverIp: serverIp}
+			$.ajax({
+				type: 'POST',
+				url: 'http://localhost:8080/activating/ip',
+				async: true,
+				dataType: 'json',
+				contentType: 'application/json;charset=utf-8',
+				data: JSON.stringify(data),
+			}).done(function (data) {
+				$('#log').text(data.response)
+				tqClient.showLog(data.response)
+			})
+		}
+
+	</script>
+</head>
+<body>
+
+<form id="form" method="post">
+	请输入AIC设备IP地址,测试连通后，点击下一步:<br>
+	<input id="server_ip" name="serverIP" placeholder="AIC IP" type="text">
+</form>
+<button id="submit_btn">点击测试是否已连通</button>
+<br>
+<input id=next_btn type="button" value="下一步"/>
+<div>
+	<span id="log">log</span>
+</div>
+</body>
+</html>

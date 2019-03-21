@@ -1,0 +1,10 @@
+server:
+    port: 8080
+#network
+network:
+    url:
+        init: /static/html/init.html
+        connection: /static/html/connection.html
+        activating: /static/html/activating.html
+        landing: /static/html/landing.html
+

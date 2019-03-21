@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>test2</title>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function () {
+
+			let serializableNum = tqClient.getSerializableNum()
+			$('#serializable_num').html(`${serializableNum}`)
+
+			let activatingCode = $('#activating_code').val()
+			$('#log').html(`activatingCode is: ${activatingCode}`)
+			$('#activating_btn').click(() => {
+				activatingCode = $('#activating_code').val()
+				let resCode = tqClient.activate(activatingCode)
+				$('#log').html(`activatingCode is: ${activatingCode}`)
+				$('#activating_res').html(resCode == 1 ? '激活成功' : '激活失败')
+			})
+
+		})
+
+	</script>
+</head>
+<body>
+<h1>activating...</h1>
+客户端序列号: <span id="serializable_num"></span>
+<input id="activating_code" placeholder="输入与序列号对应的激活码" type="text">
+<button id="activating_btn">激活</button>
+<span id="activating_res"></span>
+
+<div>
+	<span id="log">log</span>
+</div>
+</body>
+</html>
