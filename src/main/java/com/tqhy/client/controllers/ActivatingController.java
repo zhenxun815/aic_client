@@ -52,6 +52,7 @@ public class ActivatingController extends BaseWebviewController {
         }
     }
 
+    @Deprecated
     @PostMapping("/verify/connection")
     @ResponseBody
     public VerifyMsg connectAic(@RequestBody VerifyMsg msg) {
@@ -81,7 +82,7 @@ public class ActivatingController extends BaseWebviewController {
 
         return response;
     }
-
+    @Deprecated
     @PostMapping("/verify/activation")
     public VerifyMsg activateClient(@RequestBody VerifyMsg msg) {
         logger.info("get request.." + msg);
