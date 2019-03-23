@@ -19,7 +19,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -61,20 +63,7 @@ public class Network {
     }
 
     /**
-     * 根据待上传文件路径生成上传文件{@link MultipartBody.Part}对象
-     *
-     * @param filePath
-     * @return
-     */
-    public static MultipartBody.Part createUploadFilePart(String filePath) {
-        File file = new File(filePath);
-        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-        MultipartBody.Part part = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
-        return part;
-    }
-
-    /**
-     *  创建单参数请求,将字符串转换为{@link RequestBody}对象
+     * 创建单参数请求,将字符串转换为{@link RequestBody}对象
      *
      * @param content
      * @return
@@ -101,6 +90,37 @@ public class Network {
         });
         return paramMap;
     }
+
+
+    /**
+     * 根据待上传文件路径生成上传文件{@link MultipartBody.Part}对象
+     *
+     * @param filePath
+     * @return
+     */
+    public static MultipartBody.Part createFilePart(String partName, String filePath) {
+        File file = new File(filePath);
+        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        MultipartBody.Part part = MultipartBody.Part.createFormData(partName, file.getName(), requestFile);
+        return part;
+    }
+
+    /**
+     * 根据待上传文件路径生成上传文件{@link MultipartBody.Part}对象
+     *
+     * @param uploadFileMap
+     * @return
+     */
+    public static List<MultipartBody.Part> createMultiFilePart(Map<String, String> uploadFileMap) {
+        List<MultipartBody.Part> multiParts = new ArrayList<>();
+        uploadFileMap.forEach((partName, filePath) -> {
+            MultipartBody.Part filePart = createFilePart(partName, filePath);
+            multiParts.add(filePart);
+        });
+
+        return multiParts;
+    }
+
 
     public static void setBaseUrl(String ip) {
         BASE_URL = "http://" + ip + ":8080/";

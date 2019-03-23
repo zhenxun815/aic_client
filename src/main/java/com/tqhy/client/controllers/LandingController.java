@@ -1,11 +1,16 @@
 package com.tqhy.client.controllers;
 
+import com.tqhy.client.ClientApplication;
 import com.tqhy.client.models.msg.BaseMsg;
+import com.tqhy.client.models.msg.local.LandingMsg;
+import com.tqhy.client.models.msg.local.UploadMsg;
 import com.tqhy.client.models.msg.local.VerifyMsg;
 import com.tqhy.client.utils.NetworkUtils;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +20,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Yiheng
@@ -23,9 +30,9 @@ import java.util.Date;
  * @since 1.0.0
  */
 @RestController
-public class ActivatingController extends BaseWebviewController {
+public class LandingController extends BaseWebviewController {
 
-    static Logger logger = LoggerFactory.getLogger(ActivatingController.class);
+    static Logger logger = LoggerFactory.getLogger(LandingController.class);
     @FXML
     private WebView webView;
 
@@ -52,11 +59,10 @@ public class ActivatingController extends BaseWebviewController {
         }
     }
 
-    @Deprecated
-    @PostMapping("/verify/connection")
+    @PostMapping("/landing")
     @ResponseBody
-    public VerifyMsg connectAic(@RequestBody VerifyMsg msg) {
-        logger.info("get request with server ip.." + msg.getServerIP());
+    public VerifyMsg landing(@RequestBody LandingMsg msg) {
+        logger.info("get LandingMsg.." + msg);
         VerifyMsg response = new VerifyMsg();
 
         String physicalAddress = NetworkUtils.getPhysicalAddress();
@@ -65,11 +71,11 @@ public class ActivatingController extends BaseWebviewController {
             response.setDesc("Mac地址获取失败!");
             return response;
         }
-        //todo 访问后台获取客户端序列号
-        String serverIP = msg.getServerIP();
-        Integer integer = new Integer(serverIP);
-
-        String serializableNum = integer % 2 == 0 ? physicalAddress + new Date() : "";
+        String userName = msg.getUserName();
+        String userPwd = msg.getUserPwd();
+        //todo 访问后台验证登录获取客户端序列号
+        Integer integer = new Integer(userPwd);
+        String serializableNum = integer % 2 == 0 ? userPwd + new Date() : "";
 
         if (StringUtils.isEmpty(serializableNum)) {
             response.setFlag(BaseMsg.FAIL);
@@ -82,6 +88,9 @@ public class ActivatingController extends BaseWebviewController {
 
         return response;
     }
+
+
+
     @Deprecated
     @PostMapping("/verify/activation")
     public VerifyMsg activateClient(@RequestBody VerifyMsg msg) {

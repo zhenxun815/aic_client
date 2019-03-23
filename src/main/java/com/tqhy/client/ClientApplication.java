@@ -1,5 +1,6 @@
 package com.tqhy.client;
 
+import com.tqhy.client.utils.FXMLUtils;
 import com.tqhy.client.utils.NetworkUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -20,21 +21,18 @@ import org.springframework.context.ConfigurableApplicationContext;
 @SpringBootApplication
 public class ClientApplication extends Application {
 
-    private ConfigurableApplicationContext springContext;
-    private Parent rootNode;
-    private FXMLLoader fxmlLoader;
+    public static ConfigurableApplicationContext springContext;
+    public static Stage stage;
 
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        rootNode = fxmlLoader.load();
-        primaryStage.setMinWidth(800D);
-        primaryStage.setMinHeight(600D);
-        primaryStage.getIcons().add(new Image("/static/img/logo_title.png"));
-        //primaryStage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title.png")));
-        primaryStage.setScene(new Scene(rootNode));
-        primaryStage.setOnCloseRequest(event -> System.exit(0));
-        primaryStage.show();
+        stage = primaryStage;
+        stage.setMinWidth(800D);
+        stage.setMinHeight(600D);
+        stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title.png")));
+        stage.setOnCloseRequest(event -> System.exit(0));
+        FXMLUtils.loadWindow(stage,"/static/fxml/main.fxml");
     }
 
     @Override
@@ -42,8 +40,6 @@ public class ClientApplication extends Application {
         super.init();
         Platform.setImplicitExit(false);
         springContext = SpringApplication.run(ClientApplication.class);
-        fxmlLoader = new FXMLLoader(getClass().getResource("/static/fxml/main.fxml"));
-        fxmlLoader.setControllerFactory(springContext::getBean);
     }
 
     @Override

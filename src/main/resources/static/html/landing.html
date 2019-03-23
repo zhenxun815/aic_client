@@ -61,22 +61,33 @@
 			<p>客户端启动异常原因：1、客户端连接数超过数量上限；2、客户端未能连接到AIC设备；</p>
 		</div>
 		<div class="button-zone">
-			<button class="button" id="enter_program">启动程序</button>
+			<button class="button" id="enter_program" onclick="confirm()">确认</button>
 		</div>
 	</div>
 </div>
 </body>
 <script type="text/javascript">
-	function land() {
-		checkValueFunc()
-		let userName = $('#input_uname').val()
-		let userPwd = $('#input_upwd').val()
+	function confirm() {
+		layCloseFunc()
+	}
 
-		let landInfo = {userName: userName, userPwd: userPwd}
-		post_ajax('land', '/land', landInfo, (response) => {
-			let flag = response.flag
-			console.log(`flag is: ${flag}`)
-		})
+	function land() {
+		if (checkValueFunc()){
+			let userName = $('#input_uname').val()
+			let userPwd = $('#input_upwd').val()
+
+			let landInfo = {userName: userName, userPwd: userPwd}
+			post_ajax('land', '/landing', landInfo, (response) => {
+				let flag = response.flag
+				console.log(`flag is: ${flag}`)
+				if (0==flag){
+					window.location.href = baseUrlLocal + '/html/test_upload.html'
+				}else {
+					layOpenFunc1()
+				}
+
+			})
+		}
 	}
 </script>
 </html>
