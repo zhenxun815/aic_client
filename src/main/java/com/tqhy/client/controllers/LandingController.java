@@ -1,11 +1,17 @@
 package com.tqhy.client.controllers;
 
+import com.google.gson.Gson;
 import com.tqhy.client.ClientApplication;
+import com.tqhy.client.models.User;
 import com.tqhy.client.models.msg.BaseMsg;
 import com.tqhy.client.models.msg.local.LandingMsg;
 import com.tqhy.client.models.msg.local.UploadMsg;
 import com.tqhy.client.models.msg.local.VerifyMsg;
+import com.tqhy.client.network.Network;
+import com.tqhy.client.service.HeartBeatService;
 import com.tqhy.client.utils.NetworkUtils;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.web.WebEngine;
@@ -13,6 +19,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +29,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yiheng
@@ -47,6 +56,9 @@ public class LandingController extends BaseWebviewController {
 
     @Value("${network.url.init:''}")
     private String initUrl;
+
+    @Autowired
+    HeartBeatService heartBeatService;
 
     @FXML
     private void initialize() {
@@ -73,14 +85,34 @@ public class LandingController extends BaseWebviewController {
         }
         String userName = msg.getUserName();
         String userPwd = msg.getUserPwd();
-        //todo 访问后台验证登录获取客户端序列号
-        Integer integer = new Integer(userPwd);
-        String serializableNum = integer % 2 == 0 ? userPwd + new Date() : "";
+        HashMap<String, String> userMap = new HashMap<>();
+
+        userMap.put("userName", userName);
+        userMap.put("passWord", userPwd);
+
+        Network.getAiHelperApi().landing(Network.createRequestParamMap(userMap))
+               .map(body -> {
+                   String json = body.string();
+                   logger.info("AiWarningDialogController postDocConfirm recieve json:" + json);
+                   return json;
+               })
+               .observeOn(Schedulers.io())
+               .subscribeOn(Schedulers.trampoline())
+               .subscribe(json -> {
+                   logger.info("landing response: " + json);
+
+
+               });
+
+
+        String serializableNum = "";
 
         if (StringUtils.isEmpty(serializableNum)) {
+
             response.setFlag(BaseMsg.FAIL);
             response.setDesc("客户端序列号获取失败!");
         } else {
+            heartBeatService.startBeat();
             response.setFlag(BaseMsg.SUCCESS);
             response.setDesc("测试连通AIC成功!");
             response.setSerializableNum(serializableNum);
@@ -88,7 +120,6 @@ public class LandingController extends BaseWebviewController {
 
         return response;
     }
-
 
 
     @Deprecated

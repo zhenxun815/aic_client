@@ -39,7 +39,7 @@ public class Network {
 
     public static final String TEST_URL = "http://baidu.com/";
     public static String IP;
-    public static String BASE_URL;
+    public static String BASE_URL = "http://192.168.1.129:8080/";
     private static Logger logger = LoggerFactory.getLogger(Network.class);
 
     /**

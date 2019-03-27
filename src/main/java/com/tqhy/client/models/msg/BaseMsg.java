@@ -39,4 +39,6 @@ public class BaseMsg implements Serializable {
      * 响应描述信息
      */
     String desc;
+
+
 }

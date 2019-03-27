@@ -1,5 +1,6 @@
 package com.tqhy.client.network.api;
 
+import com.tqhy.client.models.User;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import io.reactivex.Observable;
 import okhttp3.MultipartBody;
@@ -62,6 +63,12 @@ public interface AiHelperApi {
     @POST("ai/helper/warningback")
     Observable<ResponseBody> postAiWarningBack(@Body ClientMsg warningBack);
 
+    @Multipart
+    @POST("login/")
+    Observable<ResponseBody> landing(@PartMap Map<String, RequestBody> params);
+
+    @POST("/heartbeat")
+    Observable<ResponseBody> heartbeat(@Body String token);
 
     @POST("ai/helper/confirm")
     Observable<ResponseBody> postHistory(@Body ClientMsg date);
