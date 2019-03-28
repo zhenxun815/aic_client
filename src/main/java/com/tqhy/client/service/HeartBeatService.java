@@ -5,6 +5,8 @@ import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,12 @@ public class HeartBeatService {
 
     private static final String CMD_CONTINUE_BEAT = "continue";
 
+    /**
+     * 判断页面是否需要跳转到登录页,与{@link com.tqhy.client.controllers.LandingController LandingController} 中
+     * {@code jumpToLandingFlag} 进行双向绑定
+     */
+    private BooleanProperty jumpToLandingFlag = new SimpleBooleanProperty(false);
+
     public void startBeat(String token) {
         status = CMD_CONTINUE_BEAT;
         Observable.interval(5000, TimeUnit.MILLISECONDS)
@@ -48,12 +56,25 @@ public class HeartBeatService {
                                  if (1 == flag) {
                                      logger.info("heart beat continue");
                                      status = CMD_CONTINUE_BEAT;
+                                     setJumpToLandingFlag(false);
                                  } else if (203 == flag) {
                                      logger.info("heart beat stop");
                                      status = CMD_STOP_BEAT;
-                                     //todo webview跳转到登录页面
+                                     setJumpToLandingFlag(true);
                                  }
                              });
                   });
+    }
+
+    public boolean isJumpToLandingFlag() {
+        return jumpToLandingFlag.get();
+    }
+
+    public BooleanProperty jumpToLandingFlagProperty() {
+        return jumpToLandingFlag;
+    }
+
+    public void setJumpToLandingFlag(boolean jumpToLandingFlag) {
+        this.jumpToLandingFlag.set(jumpToLandingFlag);
     }
 }

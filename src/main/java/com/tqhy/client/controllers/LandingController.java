@@ -9,6 +9,8 @@ import com.tqhy.client.network.Network;
 import com.tqhy.client.service.HeartBeatService;
 import com.tqhy.client.utils.NetworkUtils;
 import io.reactivex.schedulers.Schedulers;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -25,16 +27,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.tqhy.client.utils.NetworkUtils.createRequestParamMap;
-import static io.reactivex.internal.operators.flowable.FlowableBlockingSubscribe.subscribe;
-
 /**
  * @author Yiheng
  * @create 3/18/2019
  * @since 1.0.0
  */
 @RestController
-public class LandingController extends BaseWebviewController {
+public class LandingController extends BaseWebviewController{
 
     static Logger logger = LoggerFactory.getLogger(LandingController.class);
     @FXML
@@ -55,6 +54,12 @@ public class LandingController extends BaseWebviewController {
     @Autowired
     HeartBeatService heartBeatService;
 
+    /**
+     * 判断页面是否需要跳转到登录页,与{@link com.tqhy.client.service.HeartBeatService HeartBeatService} 中
+     * {@code jumpToLandingFlag} 进行双向绑定
+     */
+    private BooleanProperty jumpToLandingFlag = new SimpleBooleanProperty(false);
+
     @FXML
     private void initialize() {
         // logger.info("connectionUrl is: " + connectionUrl);
@@ -64,6 +69,15 @@ public class LandingController extends BaseWebviewController {
             WebEngine webEngine = webView.getEngine();
             webEngine.load(localUrl);
         }
+
+        jumpToLandingFlag.bindBidirectional(heartBeatService.jumpToLandingFlagProperty());
+        jumpToLandingFlag.addListener((observable, oldValue, newValue) -> {
+            logger.info("jumpToLandingFlag changed,oldValue is: " + oldValue + ", newValue is: " + newValue);
+            if (newValue){
+                WebEngine webEngine = webView.getEngine();
+                webEngine.load(NetworkUtils.toExternalForm(landingUrl));
+            }
+        });
     }
 
     @PostMapping("/landing")
@@ -132,4 +146,5 @@ public class LandingController extends BaseWebviewController {
         response.setDesc(valid ? "激活成功" : "激活失败");
         return response;
     }
+
 }

@@ -56,7 +56,7 @@ public interface AicApi {
      * @return
      */
     @Multipart
-    @POST("upload/cases/multi")
+    @POST("upload/")
     Observable<ResponseBody> uploadFiles(@PartMap Map<String, RequestBody> params, @Part MultipartBody.Part fileParts);
 
 

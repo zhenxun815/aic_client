@@ -19,6 +19,8 @@ public class FXMLUtils {
 
     /**
      *
+     * 打开新窗口
+     *
      * @param stage
      * @param url
      * @return
