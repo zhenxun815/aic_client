@@ -23,7 +23,7 @@ public class VerifyMsg extends BaseMsg {
     /**
      * 客户端序列号
      */
-    private String serializableNum;
+    private String token;
 
     /**
      * 激活码

@@ -17,7 +17,9 @@ import java.io.File;
 @ToString
 public class UploadMsg extends BaseMsg {
 
-    private String subjectName;
+    private String caseName;
 
-    private String serializableNum;
+    private String token;
+
+    private String projectId;
 }

@@ -1,5 +1,8 @@
 package com.tqhy.client.service;
 
+import com.google.gson.Gson;
+import com.tqhy.client.models.msg.server.ClientMsg;
+import com.tqhy.client.network.Network;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import org.slf4j.Logger;
@@ -22,33 +25,35 @@ public class HeartBeatService {
 
     private static final String CMD_STOP_BEAT = "stop";
 
-    private static final String CMD_STOP_CONTINUE = "continue";
+    private static final String CMD_CONTINUE_BEAT = "continue";
 
-    public void startBeat() {
-        status = CMD_STOP_CONTINUE;
-        Observable.interval(1000, TimeUnit.MILLISECONDS)
-                  .takeWhile(beatTimes -> CMD_STOP_CONTINUE.equals(status))
-                  .map(beatTimes -> {
-                           logger.info("current status is: " + status);
-                           //todo 请求后台,获取心跳返回
-                           String cmd = "";
-                           return cmd;
-                       }
-                  )
+    public void startBeat(String token) {
+        status = CMD_CONTINUE_BEAT;
+        Observable.interval(5000, TimeUnit.MILLISECONDS)
+                  .takeWhile(beatTimes -> CMD_CONTINUE_BEAT.equals(status))
                   .observeOn(Schedulers.trampoline())
-                  .subscribeOn(Schedulers.trampoline())
-                  .subscribe(cmd -> {
-                      logger.info("subscribe: " + cmd);
-                      if ("youxiao".equals(cmd)) {
+                  .subscribeOn(Schedulers.io())
+                  .subscribe(aLong -> {
+                      logger.info("heartBeating... ");
 
-                          //logger.info(".dll caller get: " + str);
-                          status = CMD_STOP_CONTINUE;
-                      } else {
-                          status = CMD_STOP_BEAT;
-                          //todo webview跳转到登录页面
-                      }
-
-
+                      Network.getAicApi()
+                             .heartbeat(token)
+                             .observeOn(Schedulers.io())
+                             .subscribeOn(Schedulers.trampoline())
+                             .subscribe(responseBody -> {
+                                 String json = responseBody.string();
+                                 logger.info("heart beat json is: " + json);
+                                 ClientMsg clientMsg = new Gson().fromJson(json, ClientMsg.class);
+                                 Integer flag = clientMsg.getFlag();
+                                 if (1 == flag) {
+                                     logger.info("heart beat continue");
+                                     status = CMD_CONTINUE_BEAT;
+                                 } else if (203 == flag) {
+                                     logger.info("heart beat stop");
+                                     status = CMD_STOP_BEAT;
+                                     //todo webview跳转到登录页面
+                                 }
+                             });
                   });
     }
 }

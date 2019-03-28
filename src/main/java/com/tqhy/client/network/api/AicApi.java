@@ -17,7 +17,7 @@ import java.util.Map;
  * @create 2018/6/13
  * @since 1.0.0
  */
-public interface AiHelperApi {
+public interface AicApi {
 
     /**
      * 单个参数,单个文件上传
@@ -57,18 +57,21 @@ public interface AiHelperApi {
      */
     @Multipart
     @POST("upload/cases/multi")
-    Observable<ResponseBody> uploadFiles(@PartMap Map<String, RequestBody> params, @Part List<MultipartBody.Part> fileParts);
+    Observable<ResponseBody> uploadFiles(@PartMap Map<String, RequestBody> params, @Part MultipartBody.Part fileParts);
 
 
     @POST("ai/helper/warningback")
     Observable<ResponseBody> postAiWarningBack(@Body ClientMsg warningBack);
 
-    @Multipart
+    /*@Multipart
     @POST("login/")
-    Observable<ResponseBody> landing(@PartMap Map<String, RequestBody> params);
+    Observable<ResponseBody> landing(@PartMap Map<String, RequestBody> params); */
+
+    @POST("login/")
+    Observable<ResponseBody> landing(@Query("userName") String userName, @Query("passWord") String passWord);
 
     @POST("/heartbeat")
-    Observable<ResponseBody> heartbeat(@Body String token);
+    Observable<ResponseBody> heartbeat(@Query("token") String token);
 
     @POST("ai/helper/confirm")
     Observable<ResponseBody> postHistory(@Body ClientMsg date);

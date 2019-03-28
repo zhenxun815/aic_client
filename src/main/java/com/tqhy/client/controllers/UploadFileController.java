@@ -1,7 +1,12 @@
 package com.tqhy.client.controllers;
 
 import com.tqhy.client.models.msg.local.UploadMsg;
+import com.tqhy.client.network.Network;
 import com.tqhy.client.utils.FXMLUtils;
+import com.tqhy.client.utils.NetworkUtils;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.input.MouseButton;
@@ -9,6 +14,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import okhttp3.MultipartBody;
+import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +23,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Yiheng
@@ -31,7 +43,7 @@ public class UploadFileController {
     /**
      * 上传目标课题
      */
-    String subjectName;
+    String caseName;
 
     /**
      * 待上传文件夹
@@ -47,6 +59,52 @@ public class UploadFileController {
         if (MouseButton.PRIMARY.equals(button)) {
             logger.info(button.name() + "....");
             logger.info("start upload: " + directory.getAbsolutePath());
+            HashMap<String, String> map = new HashMap<>();
+            map.put("case", caseName);
+            map.put("client", NetworkUtils.getPhysicalAddress());
+            Map<String, okhttp3.RequestBody> requestParamMap = NetworkUtils.createRequestParamMap(map);
+
+            File[] files = directory.listFiles(File::isFile);
+            int fileCount = files.length;
+            AtomicInteger completeCount = new AtomicInteger();
+            Arrays.stream(files)
+                  .forEach(file -> {
+                      MultipartBody.Part filePart = NetworkUtils.createFilePart("file", file.getAbsolutePath());
+                      Network.getAicApi()
+                             .uploadFiles(requestParamMap, filePart)
+                             .observeOn(Schedulers.io())
+                             .subscribeOn(Schedulers.trampoline())
+                             .subscribe(new Observer<ResponseBody>() {
+                                 @Override
+                                 public void onSubscribe(Disposable d) {
+                                     logger.info("Disposable: " + d);
+                                 }
+
+                                 @Override
+                                 public void onNext(ResponseBody responseBody) {
+                                     try {
+                                         String json = responseBody.string();
+                                         logger.info("json is: " + json);
+                                     } catch (IOException e) {
+                                         e.printStackTrace();
+                                     }
+                                 }
+
+                                 @Override
+                                 public void onError(Throwable e) {
+                                     e.printStackTrace();
+                                 }
+
+                                 @Override
+                                 public void onComplete() {
+                                     logger.info("complete");
+                                     int complete = completeCount.addAndGet(1);
+                                     double progress = (complete + 0D) / fileCount;
+                                 }
+                             });
+                  });
+
+
             //todo 上传
         }
     }
@@ -74,18 +132,19 @@ public class UploadFileController {
     }
 
     /**
-     * 开启上传窗口,舒适化页面
+     * 开启上传窗口,初始化页面
+     *
      * @param uploadMsg
      */
     @PostMapping("/upload/start")
     public void openUpload(@RequestBody UploadMsg uploadMsg) {
 
-        subjectName = uploadMsg.getSubjectName();
-        logger.info("subjectName to upload is: " + subjectName);
+        caseName = uploadMsg.getCaseName();
+        logger.info("caseName to upload is: " + caseName);
         Platform.runLater(() -> {
             stage = new Stage();
             FXMLUtils.loadWindow(stage, "/static/fxml/upload_choose.fxml");
-            text_desc.setText("将数据导入至: " + subjectName);
+            text_desc.setText("将数据导入至: " + caseName);
         });
     }
 

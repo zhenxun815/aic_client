@@ -8,9 +8,9 @@
 	<script type="text/javascript">
 		$(document).ready(function () {
 			$('#btn_to_upload').click(() => {
-				let subjectName = $('#subject_name').val()
-				console.log(`subjectName is: ${subjectName}`)
-				let requestData = {subjectName:subjectName}
+				let caseName = $('#case_name').val()
+				console.log(`subjectName is: ${caseName}`)
+				let requestData = {caseName: caseName}
 				post_ajax('upload', '/upload/start', requestData, (response) => {
 					let flag = response.flag
 					console.log(`flag is: ${flag}`)
@@ -31,7 +31,7 @@
 <body>
 <h1>上传入口页...</h1>
 
-<input id="subject_name" placeholder="输入课题名称" type="text">
+<input id="case_name" placeholder="输入课题名称" type="text">
 <button id="btn_to_upload">导入入口</button>
 <span id="activating_res"></span>
 

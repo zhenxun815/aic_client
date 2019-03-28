@@ -80,7 +80,7 @@
 			post_ajax('land', '/landing', landInfo, (response) => {
 				let flag = response.flag
 				console.log(`flag is: ${flag}`)
-				if (0==flag){
+				if (1==flag){
 					window.location.href = baseUrlLocal + '/html/test_upload.html'
 				}else {
 					layOpenFunc1()
