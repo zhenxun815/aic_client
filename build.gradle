@@ -2,6 +2,9 @@ buildscript {
     repositories {
         jcenter()
         mavenCentral()
+        maven {
+            url "http://www.dcm4che.org/maven2/"
+        }
     }
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.4.RELEASE"
@@ -51,6 +54,9 @@ jfx {
 repositories {
     jcenter()
     mavenCentral()
+    maven {
+        url "http://www.dcm4che.org/maven2/"
+    }
 }
 
 dependencies {
@@ -73,7 +79,7 @@ dependencies {
 
     compile 'com.google.code.gson:gson:2.8.5'
     compile 'io.reactivex.rxjava2:rxjava:2.1.14'
-    
+
     /**
      * retrofit+okhttp
      * 网络框架
@@ -83,4 +89,13 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.4.0'
     compile 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
     compile 'net.java.dev.jna:jna:4.5.1'
+
+    /**
+     * dcm4che
+     */
+    compile group: 'org.dcm4che', name: 'dcm4che-imageio', version: '5.16.0'
+    compile group: 'org.dcm4che', name: 'dcm4che-image', version: '5.16.0'
+    compile group: 'org.dcm4che', name: 'dcm4che-core', version: '5.16.0'
+
+
 }
