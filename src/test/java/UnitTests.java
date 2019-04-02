@@ -1,5 +1,6 @@
 import com.tqhy.client.ClientApplication;
 import com.tqhy.client.task.Dcm2JpgTask;
+import com.tqhy.client.utils.FileUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -8,8 +9,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,10 +26,12 @@ import java.util.concurrent.Future;
  * @since 1.0.0
  */
 
-public class Tests {
+public class UnitTests {
+
+    Logger logger = LoggerFactory.getLogger(UnitTests.class);
 
     @Test
-    public void test() {
+    public void testParseDicom() {
         File dicomDir = new File("F:\\dicom\\12345\\");
         File[] dicomFiles = dicomDir.listFiles(File::isFile);
 
@@ -43,5 +50,11 @@ public class Tests {
               }, ArrayList::addAll)
               .forEach(jpgFile -> System.out.println("trans jpg file finish..." + jpgFile.getAbsolutePath()));
 
+    }
+
+    @Test
+    public void testFileUtils() {
+        String batchNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+        logger.info("batchNumber is: "+batchNumber);
     }
 }
