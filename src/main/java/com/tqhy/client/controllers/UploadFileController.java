@@ -110,7 +110,8 @@ public class UploadFileController {
 
             List<File> filesInDir = FileUtils.getFilesInDir(dirToUpload);
             List<File> filesToUpload = FileUtils.transAllToJpg(filesInDir);
-
+            String caseName = dirToUpload.getName();
+            uploadMsg.setCaseName(caseName);
             UploadWorkerTask workerTask = UploadWorkerTask.with(filesToUpload, uploadMsg);
             workerTask.messageProperty()
                       .addListener((observable, oldVal, newVal) -> {
