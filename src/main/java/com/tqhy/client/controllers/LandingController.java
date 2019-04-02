@@ -33,7 +33,7 @@ import java.util.List;
  * @since 1.0.0
  */
 @RestController
-public class LandingController extends BaseWebviewController{
+public class LandingController{
 
     static Logger logger = LoggerFactory.getLogger(LandingController.class);
     @FXML
@@ -94,13 +94,8 @@ public class LandingController extends BaseWebviewController{
         }
         String userName = landingMsg.getUserName();
         String userPwd = landingMsg.getUserPwd();
-        HashMap<String, String> userMap = new HashMap<>();
-
-        userMap.put("userName", userName);
-        userMap.put("passWord", userPwd);
 
         Network.getAicApi()
-               //.landing(createRequestParamMap(userMap))
                .landing(userName, userPwd)
                .map(body -> {
                    String json = body.string();
@@ -111,11 +106,11 @@ public class LandingController extends BaseWebviewController{
 
                    if (1 == flag && null != msgs && msgs.size() > 0) {
                        response.setFlag(BaseMsg.SUCCESS);
-                       response.setDesc("测试连通AIC成功!");
+                       response.setDesc("连通AIC成功!");
                        response.setToken(msgs.get(0));
                    } else {
                        response.setFlag(BaseMsg.FAIL);
-                       response.setDesc("客户端序列号获取失败!");
+                       response.setDesc("连通AIC成功失败!");
                    }
                    return response;
                })

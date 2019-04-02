@@ -1,8 +1,12 @@
 package com.tqhy.client.utils;
 
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -18,7 +22,6 @@ public class FXMLUtils {
 
 
     /**
-     *
      * 打开新窗口
      *
      * @param stage
@@ -30,8 +33,9 @@ public class FXMLUtils {
             FXMLLoader fxmlLoader = new FXMLLoader(FXMLUtils.class.getResource(url));
             fxmlLoader.setControllerFactory(springContext::getBean);
             Parent parentNode = fxmlLoader.load();
-            Scene scene = new Scene(parentNode);
+            Scene scene = new Scene(parentNode, Color.TRANSPARENT);
             stage.setScene(scene);
+            stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title.png")));
             stage.show();
             return stage;
         } catch (IOException e) {

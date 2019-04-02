@@ -30,7 +30,6 @@ public class ClientApplication extends Application {
         stage = primaryStage;
         stage.setMinWidth(800D);
         stage.setMinHeight(600D);
-        stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title.png")));
         stage.setOnCloseRequest(event -> System.exit(0));
         FXMLUtils.loadWindow(stage,"/static/fxml/main.fxml");
     }
