@@ -7,6 +7,7 @@ import com.tqhy.client.models.msg.local.VerifyMsg;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
 import com.tqhy.client.service.HeartBeatService;
+import com.tqhy.client.utils.GsonUtils;
 import com.tqhy.client.utils.NetworkUtils;
 import io.reactivex.schedulers.Schedulers;
 import javafx.application.Platform;
@@ -72,7 +73,7 @@ public class LandingController {
         jumpToLandingFlag.addListener((observable, oldValue, newValue) -> {
             logger.info("jumpToLandingFlag changed,oldValue is: " + oldValue + ", newValue is: " + newValue);
             if (newValue) {
-                Platform.runLater(()->{
+                Platform.runLater(() -> {
                     WebEngine webEngine = webView.getEngine();
                     webEngine.load(NetworkUtils.toExternalForm(landingUrl));
                 });
@@ -98,20 +99,11 @@ public class LandingController {
         Network.getAicApi()
                .landing(userName, userPwd)
                .map(body -> {
-                   String json = body.string();
-                   logger.info("landing response: " + json);
-                   ClientMsg clientMsg = new Gson().fromJson(json, ClientMsg.class);
-                   Integer flag = clientMsg.getFlag();
-                   List<String> msgs = clientMsg.getMsg();
-
-                   if (1 == flag && null != msgs && msgs.size() > 0) {
-                       response.setFlag(BaseMsg.SUCCESS);
-                       response.setDesc("连通AIC成功!");
-                       response.setToken(msgs.get(0));
-                   } else {
-                       response.setFlag(BaseMsg.FAIL);
-                       response.setDesc("连通AIC成功失败!");
-                   }
+                   ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
+                   response.setFlag(clientMsg.getFlag());
+                   response.setDesc(clientMsg.getDesc());
+                   List<String> msg = clientMsg.getMsg();
+                   response.setToken(msg.get(0));
                    return response;
                })
                .observeOn(Schedulers.io())

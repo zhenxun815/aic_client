@@ -114,11 +114,25 @@ public class FileUtils {
         return wpos - off;
     }
 
-    public static void deleteFile(File temp) {
+    /**
+     * 删除文件夹
+     * @param temp
+     * @return
+     */
+    public static boolean deleteDir(File temp) {
         logger.info("into delete");
-        if (temp.exists() && temp.isDirectory()) {
-            boolean delete = temp.delete();
-            logger.info("delete answer: " + delete);
+        if(temp.exists()){
+            File[] subFiles = temp.listFiles();
+            Arrays.stream(subFiles)
+                  .forEach(subFile -> {
+                      if (subFile.isDirectory()) {
+                          deleteDir(subFile);
+                      } else {
+                          subFile.delete();
+                      }
+                  });
+            return temp.delete();
         }
+       return false;
     }
 }

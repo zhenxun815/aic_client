@@ -5,6 +5,7 @@ import com.tqhy.client.models.msg.local.UploadMsg;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
 import com.tqhy.client.utils.FileUtils;
+import com.tqhy.client.utils.GsonUtils;
 import com.tqhy.client.utils.NetworkUtils;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
@@ -24,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,18 +103,14 @@ public class UploadWorkerTask extends Task {
 
                        @Override
                        public void onNext(ResponseBody responseBody) {
-                           try {
-                               String json = responseBody.string();
-                               logger.info("json is: " + json);
-                               ClientMsg clientMsg = new Gson().fromJson(json, ClientMsg.class);
-                               Integer flag = clientMsg.getFlag();
-                               if (203 == flag) {
-                                   jumpToLandFlag.set(true);
-                               }
 
-                           } catch (IOException e) {
-                               e.printStackTrace();
-                           }
+                           GsonUtils.parseResponseToObj(responseBody, ClientMsg.class)
+                                    .ifPresent(clientMsg -> {
+                                        Integer flag = clientMsg.getFlag();
+                                        if (203 == flag) {
+                                            jumpToLandFlag.set(true);
+                                        }
+                                    });
                        }
 
                        @Override
@@ -127,16 +123,18 @@ public class UploadWorkerTask extends Task {
                        public void onComplete() {
                            completeCount.incrementAndGet();
                            int dirCompleteCount = dirUploadCompleteCount.incrementAndGet();
-                           if (dirCompleteCount == filesInCaseDir.size()) {
-                               File temp = new File(caseDir, "TQHY_TEMP");
-                               FileUtils.deleteFile(temp);
-                           }
                            updateProgress(completeCount.get(), total);
                            double progress = (completeCount.get() + 0D) / total * 100;
                            logger.info("complete count is: " + completeCount.get() + ", progress is: " + progress);
                            DecimalFormat decimalFormat = new DecimalFormat("#0.0");
                            String formatProgress = decimalFormat.format(progress);
                            updateMessage(progress == 100.0D ? PROGRESS_MSG_COMPLETE : formatProgress);
+
+                           //上传完毕删除生成的jpg临时文件
+                           if (dirCompleteCount == filesInCaseDir.size()) {
+                               File temp = new File(caseDir, "TQHY_TEMP");
+                               FileUtils.deleteDir(temp);
+                           }
                        }
                    });
         }

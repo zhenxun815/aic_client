@@ -2,6 +2,7 @@ package com.tqhy.client.models.msg.server;
 
 import com.tqhy.client.models.msg.BaseMsg;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
 @Getter
 @Setter
 public class ClientMsg<T> extends BaseMsg {
+
     public T data;
 
     public List<String> msg;
