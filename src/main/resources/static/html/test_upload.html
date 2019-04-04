@@ -8,13 +8,14 @@
 	<script type="text/javascript">
 		$(document).ready(function () {
 			$('#btn_to_upload').click(() => {
-				let caseName = $('#case_name').val()
+				let projectName = $('#project_name').val()
 				let projectId = $('#project_id').val()
-				let token = getStorage("AIC_TOKEN")
-				console.log(`subjectName is: ${caseName}`)
+				//let token = getStorage("AIC_TOKEN")
+				console.log(`subjectName is: ${projectName}`)
 				let requestData = {
+					//token: token,
 					projectId: projectId,
-					token: token
+					projectName: projectName
 				}
 				post_ajax('upload', '/upload/start', requestData, (response) => {
 					let flag = response.flag
@@ -29,16 +30,22 @@
 				})
 			})
 
+			$('#btn_logout').click(() => {
+				get_ajax('logout', '/logout')
+			})
+
 		})
 
 	</script>
 </head>
 <body>
-<h1>上传入口页...</h1>
+<h1>测试页...</h1>
 
-<input id="case_name" placeholder="输入课题名称" type="text">
-<input id="project_id" placeholder="输入projectId" type="text">
-<button id="btn_to_upload">导入入口</button>
+<input id="project_name" placeholder="输入课题名称" type="text"><br>
+<input id="project_id" placeholder="输入课题Id" type="text"><br>
+<h5>测试课题id: f9df4b3cceb4487c89b4757b310cc9b8</h5><br>
+<button id="btn_to_upload">导入入口</button><br>
+<button id="btn_logout">重新登录</button>
 <span id="activating_res"></span>
 
 </body>

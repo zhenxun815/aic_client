@@ -86,8 +86,13 @@
                 </VBox.margin>
                 <children>
                     <ProgressBar fx:id="progress_bar_upload">
+                        <HBox.margin>
+                            <Insets>
+                                <left>90</left>
+                            </Insets>
+                        </HBox.margin>
                     </ProgressBar>
-                    <Text fx:id="text_progress_info">
+                    <Text fx:id="text_progress_info">准备中..
                         <HBox.margin>
                             <Insets>
                                 <left>6</left>

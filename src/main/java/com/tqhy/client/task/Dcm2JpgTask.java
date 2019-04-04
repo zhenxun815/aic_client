@@ -66,7 +66,7 @@ public class Dcm2JpgTask implements Callable<File> {
         if (dicomFile.exists()) {
 
             try (ImageInputStream iis = ImageIO.createImageInputStream(dicomFile)) {
-                File jpgDir = new File(dicomFile.getParent() + "/jpg");
+                File jpgDir = new File(dicomFile.getParent() + "/TQHY_TEMP");
                 if (!jpgDir.exists()) {
                     jpgDir.mkdir();
                 }

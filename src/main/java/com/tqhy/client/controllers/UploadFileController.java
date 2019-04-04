@@ -3,7 +3,6 @@ package com.tqhy.client.controllers;
 import com.tqhy.client.models.msg.local.UploadMsg;
 import com.tqhy.client.task.UploadWorkerTask;
 import com.tqhy.client.utils.FXMLUtils;
-import com.tqhy.client.utils.FileUtils;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -18,15 +17,14 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -71,6 +69,8 @@ public class UploadFileController {
     @FXML
     ProgressBar progress_bar_upload;
 
+    @Autowired
+    LandingController landingController;
 
     @FXML
     public void initialize() {
@@ -80,9 +80,9 @@ public class UploadFileController {
         showPanel(panel_choose.getId());
         jumpToLandFlag.addListener((observable, oldVal, newVal) -> {
             if (newVal) {
-                //todo 跳转到登录页面
                 logger.info("jump to land...");
-                //stage.hide();
+                landingController.logout();
+                Platform.runLater(() -> stage.hide());
             }
         });
     }
@@ -108,17 +108,14 @@ public class UploadFileController {
             //显示上传中界面
             showPanel(panel_progress.getId());
 
-            List<File> filesInDir = FileUtils.getFilesInDir(dirToUpload);
-            List<File> filesToUpload = FileUtils.transAllToJpg(filesInDir);
-            String caseName = dirToUpload.getName();
-            uploadMsg.setCaseName(caseName);
-            UploadWorkerTask workerTask = UploadWorkerTask.with(filesToUpload, uploadMsg);
+            UploadWorkerTask workerTask = UploadWorkerTask.with(dirToUpload, uploadMsg);
             workerTask.messageProperty()
                       .addListener((observable, oldVal, newVal) -> {
                           if (UploadWorkerTask.PROGRESS_MSG_ERROR.equals(newVal)) {
                               logger.info("upload progress msg..." + newVal);
                               //显示上传失败页面
                               showPanel(panel_fail.getId());
+                              text_progress_info.setText(0 + "%");
                           } else if (UploadWorkerTask.PROGRESS_MSG_COMPLETE.equals(newVal)) {
                               logger.info("upload progress msg..." + newVal);
                               //显示上传成功页面
@@ -186,11 +183,11 @@ public class UploadFileController {
         uploadMsg = msg;
         String batchNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
         uploadMsg.setBatchNumber(batchNumber);
-        logger.info("caseName to upload is: " + uploadMsg.getCaseName()+", batchNumber is: "+batchNumber);
+        logger.info("projectName to upload is: " + uploadMsg.getProjectName() + ", batchNumber is: " + batchNumber);
         Platform.runLater(() -> {
             stage = new Stage();
             FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml");
-            text_choose_desc.setText("将数据导入至: " + uploadMsg.getCaseName());
+            text_choose_desc.setText("将数据导入至: " + uploadMsg.getProjectName());
         });
     }
 

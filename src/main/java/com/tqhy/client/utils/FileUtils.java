@@ -24,6 +24,7 @@ public class FileUtils {
     private static final String FILE_TYPE_DCM = "DCM";
 
     static Logger logger = LoggerFactory.getLogger(FileUtils.class);
+
     /**
      * 获取文件夹下所有文件
      *
@@ -61,7 +62,7 @@ public class FileUtils {
                                                      } catch (ExecutionException e) {
                                                          e.printStackTrace();
                                                      }
-                                                 }else {
+                                                 } else {
                                                      list.add(file);
                                                  }
                                              }, ArrayList::addAll);
@@ -113,4 +114,11 @@ public class FileUtils {
         return wpos - off;
     }
 
+    public static void deleteFile(File temp) {
+        logger.info("into delete");
+        if (temp.exists() && temp.isDirectory()) {
+            boolean delete = temp.delete();
+            logger.info("delete answer: " + delete);
+        }
+    }
 }

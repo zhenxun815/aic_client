@@ -9,6 +9,7 @@ import com.tqhy.client.network.Network;
 import com.tqhy.client.service.HeartBeatService;
 import com.tqhy.client.utils.NetworkUtils;
 import io.reactivex.schedulers.Schedulers;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -19,10 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +31,7 @@ import java.util.List;
  * @since 1.0.0
  */
 @RestController
-public class LandingController{
+public class LandingController {
 
     static Logger logger = LoggerFactory.getLogger(LandingController.class);
     @FXML
@@ -62,8 +60,8 @@ public class LandingController{
 
     @FXML
     private void initialize() {
-        // logger.info("connectionUrl is: " + connectionUrl);
-        // logger.info("activatingUrl is: " + activatingUrl);
+
+        webView.setContextMenuEnabled(false);
         String localUrl = NetworkUtils.toExternalForm(initUrl);
         if (!StringUtils.isEmpty(localUrl)) {
             WebEngine webEngine = webView.getEngine();
@@ -73,9 +71,11 @@ public class LandingController{
         jumpToLandingFlag.bindBidirectional(heartBeatService.jumpToLandingFlagProperty());
         jumpToLandingFlag.addListener((observable, oldValue, newValue) -> {
             logger.info("jumpToLandingFlag changed,oldValue is: " + oldValue + ", newValue is: " + newValue);
-            if (newValue){
-                WebEngine webEngine = webView.getEngine();
-                webEngine.load(NetworkUtils.toExternalForm(landingUrl));
+            if (newValue) {
+                Platform.runLater(()->{
+                    WebEngine webEngine = webView.getEngine();
+                    webEngine.load(NetworkUtils.toExternalForm(landingUrl));
+                });
             }
         });
     }
@@ -124,6 +124,11 @@ public class LandingController{
 
         return response;
 
+    }
+
+    @GetMapping("/logout")
+    public void logout() {
+        jumpToLandingFlag.set(true);
     }
 
 

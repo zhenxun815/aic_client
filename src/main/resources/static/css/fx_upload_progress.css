@@ -16,6 +16,10 @@
     -fx-font-size: 16px;
 }
 
+#text_progress_info {
+    -fx-text-alignment: left;
+}
+
 #text_progress_desc {
     -fx-fill: #333333;
     -fx-min-height: 16px;
@@ -34,9 +38,7 @@
     -fx-max-height: 16px;
     -fx-background-color: #FE6225;
     -fx-background-radius: 15px;
-    /*-fx-box-border: #D0D0D0;*/
-    /*-fx-accent: #FE6225;*/
-    -fx-background-insets: 1 1 1 1;
+    -fx-background-insets: 1px, 1px, 1px, 1px;
     -fx-padding: 0px;
 }
 
@@ -51,5 +53,5 @@
 }
 
 .progress_box {
-    -fx-alignment: center;
+    /*-fx-alignment: center;*/
 }

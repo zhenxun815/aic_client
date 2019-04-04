@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import com.tqhy.client.models.msg.local.UploadMsg;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
+import com.tqhy.client.utils.FileUtils;
 import com.tqhy.client.utils.NetworkUtils;
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,28 +48,48 @@ public class UploadWorkerTask extends Task {
     BooleanProperty jumpToLandFlag = new SimpleBooleanProperty(false);
 
     @NonNull
-    List<File> filesToUpload;
+    File dirToUpload;
     @NonNull
     UploadMsg uploadMsg;
 
+    int total;
+    AtomicInteger completeCount;
+
     @Override
     protected Object call() throws Exception {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("caseName", uploadMsg.getCaseName());
-        map.put("token", "test");
-        map.put("projectId", "f9df4b3cceb4487c89b4757b310cc9b8");
-        map.put("batchNumber", uploadMsg.getBatchNumber());
-        Map<String, RequestBody> requestParamMap = NetworkUtils.createRequestParamMap(map);
-        upLoad(filesToUpload,requestParamMap);
-        //fakeUpload(filesToUpload);
+
+        completeCount = new AtomicInteger(0);
+        total = FileUtils.getFilesInDir(dirToUpload).size();
+
+        File[] caseDirs = dirToUpload.listFiles(File::isDirectory);
+        for (File caseDir : caseDirs) {
+            if (jumpToLandFlag.get()) {
+                break;
+            }
+            HashMap<String, String> map = new HashMap<>();
+            map.put("caseName", caseDir.getName());
+            map.put("token", "test");
+            map.put("projectId", uploadMsg.getProjectId());
+            map.put("batchNumber", uploadMsg.getBatchNumber());
+            Map<String, RequestBody> requestParamMap = NetworkUtils.createRequestParamMap(map);
+
+
+            upLoad(caseDir, requestParamMap);
+            //fakeUpload(filesToUpload);
+        }
+
         return null;
     }
 
 
-    private AtomicInteger upLoad(List<File> filesToUpload, Map<String, RequestBody> requestParamMap) {
-        AtomicInteger completeCount = new AtomicInteger(0);
-        int total = filesToUpload.size();
-        filesToUpload.forEach(file -> {
+    private void upLoad(File caseDir, Map<String, RequestBody> requestParamMap) {
+        List<File> filesInCaseDir = FileUtils.getFilesInDir(caseDir);
+        List<File> transformedFiles = FileUtils.transAllToJpg(filesInCaseDir);
+        AtomicInteger dirUploadCompleteCount = new AtomicInteger(0);
+        for (File file : transformedFiles) {
+            if (jumpToLandFlag.get()) {
+                break;
+            }
             MultipartBody.Part filePart = NetworkUtils.createFilePart("file", file.getAbsolutePath());
             Network.getAicApi()
                    .uploadFiles(requestParamMap, filePart)
@@ -84,12 +105,13 @@ public class UploadWorkerTask extends Task {
                        public void onNext(ResponseBody responseBody) {
                            try {
                                String json = responseBody.string();
+                               logger.info("json is: " + json);
                                ClientMsg clientMsg = new Gson().fromJson(json, ClientMsg.class);
                                Integer flag = clientMsg.getFlag();
                                if (203 == flag) {
                                    jumpToLandFlag.set(true);
                                }
-                               logger.info("json is: " + json);
+
                            } catch (IOException e) {
                                e.printStackTrace();
                            }
@@ -104,14 +126,20 @@ public class UploadWorkerTask extends Task {
                        @Override
                        public void onComplete() {
                            completeCount.incrementAndGet();
+                           int dirCompleteCount = dirUploadCompleteCount.incrementAndGet();
+                           if (dirCompleteCount == filesInCaseDir.size()) {
+                               File temp = new File(caseDir, "TQHY_TEMP");
+                               FileUtils.deleteFile(temp);
+                           }
                            updateProgress(completeCount.get(), total);
                            double progress = (completeCount.get() + 0D) / total * 100;
                            logger.info("complete count is: " + completeCount.get() + ", progress is: " + progress);
-                           updateMessage(progress == 100.0D ? PROGRESS_MSG_COMPLETE : DecimalFormat.getInstance().format(progress));
+                           DecimalFormat decimalFormat = new DecimalFormat("#0.0");
+                           String formatProgress = decimalFormat.format(progress);
+                           updateMessage(progress == 100.0D ? PROGRESS_MSG_COMPLETE : formatProgress);
                        }
                    });
-        });
-        return completeCount;
+        }
     }
 
     private AtomicInteger fakeUpload(List<File> filesToUpload) {
