@@ -104,13 +104,11 @@ public class UploadWorkerTask extends Task {
                        @Override
                        public void onNext(ResponseBody responseBody) {
 
-                           GsonUtils.parseResponseToObj(responseBody, ClientMsg.class)
-                                    .ifPresent(clientMsg -> {
-                                        Integer flag = clientMsg.getFlag();
-                                        if (203 == flag) {
-                                            jumpToLandFlag.set(true);
-                                        }
-                                    });
+                           ClientMsg clientMsg = GsonUtils.parseResponseToObj(responseBody);
+                           Integer flag = clientMsg.getFlag();
+                           if (203 == flag) {
+                               jumpToLandFlag.set(true);
+                           }
                        }
 
                        @Override

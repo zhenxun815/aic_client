@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -28,10 +29,12 @@ public class ClientApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         stage = primaryStage;
-        stage.setMinWidth(800D);
+        stage.setMinWidth(1080D);
         stage.setMinHeight(600D);
         stage.setOnCloseRequest(event -> System.exit(0));
-        FXMLUtils.loadWindow(stage,"/static/fxml/main.fxml");
+
+        FXMLUtils.loadWindow(stage, "/static/fxml/main.fxml");
+
     }
 
     @Override

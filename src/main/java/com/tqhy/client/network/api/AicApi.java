@@ -60,8 +60,8 @@ public interface AicApi {
     Observable<ResponseBody> uploadFiles(@PartMap Map<String, RequestBody> params, @Part MultipartBody.Part fileParts);
 
 
-    @POST("ai/helper/warningback")
-    Observable<ResponseBody> postAiWarningBack(@Body ClientMsg warningBack);
+    @GET("ping")
+    Observable<ResponseBody> pingServer();
 
     /*@Multipart
     @POST("login/")

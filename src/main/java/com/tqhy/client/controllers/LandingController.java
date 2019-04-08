@@ -1,6 +1,5 @@
 package com.tqhy.client.controllers;
 
-import com.google.gson.Gson;
 import com.tqhy.client.models.msg.BaseMsg;
 import com.tqhy.client.models.msg.local.LandingMsg;
 import com.tqhy.client.models.msg.local.VerifyMsg;
@@ -14,8 +13,12 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.image.Image;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +26,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -66,6 +68,11 @@ public class LandingController {
         String localUrl = NetworkUtils.toExternalForm(initUrl);
         if (!StringUtils.isEmpty(localUrl)) {
             WebEngine webEngine = webView.getEngine();
+            webEngine.setOnAlert(event -> {
+                String data = event.getData();
+                logger.info("alert data is: " + data);
+                showAlert(data);
+            });
             webEngine.load(localUrl);
         }
 
@@ -81,18 +88,32 @@ public class LandingController {
         });
     }
 
+    /**
+     * alert
+     *
+     * @param message
+     */
+    private void showAlert(String message) {
+        Dialog<Void> alert = new Dialog<>();
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title.png")));
+        alert.getDialogPane().setContentText(message);
+        alert.getDialogPane().getButtonTypes().add(ButtonType.OK);
+        alert.showAndWait();
+    }
+
     @PostMapping("/landing")
     @ResponseBody
     public VerifyMsg landing(@RequestBody LandingMsg landingMsg) {
         logger.info("get LandingMsg.." + landingMsg);
         VerifyMsg response = new VerifyMsg();
 
-        String physicalAddress = NetworkUtils.getPhysicalAddress();
+       /* String physicalAddress = NetworkUtils.getPhysicalAddress();
         if (StringUtils.isEmpty(physicalAddress)) {
             response.setFlag(BaseMsg.FAIL);
             response.setDesc("Mac地址获取失败!");
             return response;
-        }
+        }*/
         String userName = landingMsg.getUserName();
         String userPwd = landingMsg.getUserPwd();
 
@@ -103,7 +124,9 @@ public class LandingController {
                    response.setFlag(clientMsg.getFlag());
                    response.setDesc(clientMsg.getDesc());
                    List<String> msg = clientMsg.getMsg();
-                   response.setToken(msg.get(0));
+                   String token = msg.get(0);
+                   logger.info("token is: " + token);
+                   response.setToken(token);
                    return response;
                })
                .observeOn(Schedulers.io())
@@ -124,18 +147,27 @@ public class LandingController {
     }
 
 
-    @Deprecated
-    @PostMapping("/verify/activation")
+    @PostMapping("/verify/connection")
     public VerifyMsg activateClient(@RequestBody VerifyMsg msg) {
         logger.info("get request.." + msg);
-        String serializableNum = msg.getToken();
-        logger.info("get token: " + serializableNum);
-
-        //todo 验证序列号
-        boolean valid = true;
+        String serverIP = msg.getServerIP();
+        Network.setBaseUrl(serverIP);
         VerifyMsg response = new VerifyMsg();
-        response.setFlag(valid ? BaseMsg.SUCCESS : BaseMsg.FAIL);
-        response.setDesc(valid ? "激活成功" : "激活失败");
+
+        Network.getAicApi()
+               .pingServer()
+               .map(body -> {
+                   ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
+                   response.setFlag(clientMsg.getFlag());
+                   return response;
+               })
+               .observeOn(Schedulers.io())
+               .subscribeOn(Schedulers.trampoline())
+               .subscribe(res -> {
+                   if (BaseMsg.SUCCESS == res.getFlag()) {
+                       logger.info("ping server: " + serverIP + " success");
+                   }
+               });
         return response;
     }
 

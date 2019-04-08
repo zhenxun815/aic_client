@@ -28,5 +28,5 @@ public class VerifyMsg extends BaseMsg {
     /**
      * 激活码
      */
-    private String activationCode;
+    //private String activationCode;
 }
