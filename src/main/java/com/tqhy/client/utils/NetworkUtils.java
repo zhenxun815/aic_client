@@ -5,6 +5,7 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.net.*;
@@ -78,7 +79,7 @@ public class NetworkUtils {
      * @return 本地ip字符串
      */
     public static String getLocalIp() {
-        String ip = null;
+        String ip = "";
         try {
             byte[] addr = InetAddress.getLocalHost().getAddress();
             ip = (addr[0] & 0xff) + "." + (addr[1] & 0xff) + "." + (addr[2] & 0xff) + "." + (addr[3] & 0xff);
@@ -96,6 +97,9 @@ public class NetworkUtils {
      */
     public static boolean isIP(String str) {
 
+        if (StringUtils.isEmpty(str)) {
+            return false;
+        }
         // 匹配 1
         // String regex = "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}";
         // 匹配 2

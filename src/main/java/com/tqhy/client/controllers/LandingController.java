@@ -120,6 +120,14 @@ public class LandingController {
             response.setDesc("Mac地址获取失败!");
             return response;
         }*/
+
+        String localIp = NetworkUtils.getLocalIp();
+        if (!NetworkUtils.isIP(localIp)) {
+            response.setFlag(BaseMsg.FAIL);
+            response.setDesc("IP地址获取失败!");
+            return response;
+        }
+
         String userName = landingMsg.getUserName();
         String userPwd = landingMsg.getUserPwd();
 
@@ -133,6 +141,7 @@ public class LandingController {
                    String token = msg.get(0);
                    logger.info("token is: " + token);
                    response.setToken(token);
+                   response.setLocalIP(localIp);
                    return response;
                })
                .observeOn(Schedulers.io())
