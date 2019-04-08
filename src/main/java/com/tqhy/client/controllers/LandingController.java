@@ -1,5 +1,6 @@
 package com.tqhy.client.controllers;
 
+import com.tqhy.client.config.Constants;
 import com.tqhy.client.models.msg.BaseMsg;
 import com.tqhy.client.models.msg.local.LandingMsg;
 import com.tqhy.client.models.msg.local.VerifyMsg;
@@ -27,7 +28,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author Yiheng
@@ -72,7 +72,7 @@ public class LandingController {
             webEngine.setOnAlert(event -> {
                 String data = event.getData();
                 logger.info("alert data is: " + data);
-                if ("203".equals(data)) {
+                if (Constants.CMD_MSG_LOGOUT.equals(data)) {
                     heartBeatService.stopBeat();
                     logout();
                 } else {
@@ -144,7 +144,6 @@ public class LandingController {
                });
 
         return response;
-
     }
 
     @GetMapping("/logout")

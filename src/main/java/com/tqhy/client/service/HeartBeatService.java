@@ -1,6 +1,7 @@
 package com.tqhy.client.service;
 
 import com.google.gson.Gson;
+import com.tqhy.client.config.Constants;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
 import io.reactivex.Observable;
@@ -12,6 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
+
+import static com.tqhy.client.config.Constants.CMD_MSG_CONTINUE_BEAT;
+import static com.tqhy.client.config.Constants.CMD_MSG_STOP_BEAT;
 
 /**
  * @author Yiheng
@@ -25,10 +29,6 @@ public class HeartBeatService {
 
     private static String status;
 
-    private static final String CMD_STOP_BEAT = "stop";
-
-    private static final String CMD_CONTINUE_BEAT = "continue";
-
     /**
      * 判断页面是否需要跳转到登录页,与{@link com.tqhy.client.controllers.LandingController LandingController} 中
      * {@code jumpToLandingFlag} 进行双向绑定
@@ -36,14 +36,14 @@ public class HeartBeatService {
     private BooleanProperty jumpToLandingFlag = new SimpleBooleanProperty(false);
 
     public void stopBeat() {
-        status = CMD_STOP_BEAT;
+        status = CMD_MSG_STOP_BEAT;
     }
 
     public void startBeat(String token) {
-        status = CMD_CONTINUE_BEAT;
+        status = CMD_MSG_CONTINUE_BEAT;
 
         Observable.interval(5000, TimeUnit.MILLISECONDS)
-                  .takeWhile(beatTimes -> CMD_CONTINUE_BEAT.equals(status))
+                  .takeWhile(beatTimes -> CMD_MSG_CONTINUE_BEAT.equals(status))
                   .observeOn(Schedulers.trampoline())
                   .subscribeOn(Schedulers.io())
                   .subscribe(aLong -> {
@@ -60,9 +60,9 @@ public class HeartBeatService {
                                  Integer flag = clientMsg.getFlag();
                                  if (1 == flag) {
                                      logger.info("heart beat continue");
-                                     status = CMD_CONTINUE_BEAT;
+                                     status = CMD_MSG_CONTINUE_BEAT;
                                      setJumpToLandingFlag(false);
-                                 } else if (203 == flag) {
+                                 } else if (Constants.CMD_STATUS_LOGOUT == flag) {
                                      logger.info("heart beat stop");
                                      stopBeat();
                                      setJumpToLandingFlag(true);
