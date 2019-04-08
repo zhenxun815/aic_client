@@ -44,7 +44,7 @@ public class Network {
      */
     public static AicApi getAicApi() {
 
-        //logger.info("into getAicApi..");
+        logger.info("into getAicApi..base url: " + BASE_URL);
         if (null == aicApi) {
             Retrofit retrofit = new Retrofit.Builder()
                     .client(okHttpClient)
@@ -59,6 +59,7 @@ public class Network {
 
     public static void setBaseUrl(String ip) {
         BASE_URL = "http://" + ip + ":8080/";
+        aicApi = null;
     }
 
 }

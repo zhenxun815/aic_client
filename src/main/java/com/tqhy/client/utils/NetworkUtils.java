@@ -6,7 +6,9 @@ import okhttp3.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
+import sun.security.krb5.internal.HostAddress;
 
+import javax.xml.ws.Holder;
 import java.io.File;
 import java.net.*;
 import java.util.ArrayList;
@@ -80,12 +82,15 @@ public class NetworkUtils {
      */
     public static String getLocalIp() {
         String ip = "";
+        String hostAddress = "";
         try {
             byte[] addr = InetAddress.getLocalHost().getAddress();
+            hostAddress = InetAddress.getLocalHost().getHostAddress();
             ip = (addr[0] & 0xff) + "." + (addr[1] & 0xff) + "." + (addr[2] & 0xff) + "." + (addr[3] & 0xff);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
+        logger.info("local ip is: " + ip + ", hostAddress is: " + hostAddress);
         return ip;
     }
 

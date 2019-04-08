@@ -169,6 +169,7 @@ public class LandingController {
         if (NetworkUtils.isIP(serverIP)) {
 
             Network.setBaseUrl(serverIP);
+            logger.info("base url is: " + Network.BASE_URL);
             Network.getAicApi()
                    .pingServer()
                    .map(body -> {
@@ -178,6 +179,7 @@ public class LandingController {
                    })
                    .observeOn(Schedulers.io())
                    .subscribeOn(Schedulers.trampoline())
+                   .doOnError(error-> error.printStackTrace())
                    .subscribe(res -> {
                        if (BaseMsg.SUCCESS == res.getFlag()) {
                            logger.info("ping server: " + serverIP + " success");
