@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * @author Yiheng
@@ -87,6 +88,25 @@ public class NetworkUtils {
         return ip;
     }
 
+    /**
+     * Ip地址判断<br>
+     *
+     * @param str
+     * @return
+     */
+    public static boolean isIP(String str) {
+
+        // 匹配 1
+        // String regex = "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}";
+        // 匹配 2
+        String regex = "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}";
+
+        // 匹配1 和匹配2均可实现Ip判断的效果
+        Pattern pattern = Pattern.compile(regex);
+
+        return pattern.matcher(str).matches();
+
+    }
 
     /**
      * 创建单参数请求,将字符串转换为{@link RequestBody}对象
