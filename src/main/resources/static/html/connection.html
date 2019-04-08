@@ -50,10 +50,6 @@
 							<span class="progress"></span>
 							<span class="progress"></span>
 						</div>
-						<div class="right">
-							<div class="icon-zone"></div>
-							<p class="word-zone">获取激活码</p>
-						</div>
 					</div>
 					<div class="input-box">
 						<h6 class="title">请输入AIC设备IP地址,测试连通后，点击下一步</h6>
@@ -88,6 +84,7 @@
 </body>
 <script type="text/javascript">
 
+	let flag = 0
 
 	function testingConnFunc() {
 		if (checkValueFunc()) {
@@ -102,25 +99,22 @@
 
 			post_ajax('connTest', '/verify/connection', requestData, (response) => {
 				//console.log(`response data is: ${JSON.stringify(response)}`)
-				let flag = response.flag
+				flag = response.flag
 				console.log(`flag is: ${flag}`)
-				if (flag == 0) {
-					let serializableNum = response.serializableNum
-					setStorage('serializableNum', serializableNum)
+				if (flag == 1) {
 					$('.spin').hide()
 					$('#btn_connection').html('连接成功')
 				} else {
 					//layOpenFunc1()
 					$('#btn_connection').html('连接失败,点击重试')
-					console.log(`reponse desc : ${response.desc}`)
 				}
 			})
 		}
 	}
 
 	function nextStep() {
-		if (getStorage('serializableNum')) {
-			window.location.href = baseUrlLocal + '/html/activating.html'
+		if (flag) {
+			window.location.href = baseUrlLocal + '/html/landing.html'
 		}
 	}
 </script>
