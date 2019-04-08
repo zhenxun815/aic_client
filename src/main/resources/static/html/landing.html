@@ -83,13 +83,12 @@
 				console.log(`flag is: ${flag}`)
 				if (1 == flag) {
 					let token = response.token
-					localStorage.setItem("AIC_TOKEN", token)
+					//localStorage.setItem("AIC_TOKEN", token)
 					//window.location.href = baseUrlLocal + '/html/test_upload.html'
 					window.location.href = 'http://192.168.1.129:8080/index.html?token=' + token
 				} else {
 					layOpenFunc1()
 				}
-
 			})
 		}
 	}

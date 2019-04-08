@@ -87,7 +87,7 @@ function checkValueFunc() {
 function post_ajax(apiName, ajaxUrl, request, callback) {
 	$.ajax({
 		type: "POST",
-		url: ajaxUrl,
+		url: baseUrlLocal+ajaxUrl,
 		async: true,
 		dataType: "json",
 		contentType: "application/json;charset=utf-8",
