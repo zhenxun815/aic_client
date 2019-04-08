@@ -35,8 +35,13 @@ public class HeartBeatService {
      */
     private BooleanProperty jumpToLandingFlag = new SimpleBooleanProperty(false);
 
+    public void stopBeat() {
+        status = CMD_STOP_BEAT;
+    }
+
     public void startBeat(String token) {
         status = CMD_CONTINUE_BEAT;
+
         Observable.interval(5000, TimeUnit.MILLISECONDS)
                   .takeWhile(beatTimes -> CMD_CONTINUE_BEAT.equals(status))
                   .observeOn(Schedulers.trampoline())
@@ -59,7 +64,7 @@ public class HeartBeatService {
                                      setJumpToLandingFlag(false);
                                  } else if (203 == flag) {
                                      logger.info("heart beat stop");
-                                     status = CMD_STOP_BEAT;
+                                     stopBeat();
                                      setJumpToLandingFlag(true);
                                  }
                              });

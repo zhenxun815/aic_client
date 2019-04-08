@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Yiheng
@@ -64,14 +65,19 @@ public class LandingController {
     @FXML
     private void initialize() {
 
-        webView.setContextMenuEnabled(false);
+        //webView.setContextMenuEnabled(false);
         String localUrl = NetworkUtils.toExternalForm(initUrl);
         if (!StringUtils.isEmpty(localUrl)) {
             WebEngine webEngine = webView.getEngine();
             webEngine.setOnAlert(event -> {
                 String data = event.getData();
                 logger.info("alert data is: " + data);
-                showAlert(data);
+                if ("203".equals(data)) {
+                    heartBeatService.stopBeat();
+                    logout();
+                } else {
+                    showAlert(data);
+                }
             });
             webEngine.load(localUrl);
         }
@@ -94,7 +100,7 @@ public class LandingController {
      * @param message
      */
     private void showAlert(String message) {
-        Dialog<Void> alert = new Dialog<>();
+        Dialog<ButtonType> alert = new Dialog<>();
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title.png")));
         alert.getDialogPane().setContentText(message);
@@ -151,23 +157,29 @@ public class LandingController {
     public VerifyMsg activateClient(@RequestBody VerifyMsg msg) {
         logger.info("get request.." + msg);
         String serverIP = msg.getServerIP();
-        Network.setBaseUrl(serverIP);
         VerifyMsg response = new VerifyMsg();
+        if (NetworkUtils.isIP(serverIP)) {
 
-        Network.getAicApi()
-               .pingServer()
-               .map(body -> {
-                   ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
-                   response.setFlag(clientMsg.getFlag());
-                   return response;
-               })
-               .observeOn(Schedulers.io())
-               .subscribeOn(Schedulers.trampoline())
-               .subscribe(res -> {
-                   if (BaseMsg.SUCCESS == res.getFlag()) {
-                       logger.info("ping server: " + serverIP + " success");
-                   }
-               });
+            Network.setBaseUrl(serverIP);
+            Network.getAicApi()
+                   .pingServer()
+                   .map(body -> {
+                       ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
+                       response.setFlag(clientMsg.getFlag());
+                       return response;
+                   })
+                   .observeOn(Schedulers.io())
+                   .subscribeOn(Schedulers.trampoline())
+                   .subscribe(res -> {
+                       if (BaseMsg.SUCCESS == res.getFlag()) {
+                           logger.info("ping server: " + serverIP + " success");
+                       }
+                   });
+        } else {
+            response.setFlag(0);
+            response.setDesc("ip地址格式不正确");
+        }
+
         return response;
     }
 
