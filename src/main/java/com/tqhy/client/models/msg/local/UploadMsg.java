@@ -1,9 +1,7 @@
 package com.tqhy.client.models.msg.local;
 
 import com.tqhy.client.models.msg.BaseMsg;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.File;
 
@@ -15,13 +13,16 @@ import java.io.File;
 @Getter
 @Setter
 @ToString
+@RequiredArgsConstructor(staticName = "with")
 public class UploadMsg extends BaseMsg {
 
+    @NonNull
+    private String projectId;
+
+    @NonNull
     private String projectName;
 
     private String token;
-
-    private String projectId;
 
     private String batchNumber;
 }

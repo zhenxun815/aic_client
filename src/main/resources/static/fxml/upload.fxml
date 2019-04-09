@@ -133,7 +133,7 @@
                     </Insets>
                 </VBox.margin>
             </Text>
-            <Text fx:id="text_success_info">导入批次:201903080000
+            <Text fx:id="text_success_info">导入批次:
                 <VBox.margin>
                     <Insets>
                         <top>14</top>

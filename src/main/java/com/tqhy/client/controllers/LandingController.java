@@ -3,6 +3,7 @@ package com.tqhy.client.controllers;
 import com.tqhy.client.config.Constants;
 import com.tqhy.client.models.msg.BaseMsg;
 import com.tqhy.client.models.msg.local.LandingMsg;
+import com.tqhy.client.models.msg.local.UploadMsg;
 import com.tqhy.client.models.msg.local.VerifyMsg;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
@@ -56,6 +57,9 @@ public class LandingController {
     @Autowired
     HeartBeatService heartBeatService;
 
+    @Autowired
+    UploadFileController uploadFileController;
+
     /**
      * 判断页面是否需要跳转到登录页,与{@link com.tqhy.client.service.HeartBeatService HeartBeatService} 中
      * {@code jumpToLandingFlag} 进行双向绑定
@@ -72,7 +76,12 @@ public class LandingController {
             webEngine.setOnAlert(event -> {
                 String data = event.getData();
                 logger.info("alert data is: " + data);
-                if (Constants.CMD_MSG_LOGOUT.equals(data)) {
+                if (data.startsWith(Constants.CMD_MSG_UPLOAD)) {
+                    String[] split = data.split(";");
+                    String projectId = split[1];
+                    String projectName = split[2];
+                    uploadFileController.openUpload(UploadMsg.with(projectId, projectName));
+                } else if (Constants.CMD_MSG_LOGOUT.equals(data)) {
                     heartBeatService.stopBeat();
                     logout();
                 } else {
@@ -179,7 +188,7 @@ public class LandingController {
                    })
                    .observeOn(Schedulers.io())
                    .subscribeOn(Schedulers.trampoline())
-                   .doOnError(error-> error.printStackTrace())
+                   .doOnError(error -> error.printStackTrace())
                    .subscribe(res -> {
                        if (BaseMsg.SUCCESS == res.getFlag()) {
                            logger.info("ping server: " + serverIP + " success");

@@ -9,6 +9,8 @@ public class Constants {
 
     public static final String CMD_MSG_LOGOUT = "203";
 
+    public static final String CMD_MSG_UPLOAD = "upload";
+
     public static final String CMD_MSG_STOP_BEAT = "stop";
 
     public static final String CMD_MSG_CONTINUE_BEAT = "continue";

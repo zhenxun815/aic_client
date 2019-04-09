@@ -8,3 +8,9 @@ network:
         activating: /static/html/activating.html
         landing: /static/html/landing.html
 
+#log
+logging:
+    path: ../logs
+    file:
+        max-size: 60MB
+        max-history: 3

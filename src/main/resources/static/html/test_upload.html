@@ -20,7 +20,8 @@
 					projectId: projectId,
 					projectName: projectName
 				}
-				post_ajax('upload', '/upload/start', requestData, (response) => {
+				alert('upload;' + projectId + ';' + projectName)
+				/*post_ajax('upload', '/upload/start', requestData, (response) => {
 					let flag = response.flag
 					console.log(`flag is: ${flag}`)
 					if (0 == flag) {
@@ -30,7 +31,7 @@
 						layCloseFunc()
 						layOpenFunc3()
 					}
-				})
+				})*/
 			})
 
 			$('#btn_logout').click(() => {

@@ -67,6 +67,8 @@ public class UploadFileController {
     @FXML
     Text text_progress_info;
     @FXML
+    Text text_success_info;
+    @FXML
     ProgressBar progress_bar_upload;
 
     @Autowired
@@ -188,6 +190,7 @@ public class UploadFileController {
             stage = new Stage();
             FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml");
             text_choose_desc.setText("将数据导入至: " + uploadMsg.getProjectName());
+            text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
         });
     }
 
