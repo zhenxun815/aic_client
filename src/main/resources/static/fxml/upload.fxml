@@ -9,20 +9,21 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.tqhy.client.controllers.UploadFileController"
+            stylesheets="@../css/fx_upload_pane.css"
             prefHeight="268.0" prefWidth="620.0" style="-fx-background-color: transparent;-fx-padding: 10px">
 
     <!--选择上传文件夹显示页面-->
-    <VBox fx:id="panel_choose" stylesheets="@../css/fx_upload_choose.css">
+    <VBox fx:id="panel_choose" styleClass="pane">
         <children>
 
-            <Text fx:id="text_choose_title">导入数据
+            <Text fx:id="text_choose_title" styleClass="text_title">导入数据
                 <VBox.margin>
                     <Insets>
                         <top>30</top>
                     </Insets>
                 </VBox.margin>
             </Text>
-            <Text fx:id="text_choose_desc" styleClass="text_tips">数据导入至
+            <Text fx:id="text_choose_desc" styleClass="text_tips">将数据导入至:
                 <VBox.margin>
                     <Insets>
                         <top>25</top>
@@ -30,8 +31,8 @@
                     </Insets>
                 </VBox.margin>
             </Text>
-            <HBox styleClass="choose_btn_container">
-                <Button fx:id="btn_choose" onMouseClicked="#chooseDirectory">选择文件</Button>
+            <HBox styleClass="small_btn_container">
+                <Button fx:id="btn_choose" onMouseClicked="#chooseDirectory" styleClass="btn_small">选择文件</Button>
 
                 <Text fx:id="text_choose_info">未选择任何文件
                     <HBox.margin>
@@ -55,8 +56,8 @@
                     </Insets>
                 </VBox.margin>
                 <children>
-                    <Button fx:id="btn_cancel_upload" onMouseClicked="#cancelUpload">取消</Button>
-                    <Button fx:id="btn_start_upload" onMouseClicked="#startUpload">开始导入
+                    <Button fx:id="btn_cancel_upload" onMouseClicked="#cancelUpload" styleClass="btn_cancel">取消</Button>
+                    <Button fx:id="btn_start_upload" onMouseClicked="#startUpload" styleClass="btn_confirm">开始导入
                         <HBox.margin>
                             <Insets>
                                 <left>75</left>
@@ -69,9 +70,9 @@
     </VBox>
 
     <!--上传中显示页面-->
-    <VBox fx:id="panel_progress" stylesheets="@../css/fx_upload_progress.css">
+    <VBox fx:id="panel_progress" stylesheets="@../css/fx_upload_progress.css" styleClass="pane">
         <children>
-            <Text fx:id="text_progress_title">导入数据
+            <Text fx:id="text_progress_title" styleClass="text_title">导入数据
                 <VBox.margin>
                     <Insets>
                         <top>30</top>
@@ -101,7 +102,7 @@
                     </Text>
                 </children>
             </HBox>
-            <Text fx:id="text_progress_desc">数据正在上传,请耐心等待...
+            <Text fx:id="text_progress_desc" styleClass="text_tips">数据正在上传,请耐心等待...
                 <VBox.margin>
                     <Insets>
                         <top>30</top>
@@ -112,7 +113,7 @@
     </VBox>
 
     <!--上传成功显示页面-->
-    <VBox fx:id="panel_success" stylesheets="@../css/fx_upload_success.css">
+    <VBox fx:id="panel_success" styleClass="pane">
         <children>
             <ImageView fitHeight="40" fitWidth="40">
                 <image>
@@ -140,7 +141,7 @@
                     </Insets>
                 </VBox.margin>
             </Text>
-            <Button fx:id="btn_success_confirm" onMouseClicked="#cancelUpload">确认
+            <Button fx:id="btn_success_confirm" onMouseClicked="#cancelUpload" styleClass="btn_confirm">确认
                 <VBox.margin>
                     <Insets>
                         <top>31</top>
@@ -151,7 +152,7 @@
     </VBox>
 
     <!--上传失败显示界面-->
-    <VBox fx:id="panel_fail" stylesheets="@../css/fx_upload_fail.css">
+    <VBox fx:id="panel_fail" styleClass="pane">
         <children>
             <ImageView fitHeight="40" fitWidth="40">
                 <image>
@@ -165,7 +166,7 @@
                 </VBox.margin>
             </ImageView>
 
-            <Text fx:id="text_fail_desc">数据上传失败
+            <Text fx:id="text_fail_desc" styleClass="text_tips">数据上传失败
                 <VBox.margin>
                     <Insets>
                         <top>33</top>
@@ -179,8 +180,8 @@
                     </Insets>
                 </VBox.margin>
                 <children>
-                    <Button fx:id="btn_fail_cancel" onMouseClicked="#cancelUpload">取消</Button>
-                    <Button fx:id="btn_fail_retry" onMouseClicked="#retry">重试
+                    <Button fx:id="btn_fail_cancel" onMouseClicked="#cancelUpload" styleClass="btn_cancel">取消</Button>
+                    <Button fx:id="btn_fail_retry" onMouseClicked="#retry" styleClass="btn_confirm">重试
                         <HBox.margin>
                             <Insets>
                                 <left>75</left>

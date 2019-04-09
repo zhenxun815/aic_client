@@ -39,6 +39,9 @@ public class UploadFileController {
     Logger logger = LoggerFactory.getLogger(UploadFileController.class);
     Stage stage;
 
+    /**
+     * 是否跳转登录页面flag
+     */
     BooleanProperty jumpToLandFlag = new SimpleBooleanProperty(false);
 
     /**
@@ -60,14 +63,34 @@ public class UploadFileController {
     @FXML
     VBox panel_fail;
 
+    /**
+     * 显示将文件上传至哪个集合
+     */
     @FXML
     Text text_choose_desc;
+
+    /**
+     * 选择上传文件提示
+     * 未选择显示:未选择任何文件;已选择显示:选择文件夹的全路径
+     */
     @FXML
     Text text_choose_info;
+
+    /**
+     * 上传进度百分比提示内容
+     */
     @FXML
     Text text_progress_info;
+
+    /**
+     * 上传成功提示内容,显示本次上传批次号
+     */
     @FXML
     Text text_success_info;
+
+    /**
+     * 上传进度条
+     */
     @FXML
     ProgressBar progress_bar_upload;
 
