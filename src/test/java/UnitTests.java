@@ -1,20 +1,13 @@
-import com.tqhy.client.ClientApplication;
 import com.tqhy.client.task.Dcm2JpgTask;
 import com.tqhy.client.utils.FileUtils;
+import com.tqhy.client.utils.NetworkUtils;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -54,7 +47,18 @@ public class UnitTests {
 
     @Test
     public void testFileUtils() {
-        String batchNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
-        logger.info("batchNumber is: "+batchNumber);
+        // String batchNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+        //logger.info("batchNumber is: "+batchNumber);
+        String dirToDeletePath = "F:\\dicom\\1234\\case3\\TQHY_TEMP";
+        File dirToDelete = new File(dirToDeletePath);
+        boolean deleteDir = FileUtils.deleteDir(dirToDelete);
+
+        logger.info("delete success: " + deleteDir);
+    }
+
+    @Test
+    public void testIp() {
+        boolean ip = NetworkUtils.isIP("123");
+        logger.info("is ip: " + ip);
     }
 }

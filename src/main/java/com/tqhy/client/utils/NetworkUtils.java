@@ -33,7 +33,7 @@ public class NetworkUtils {
      * @return
      */
     public static String toExternalForm(String url) {
-        System.out.println("url is: " + url);
+        logger.info("url is: " + url);
         URL resource = NetworkUtils.class.getResource(url);
 
         return null == resource ? null : resource.toExternalForm();

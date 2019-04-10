@@ -8,9 +8,15 @@ network:
         activating: /static/html/activating.html
         landing: /static/html/landing.html
 
+path:
+    data: ./data
+
 #log
 logging:
-    path: ../logs
+    path: ./logs/
     file:
-        max-size: 60MB
+        max-size: 30MB
         max-history: 3
+    pattern:
+        file: "%black(%d{yyyy-MM-dd HH:mm:ss}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable"
+        console: "%black(%d{yyyy-MM-dd HH:mm:ss}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable"

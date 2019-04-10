@@ -8,6 +8,7 @@ import com.tqhy.client.models.msg.local.VerifyMsg;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
 import com.tqhy.client.service.HeartBeatService;
+import com.tqhy.client.utils.FileUtils;
 import com.tqhy.client.utils.GsonUtils;
 import com.tqhy.client.utils.NetworkUtils;
 import io.reactivex.schedulers.Schedulers;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -54,6 +56,8 @@ public class LandingController {
     @Value("${network.url.init:''}")
     private String initUrl;
 
+    @Value("${path.data:'./data'}")
+    private String localDataPath;
     @Autowired
     HeartBeatService heartBeatService;
 
@@ -68,8 +72,20 @@ public class LandingController {
 
     @FXML
     private void initialize() {
+        initJumpToLanding();
+        String serverIP = initServerIP();
+        initWebEngine(serverIP);
+    }
 
-        //webView.setContextMenuEnabled(false);
+    /**
+     * 初始化WebEngine
+     *
+     * @param serverIP 后台IP地址
+     */
+    private void initWebEngine(String serverIP) {
+        //禁用右键菜单
+        webView.setContextMenuEnabled(false);
+
         String localUrl = NetworkUtils.toExternalForm(initUrl);
         if (!StringUtils.isEmpty(localUrl)) {
             WebEngine webEngine = webView.getEngine();
@@ -88,9 +104,15 @@ public class LandingController {
                     showAlert(data);
                 }
             });
-            webEngine.load(localUrl);
-        }
 
+            webEngine.load(localUrl + "?serverIP=" + serverIP);
+        }
+    }
+
+    /**
+     * 初始化跳转登录页面逻辑
+     */
+    private void initJumpToLanding() {
         jumpToLandingFlag.bindBidirectional(heartBeatService.jumpToLandingFlagProperty());
         jumpToLandingFlag.addListener((observable, oldValue, newValue) -> {
             logger.info("jumpToLandingFlag changed,oldValue is: " + oldValue + ", newValue is: " + newValue);
@@ -104,6 +126,26 @@ public class LandingController {
     }
 
     /**
+     * 初始化获取后台IP地址
+     *
+     * @return
+     */
+    private String initServerIP() {
+        File serverIPFile = new File(localDataPath, "serverIP");
+        if (serverIPFile.exists()) {
+            List<String> datas = FileUtils.readLine(serverIPFile, line -> line);
+            String serverIP = datas.size() > 0 ? datas.get(0).trim() : "";
+            VerifyMsg verifyMsg = new VerifyMsg();
+            verifyMsg.setServerIP(serverIP);
+            VerifyMsg response = activateClient(verifyMsg);
+            if (BaseMsg.SUCCESS == response.getFlag()) {
+                return serverIP;
+            }
+        }
+        return "";
+    }
+
+    /**
      * alert
      *
      * @param message
@@ -111,7 +153,7 @@ public class LandingController {
     private void showAlert(String message) {
         Dialog<ButtonType> alert = new Dialog<>();
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title.png")));
+        stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title_light.png")));
         alert.getDialogPane().setContentText(message);
         alert.getDialogPane().getButtonTypes().add(ButtonType.OK);
         alert.showAndWait();
@@ -151,6 +193,7 @@ public class LandingController {
                    logger.info("token is: " + token);
                    response.setToken(token);
                    response.setLocalIP(localIp);
+                   response.setServerIP(Network.SERVER_IP);
                    return response;
                })
                .observeOn(Schedulers.io())
@@ -176,14 +219,14 @@ public class LandingController {
         String serverIP = msg.getServerIP();
         VerifyMsg response = new VerifyMsg();
         if (NetworkUtils.isIP(serverIP)) {
-
             Network.setBaseUrl(serverIP);
             logger.info("base url is: " + Network.BASE_URL);
             Network.getAicApi()
                    .pingServer()
                    .map(body -> {
                        ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
-                       response.setFlag(clientMsg.getFlag());
+                       Integer flag = clientMsg.getFlag();
+                       response.setFlag(flag);
                        return response;
                    })
                    .observeOn(Schedulers.io())
@@ -192,6 +235,9 @@ public class LandingController {
                    .subscribe(res -> {
                        if (BaseMsg.SUCCESS == res.getFlag()) {
                            logger.info("ping server: " + serverIP + " success");
+                           Network.SERVER_IP = serverIP;
+                           File serverIPFile = new File(localDataPath, "serverIP");
+                           FileUtils.writeFile(serverIPFile, serverIP, null, true);
                        }
                    });
         } else {

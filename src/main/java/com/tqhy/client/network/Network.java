@@ -32,7 +32,7 @@ public class Network {
     private static CallAdapter.Factory rxJavaCallAdapterFactory = RxJava2CallAdapterFactory.create();
 
     public static final String TEST_URL = "http://baidu.com/";
-    public static String IP;
+    public static String SERVER_IP;
     public static String BASE_URL = "http://192.168.1.129:8080/";
     //public static String BASE_URL = "http://localhost:8764/";
     private static Logger logger = LoggerFactory.getLogger(Network.class);

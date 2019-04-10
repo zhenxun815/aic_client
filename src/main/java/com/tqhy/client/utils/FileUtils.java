@@ -3,6 +3,7 @@ package com.tqhy.client.utils;
 import com.tqhy.client.task.Dcm2JpgTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.Nullable;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 
 /**
  * @author Yiheng
@@ -135,4 +137,85 @@ public class FileUtils {
         }
        return false;
     }
+
+    /**
+     * 按行读取文件,返回一个由每行处理结果对象组成的集合
+     *
+     * @param file     待读行文件
+     * @param function 对每一行内容处理的{@link Function <String,T> Function}
+     * @param <T>      返回集合泛型
+     * @return
+     */
+    public static <T> List<T> readLine(File file, Function<String, T> function) {
+        ArrayList<T> list = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                T apply = function.apply(line);
+                if (null != apply) {
+                    list.add(apply);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+
+    /**
+     * 写文件
+     *
+     * @param file
+     * @param info     待写入信息
+     * @param function 处理写入内容,为null则不做任何处理
+     * @param create   当文件不存在时是否创建新文件
+     */
+    public static void writeFile(File file, String info, @Nullable Function<StringBuilder, StringBuilder> function, boolean create) {
+
+        if (create && !file.exists()) {
+            createNewFile(file);
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            if (null == function) {
+                writer.write(info);
+            } else {
+                String apply = function.apply(new StringBuilder(info))
+                                       .toString();
+                writer.write(apply);
+            }
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 创建新文件
+     *
+     * @param file
+     * @return
+     */
+    public static boolean createNewFile(File file) {
+        if (file.exists()) {
+            file.delete();
+        }
+
+        try {
+            File parentFile = file.getParentFile();
+            if (!parentFile.exists()) {
+                parentFile.mkdirs();
+            }
+            boolean newFile = file.createNewFile();
+            return newFile;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
 }

@@ -108,6 +108,8 @@
 				if (flag == 1) {
 					$('.spin').hide()
 					$('#btn_connection').html('连接成功')
+					serverIP = response.serverIP
+					localStorage.setItem('serverIP',serverIP)
 				} else {
 					//layOpenFunc1()
 					$('#btn_connection').html('连接失败,点击重试')
