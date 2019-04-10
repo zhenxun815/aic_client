@@ -1,5 +1,6 @@
 package com.tqhy.client.utils;
 
+import com.tqhy.client.config.Constants;
 import com.tqhy.client.task.Dcm2JpgTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,8 +233,12 @@ public class FileUtils {
         return appPath;
     }
 
-    public static File getLocalFile(String path, String name) {
-        return null;
+    public static File getLocalFile(String relativePath, String fileName) {
+        String rootPath = getAppPath();
+        String localFilePath = rootPath + relativePath;
+        logger.info("serverIPFilePath is: " + localFilePath);
+        File localFile = new File(localFilePath, fileName);
+        return localFile;
     }
 
 }

@@ -123,6 +123,7 @@ public class LandingController {
                     WebEngine webEngine = webView.getEngine();
                     webEngine.load(NetworkUtils.toExternalForm(landingUrl));
                 });
+                jumpToLandingFlag.set(false);
             }
         });
     }
@@ -134,11 +135,7 @@ public class LandingController {
      */
     private String initServerIP() {
         logger.info("into init webEngine..");
-        String rootPath = FileUtils.getAppPath();
-        String serverIPFilePath = rootPath + localDataPath;
-        logger.info("serverIPFilePath is: " + serverIPFilePath);
-        File serverIPFile = new File(serverIPFilePath, Constants.PATH_SERVER_IP);
-        logger.info("serverIPFile is: " + serverIPFile.getAbsolutePath());
+        File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
         if (serverIPFile.exists()) {
             List<String> datas = FileUtils.readLine(serverIPFile, line -> line);
             String serverIP = datas.size() > 0 ? datas.get(0).trim() : "";
@@ -244,12 +241,8 @@ public class LandingController {
                            logger.info("ping server: " + serverIP + " success");
                            Network.SERVER_IP = serverIP;
 
-                           String rootPath = FileUtils.getAppPath();
-                           String serverIPFilePath = rootPath + localDataPath;
-                           logger.info("serverIPFilePath is: " + serverIPFilePath);
-                           File serverIPFile = new File(serverIPFilePath, Constants.PATH_SERVER_IP);
 
-                           FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
+                           File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
                            FileUtils.writeFile(serverIPFile, serverIP, null, true);
                        }
                    });
