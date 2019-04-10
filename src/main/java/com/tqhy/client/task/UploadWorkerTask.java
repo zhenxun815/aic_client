@@ -57,10 +57,10 @@ public class UploadWorkerTask extends Task {
 
     @Override
     protected Object call() throws Exception {
-
+        logger.info("start upload task...");
         completeCount = new AtomicInteger(0);
         total = FileUtils.getFilesInDir(dirToUpload).size();
-
+        logger.info("total file count is: " + total);
         File[] caseDirs = dirToUpload.listFiles(File::isDirectory);
         for (File caseDir : caseDirs) {
             if (jumpToLandFlag.get()) {
@@ -73,7 +73,7 @@ public class UploadWorkerTask extends Task {
             map.put("batchNumber", uploadMsg.getBatchNumber());
             Map<String, RequestBody> requestParamMap = NetworkUtils.createRequestParamMap(map);
 
-
+            logger.info("upload token: " + Network.TOKEN + ", caseName: " + caseDir.getName() + ", projectId: " + uploadMsg.getProjectId() + ", batchNumber: " + uploadMsg.getBatchNumber());
             upLoad(caseDir, requestParamMap);
             //fakeUpload(filesToUpload);
         }
@@ -83,10 +83,12 @@ public class UploadWorkerTask extends Task {
 
 
     private void upLoad(File caseDir, Map<String, RequestBody> requestParamMap) {
+        logger.info("into upload case: " + caseDir.getAbsolutePath());
         List<File> filesInCaseDir = FileUtils.getFilesInDir(caseDir);
         List<File> transformedFiles = FileUtils.transAllToJpg(filesInCaseDir);
         AtomicInteger dirUploadCompleteCount = new AtomicInteger(0);
         for (File file : transformedFiles) {
+            logger.info("start upload file: " + file.getAbsolutePath());
             if (jumpToLandFlag.get()) {
                 break;
             }
@@ -103,7 +105,6 @@ public class UploadWorkerTask extends Task {
 
                        @Override
                        public void onNext(ResponseBody responseBody) {
-
                            ClientMsg clientMsg = GsonUtils.parseResponseToObj(responseBody);
                            Integer flag = clientMsg.getFlag();
                            if (203 == flag) {

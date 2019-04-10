@@ -108,6 +108,7 @@ public class UploadFileController {
                 logger.info("jump to land...");
                 landingController.logout();
                 Platform.runLater(() -> stage.hide());
+                jumpToLandFlag.set(false);
             }
         });
     }
@@ -128,7 +129,7 @@ public class UploadFileController {
             if (null == dirToUpload) {
                 return;
             }
-            logger.info("start upload: " + dirToUpload.getAbsolutePath());
+            logger.info("dir to upload: " + dirToUpload.getAbsolutePath());
 
             //显示上传中界面
             showPanel(panel_progress.getId());

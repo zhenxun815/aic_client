@@ -89,25 +89,28 @@ public class LandingController {
         String localUrl = NetworkUtils.toExternalForm(initUrl);
         if (!StringUtils.isEmpty(localUrl)) {
             WebEngine webEngine = webView.getEngine();
-            webEngine.setOnAlert(event -> {
-                String data = event.getData();
-                logger.info("alert data is: " + data);
-                if (data.startsWith(Constants.CMD_MSG_UPLOAD)) {
-                    String[] split = data.split(";");
-                    String projectId = split[1];
-                    String projectName = split[2];
-                    uploadFileController.openUpload(UploadMsg.with(projectId, projectName));
-                } else if (Constants.CMD_MSG_LOGOUT.equals(data)) {
-                    heartBeatService.stopBeat();
-                    logout();
-                } else {
-                    showAlert(data);
-                }
-            });
-
+            initWebAlert(webEngine);
             logger.info("localUrl is: " + localUrl);
             webEngine.load(localUrl);
         }
+    }
+
+    private void initWebAlert(WebEngine webEngine) {
+        webEngine.setOnAlert(event -> {
+            String data = event.getData();
+            logger.info("alert data is: " + data);
+            if (data.startsWith(Constants.CMD_MSG_UPLOAD)) {
+                String[] split = data.split(";");
+                String projectId = split[1];
+                String projectName = split[2];
+                uploadFileController.openUpload(UploadMsg.with(projectId, projectName));
+            } else if (Constants.CMD_MSG_LOGOUT.equals(data)) {
+                heartBeatService.stopBeat();
+                logout();
+            } else {
+                showAlert(data);
+            }
+        });
     }
 
 
@@ -121,6 +124,7 @@ public class LandingController {
             if (newValue) {
                 Platform.runLater(() -> {
                     WebEngine webEngine = webView.getEngine();
+                    //initWebAlert(webEngine);
                     webEngine.load(NetworkUtils.toExternalForm(initLandingUrl));
                 });
                 jumpToLandingFlag.set(false);
