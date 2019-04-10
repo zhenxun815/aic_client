@@ -1,14 +1,10 @@
 package com.tqhy.client;
 
+import com.tqhy.client.unique.AlreadyLockedException;
+import com.tqhy.client.unique.JUnique;
 import com.tqhy.client.utils.FXMLUtils;
-import com.tqhy.client.utils.NetworkUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -34,7 +30,6 @@ public class ClientApplication extends Application {
         stage.setOnCloseRequest(event -> System.exit(0));
 
         FXMLUtils.loadWindow(stage, "/static/fxml/main.fxml");
-
     }
 
     @Override
@@ -55,7 +50,25 @@ public class ClientApplication extends Application {
     }
 
     public static void main(String[] args) {
-        launch(args);
+        String appId = "TQHY-AIC-CLIENT";
+        boolean alreadyRunning;
+        try {
+            JUnique.acquireLock(appId, message -> {
+                System.out.println("get message: " + message);
+                return null;
+            });
+            alreadyRunning = false;
+        } catch (AlreadyLockedException e) {
+            alreadyRunning = true;
+        }
+
+        if (alreadyRunning) {
+            for (int i = 0; i < args.length; i++) {
+                JUnique.sendMessage(appId, "call_window");
+            }
+        } else {
+            launch(args);
+        }
     }
 
 
