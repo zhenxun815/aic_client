@@ -1,5 +1,6 @@
 package com.tqhy.client.controllers;
 
+import ch.qos.logback.core.util.FileUtil;
 import com.tqhy.client.config.Constants;
 import com.tqhy.client.models.msg.BaseMsg;
 import com.tqhy.client.models.msg.local.LandingMsg;
@@ -53,10 +54,13 @@ public class LandingController {
     @Value("${network.url.landing:''}")
     private String landingUrl;
 
-    @Value("${network.url.init:''}")
-    private String initUrl;
+    @Value("${network.url.init-landing:''}")
+    private String initLandingUrl;
 
-    @Value("${path.data:'./data'}")
+    @Value("${network.url.init-connection:''}")
+    private String initConnectionUrl;
+
+    @Value("${path.data:'/data/'}")
     private String localDataPath;
     @Autowired
     HeartBeatService heartBeatService;
@@ -77,15 +81,11 @@ public class LandingController {
         initWebEngine(serverIP);
     }
 
-    /**
-     * 初始化WebEngine
-     *
-     * @param serverIP 后台IP地址
-     */
     private void initWebEngine(String serverIP) {
         //禁用右键菜单
-        webView.setContextMenuEnabled(false);
-
+        //webView.setContextMenuEnabled(false);
+        logger.info("into init webEngine..");
+        String initUrl = StringUtils.isEmpty(serverIP) ? initConnectionUrl : initLandingUrl;
         String localUrl = NetworkUtils.toExternalForm(initUrl);
         if (!StringUtils.isEmpty(localUrl)) {
             WebEngine webEngine = webView.getEngine();
@@ -105,9 +105,11 @@ public class LandingController {
                 }
             });
 
-            webEngine.load(localUrl + "?serverIP=" + serverIP);
+            logger.info("localUrl is: " + localUrl);
+            webEngine.load(localUrl);
         }
     }
+
 
     /**
      * 初始化跳转登录页面逻辑
@@ -131,7 +133,12 @@ public class LandingController {
      * @return
      */
     private String initServerIP() {
-        File serverIPFile = new File(localDataPath, "serverIP");
+        logger.info("into init webEngine..");
+        String rootPath = FileUtils.getAppPath();
+        String serverIPFilePath = rootPath + localDataPath;
+        logger.info("serverIPFilePath is: " + serverIPFilePath);
+        File serverIPFile = new File(serverIPFilePath, Constants.PATH_SERVER_IP);
+        logger.info("serverIPFile is: " + serverIPFile.getAbsolutePath());
         if (serverIPFile.exists()) {
             List<String> datas = FileUtils.readLine(serverIPFile, line -> line);
             String serverIP = datas.size() > 0 ? datas.get(0).trim() : "";
@@ -236,7 +243,13 @@ public class LandingController {
                        if (BaseMsg.SUCCESS == res.getFlag()) {
                            logger.info("ping server: " + serverIP + " success");
                            Network.SERVER_IP = serverIP;
-                           File serverIPFile = new File(localDataPath, "serverIP");
+
+                           String rootPath = FileUtils.getAppPath();
+                           String serverIPFilePath = rootPath + localDataPath;
+                           logger.info("serverIPFilePath is: " + serverIPFilePath);
+                           File serverIPFile = new File(serverIPFilePath, Constants.PATH_SERVER_IP);
+
+                           FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
                            FileUtils.writeFile(serverIPFile, serverIP, null, true);
                        }
                    });

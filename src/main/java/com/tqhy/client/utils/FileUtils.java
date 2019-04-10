@@ -118,12 +118,13 @@ public class FileUtils {
 
     /**
      * 删除文件夹
+     *
      * @param temp
      * @return
      */
     public static boolean deleteDir(File temp) {
         logger.info("into delete");
-        if(temp.exists()){
+        if (temp.exists()) {
             File[] subFiles = temp.listFiles();
             Arrays.stream(subFiles)
                   .forEach(subFile -> {
@@ -135,7 +136,7 @@ public class FileUtils {
                   });
             return temp.delete();
         }
-       return false;
+        return false;
     }
 
     /**
@@ -216,6 +217,23 @@ public class FileUtils {
         }
 
         return false;
+    }
+
+    /**
+     * 获取项目所在路径
+     *
+     * @return
+     */
+    public static String getAppPath() {
+        String jarPath = FileUtils.class.getProtectionDomain().getCodeSource().getLocation().getFile();
+        int end = jarPath.lastIndexOf("/");
+        String appPath = jarPath.substring(1, end);
+        //logger.info("appPath is: "+appPath);
+        return appPath;
+    }
+
+    public static File getLocalFile(String path, String name) {
+        return null;
     }
 
 }

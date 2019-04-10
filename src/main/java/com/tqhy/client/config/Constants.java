@@ -7,6 +7,7 @@ package com.tqhy.client.config;
  */
 public class Constants {
 
+    /************************ CMD *************************/
     public static final String CMD_MSG_LOGOUT = "203";
 
     public static final String CMD_MSG_UPLOAD = "upload";
@@ -16,4 +17,8 @@ public class Constants {
     public static final String CMD_MSG_CONTINUE_BEAT = "continue";
 
     public static final int CMD_STATUS_LOGOUT = 203;
+
+    /************************ PATH *************************/
+
+    public static final String PATH_SERVER_IP = "serverIP";
 }

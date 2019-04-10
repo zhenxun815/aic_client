@@ -3,13 +3,14 @@ server:
 #network
 network:
     url:
-        init: /static/html/init.html
+        init-connection: /static/html/init_connection.html
+        init-landing: /static/html/init_landing.html
         connection: /static/html/connection.html
         activating: /static/html/activating.html
         landing: /static/html/landing.html
 
 path:
-    data: ./data
+    data: /data/
 
 #log
 logging:
@@ -17,6 +18,3 @@ logging:
     file:
         max-size: 30MB
         max-history: 3
-    pattern:
-        file: "%black(%d{yyyy-MM-dd HH:mm:ss}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable"
-        console: "%black(%d{yyyy-MM-dd HH:mm:ss}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable"
