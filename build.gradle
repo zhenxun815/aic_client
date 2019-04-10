@@ -61,6 +61,11 @@ repositories {
     maven {
         url "http://www.dcm4che.org/maven2/"
     }
+
+    maven {
+        name = 'dcm4che-github'
+        url "https://raw.github.com/nroduit/mvn-repo/master/"
+    }
 }
 
 dependencies {
@@ -94,11 +99,22 @@ dependencies {
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
     implementation 'net.java.dev.jna:jna:4.5.1'
 
-    /**
-     * dcm4che
-     */
-    implementation (group: 'org.dcm4che', name: 'dcm4che-imageio', version: '5.16.0'){
+
+    compile (group: 'org.dcm4che.tool', name: 'dcm4che-tool-dcm2jpg', version: '5.16.1') {
         exclude group: 'org.slf4j'
+    }
+
+    compile (group: 'org.weasis.thirdparty.org.opencv', name: 'opencv_java', version: '4.0.0-dcmR3') {
+        artifact {
+            name = 'opencv_java'
+            type = 'dll'
+            classifier = 'windows-x86-64'
+        }
+        artifact {
+            name = 'opencv_java'
+            type = 'dll'
+            classifier = 'windows-x86'
+        }
     }
     /*implementation group: 'org.dcm4che', name: 'dcm4che-image', version: '5.16.0'
     implementation group: 'org.dcm4che', name: 'dcm4che-core', version: '5.16.0'*/

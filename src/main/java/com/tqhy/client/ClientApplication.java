@@ -3,12 +3,20 @@ package com.tqhy.client;
 import com.tqhy.client.unique.AlreadyLockedException;
 import com.tqhy.client.unique.JUnique;
 import com.tqhy.client.utils.FXMLUtils;
+import com.tqhy.client.utils.FileUtils;
+import com.tqhy.client.utils.NetworkUtils;
+import com.tqhy.client.utils.SystemUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+
+import java.io.File;
 
 /**
  * @author Yiheng
@@ -18,6 +26,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 @SpringBootApplication
 public class ClientApplication extends Application {
 
+    static Logger logger = LoggerFactory.getLogger(ClientApplication.class);
     public static ConfigurableApplicationContext springContext;
     public static Stage stage;
 
@@ -37,6 +46,27 @@ public class ClientApplication extends Application {
         super.init();
         Platform.setImplicitExit(false);
         springContext = SpringApplication.run(ClientApplication.class);
+
+        initLibPath();
+        String appPath = FileUtils.getAppPath();
+        SystemUtils.setLibPath(appPath + "/data");
+    }
+
+    private void initLibPath() {
+        String arc = SystemUtils.getArc();
+        File origin32Dll = FileUtils.getLocalFile("/", "opencv_java_32bit.dll");
+        File origin64Dll = FileUtils.getLocalFile("/", "opencv_java_32bit.dll");
+        File destDll = FileUtils.getLocalFile("/", "opencv_java.dll");
+        if (SystemUtils.SYS_ARC_64.equals(arc)) {
+            origin32Dll.delete();
+            origin64Dll.renameTo(destDll);
+        } else if (SystemUtils.SYS_ARC_32.equals(arc)) {
+            origin64Dll.delete();
+            origin32Dll.renameTo(destDll);
+        } else {
+            logger.info("init lib path fail!");
+            stop();
+        }
     }
 
     @Override
@@ -44,6 +74,7 @@ public class ClientApplication extends Application {
         springContext.stop();
         try {
             super.stop();
+            System.exit(0);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -67,6 +98,7 @@ public class ClientApplication extends Application {
                 JUnique.sendMessage(appId, "call_window");
             }
         } else {
+
             launch(args);
         }
     }

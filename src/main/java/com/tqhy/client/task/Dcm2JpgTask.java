@@ -1,11 +1,11 @@
 package com.tqhy.client.task;
 
 
-
 import lombok.*;
-import org.dcm4che3.data.Attributes;
 import org.dcm4che3.image.BufferedImageUtils;
 import org.dcm4che3.imageio.plugins.dcm.DicomImageReadParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.*;
 import javax.imageio.stream.ImageInputStream;
@@ -31,6 +31,7 @@ import java.util.concurrent.Callable;
 public class Dcm2JpgTask implements Callable<File> {
 
 
+    static Logger logger = LoggerFactory.getLogger(Dcm2JpgTask.class);
     private boolean autoWindowing = true;
     private boolean preferWindow = true;
     private int overlayGrayscaleValue = 0xffff;
@@ -41,6 +42,7 @@ public class Dcm2JpgTask implements Callable<File> {
 
     @NonNull
     private File dicomFile;
+
     /**
      * 初始化ImageWriter
      */
@@ -59,6 +61,8 @@ public class Dcm2JpgTask implements Callable<File> {
      * @return 转换后的jgp文件File对象
      */
     public File convert(File dicomFile) {
+        logger.info("start convert dicom to jpg: " + dicomFile.getAbsolutePath());
+
         initImageWriter();
         if (null == dicomFile) {
             return null;
@@ -118,6 +122,6 @@ public class Dcm2JpgTask implements Callable<File> {
     @Override
     public File call() throws Exception {
 
-        return  convert(dicomFile);
+        return convert(dicomFile);
     }
 }

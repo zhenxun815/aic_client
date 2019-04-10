@@ -75,7 +75,7 @@ public class UploadWorkerTask extends Task {
 
             logger.info("upload token: " + Network.TOKEN + ", caseName: " + caseDir.getName() + ", projectId: " + uploadMsg.getProjectId() + ", batchNumber: " + uploadMsg.getBatchNumber());
             upLoad(caseDir, requestParamMap);
-            //fakeUpload(filesToUpload);
+            //fakeUpload(dirToUpload);
         }
 
         return null;
@@ -139,48 +139,53 @@ public class UploadWorkerTask extends Task {
         }
     }
 
-    private AtomicInteger fakeUpload(List<File> filesToUpload) {
+    private AtomicInteger fakeUpload(File caseDir) {
+        String libPath = System.getProperty("java.library.path");
+        logger.info("lib path: is: " + libPath);
+
+        List<File> filesInCaseDir = FileUtils.getFilesInDir(caseDir);
+        List<File> transformedFiles = FileUtils.transAllToJpg(filesInCaseDir);
         logger.info("into fakeUpload...");
         AtomicInteger completeCount = new AtomicInteger(0);
-        int total = filesToUpload.size();
-        filesToUpload.forEach(file ->
-                                      Observable.create((ObservableOnSubscribe<File>) emitter -> {
-                                                            emitter.onNext(file);
-                                                            emitter.onComplete();
-                                                        }
-                                      ).observeOn(Schedulers.io())
-                                                .subscribeOn(Schedulers.single())
-                                                .blockingSubscribe(new Observer<File>() {
-                                                    @Override
-                                                    public void onSubscribe(Disposable d) {
-                                                        logger.info("Disposable: " + d);
-                                                    }
+        int total = transformedFiles.size();
+        transformedFiles.forEach(file ->
+                                         Observable.create((ObservableOnSubscribe<File>) emitter -> {
+                                                               emitter.onNext(file);
+                                                               emitter.onComplete();
+                                                           }
+                                         ).observeOn(Schedulers.io())
+                                                   .subscribeOn(Schedulers.single())
+                                                   .blockingSubscribe(new Observer<File>() {
+                                                       @Override
+                                                       public void onSubscribe(Disposable d) {
+                                                           logger.info("Disposable: " + d);
+                                                       }
 
-                                                    @Override
-                                                    public void onNext(File file) {
-                                                        try {
-                                                            Thread.sleep(2000);
-                                                            logger.info(file.getAbsolutePath() + " uploading...");
-                                                        } catch (InterruptedException e) {
-                                                            e.printStackTrace();
-                                                        }
-                                                    }
+                                                       @Override
+                                                       public void onNext(File file) {
+                                                           try {
+                                                               Thread.sleep(2000);
+                                                               logger.info(file.getAbsolutePath() + " uploading...");
+                                                           } catch (InterruptedException e) {
+                                                               e.printStackTrace();
+                                                           }
+                                                       }
 
-                                                    @Override
-                                                    public void onError(Throwable e) {
-                                                        updateMessage(PROGRESS_MSG_ERROR);
-                                                        e.printStackTrace();
-                                                    }
+                                                       @Override
+                                                       public void onError(Throwable e) {
+                                                           updateMessage(PROGRESS_MSG_ERROR);
+                                                           e.printStackTrace();
+                                                       }
 
-                                                    @Override
-                                                    public void onComplete() {
-                                                        completeCount.incrementAndGet();
-                                                        updateProgress(completeCount.get(), total);
-                                                        double progress = (completeCount.get() + 0D) / total * 100;
-                                                        logger.info("complete count is: " + completeCount.get() + ", progress is: " + progress);
-                                                        updateMessage(progress == 100.0D ? PROGRESS_MSG_COMPLETE : DecimalFormat.getInstance().format(progress));
-                                                    }
-                                                }));
+                                                       @Override
+                                                       public void onComplete() {
+                                                           completeCount.incrementAndGet();
+                                                           updateProgress(completeCount.get(), total);
+                                                           double progress = (completeCount.get() + 0D) / total * 100;
+                                                           logger.info("complete count is: " + completeCount.get() + ", progress is: " + progress);
+                                                           updateMessage(progress == 100.0D ? PROGRESS_MSG_COMPLETE : DecimalFormat.getInstance().format(progress));
+                                                       }
+                                                   }));
 
         return completeCount;
     }

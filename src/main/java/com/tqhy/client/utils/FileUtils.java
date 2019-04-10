@@ -233,10 +233,16 @@ public class FileUtils {
         return appPath;
     }
 
+    /**
+     * 获取相对jar包所在文件夹路径的{@link File File}对象
+     * @param relativePath 相对jar包所在文件夹相对路径.以<em>"/"<em/>开头
+     * @param fileName 文件名
+     * @return
+     */
     public static File getLocalFile(String relativePath, String fileName) {
         String rootPath = getAppPath();
         String localFilePath = rootPath + relativePath;
-        logger.info("serverIPFilePath is: " + localFilePath);
+        logger.info("localFilePath is: " + localFilePath);
         File localFile = new File(localFilePath, fileName);
         return localFile;
     }
