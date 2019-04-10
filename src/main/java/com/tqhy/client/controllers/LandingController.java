@@ -121,7 +121,7 @@ public class LandingController {
             if (newValue) {
                 Platform.runLater(() -> {
                     WebEngine webEngine = webView.getEngine();
-                    webEngine.load(NetworkUtils.toExternalForm(landingUrl));
+                    webEngine.load(NetworkUtils.toExternalForm(initLandingUrl));
                 });
                 jumpToLandingFlag.set(false);
             }
