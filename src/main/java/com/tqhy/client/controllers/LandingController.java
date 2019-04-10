@@ -124,6 +124,7 @@ public class LandingController {
                     webEngine.load(NetworkUtils.toExternalForm(initLandingUrl));
                 });
                 jumpToLandingFlag.set(false);
+                Network.TOKEN = null;
             }
         });
     }
@@ -205,6 +206,7 @@ public class LandingController {
                .subscribe(res -> {
                    if (BaseMsg.SUCCESS == res.getFlag()) {
                        heartBeatService.startBeat(response.getToken());
+                       Network.TOKEN = response.getToken();
                    }
                });
 

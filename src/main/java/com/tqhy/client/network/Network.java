@@ -33,6 +33,7 @@ public class Network {
 
     public static final String TEST_URL = "http://baidu.com/";
     public static String SERVER_IP;
+    public static String TOKEN;
     public static String BASE_URL = "http://192.168.1.129:8080/";
     //public static String BASE_URL = "http://localhost:8764/";
     private static Logger logger = LoggerFactory.getLogger(Network.class);

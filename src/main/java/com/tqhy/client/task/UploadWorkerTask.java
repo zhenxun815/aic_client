@@ -68,7 +68,7 @@ public class UploadWorkerTask extends Task {
             }
             HashMap<String, String> map = new HashMap<>();
             map.put("caseName", caseDir.getName());
-            map.put("token", uploadMsg.getToken());
+            map.put("token", Network.TOKEN);
             map.put("projectId", uploadMsg.getProjectId());
             map.put("batchNumber", uploadMsg.getBatchNumber());
             Map<String, RequestBody> requestParamMap = NetworkUtils.createRequestParamMap(map);
