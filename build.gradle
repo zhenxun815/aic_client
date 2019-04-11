@@ -17,7 +17,7 @@ plugins {
 }
 
 group 'com.tqhy'
-version '2.0.0'
+version '1.0.0'
 
 apply plugin: 'java'
 apply plugin: 'javafx-gradle-plugin'
@@ -37,22 +37,6 @@ task fatJar(type: Jar) {
     baseName = project.name + '-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
-}
-
-jfx {
-    verbose = true
-    mainClass = 'com.tqhy.client.ClientAppliction'
-    jfxAppOutputDir = "build/jfx/app"
-    jfxMainAppJarName = "client.jar"
-    deployDir = "/deploy"
-    additionalAppResources = "/"
-    css2bin = true
-    preLoader = null
-
-    vendor = 'tqhy'
-    bundler = "ALL"
-    appName = "client3"
-    checkForAbsolutePaths = true
 }
 
 repositories {
@@ -99,12 +83,13 @@ dependencies {
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
     implementation 'net.java.dev.jna:jna:4.5.1'
 
-
-    compile (group: 'org.dcm4che.tool', name: 'dcm4che-tool-dcm2jpg', version: '5.16.1') {
+    /**
+     * DCM4CHE
+     */
+    compile(group: 'org.dcm4che.tool', name: 'dcm4che-tool-dcm2jpg', version: '5.16.1') {
         exclude group: 'org.slf4j'
     }
-
-    compile (group: 'org.weasis.thirdparty.org.opencv', name: 'opencv_java', version: '4.0.0-dcmR3') {
+    compile(group: 'org.weasis.thirdparty.org.opencv', name: 'opencv_java', version: '4.0.0-dcmR3') {
         artifact {
             name = 'opencv_java'
             type = 'dll'
@@ -116,8 +101,6 @@ dependencies {
             classifier = 'windows-x86'
         }
     }
-    /*implementation group: 'org.dcm4che', name: 'dcm4che-image', version: '5.16.0'
-    implementation group: 'org.dcm4che', name: 'dcm4che-core', version: '5.16.0'*/
 
 
 }
