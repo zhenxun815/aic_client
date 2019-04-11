@@ -36,10 +36,16 @@ public class ClientApplication extends Application {
         stage = primaryStage;
         initPrimaryStageSize();
         stage.setOnCloseRequest(event -> System.exit(0));
+
+
         FXMLUtils.loadWindow(stage, "/static/fxml/main.fxml");
     }
 
+    /**
+     * 初始最大化窗口,固定窗体大小
+     */
     private void initPrimaryStageSize() {
+
         Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
         double minX = visualBounds.getMinX();
         double minY = visualBounds.getMinY();
