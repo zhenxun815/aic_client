@@ -1,12 +1,9 @@
 package com.tqhy.client.network.api;
 
-import com.tqhy.client.models.User;
-import com.tqhy.client.models.msg.server.ClientMsg;
 import io.reactivex.Observable;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
-import retrofit2.Call;
 import retrofit2.http.*;
 
 import java.util.List;
@@ -59,7 +56,11 @@ public interface AicApi {
     @POST("upload/")
     Observable<ResponseBody> uploadFiles(@PartMap Map<String, RequestBody> params, @Part MultipartBody.Part fileParts);
 
-
+    /**
+     * 测试后台是否联通
+     *
+     * @return
+     */
     @GET("ping")
     Observable<ResponseBody> pingServer();
 
@@ -70,28 +71,15 @@ public interface AicApi {
     @POST("login/")
     Observable<ResponseBody> landing(@Query("userName") String userName, @Query("passWord") String passWord);
 
+    /**
+     * 与后台保持心跳请求
+     * @param token
+     * @return
+     */
     @POST("/heartbeat")
     Observable<ResponseBody> heartbeat(@Query("token") String token);
-
-    @POST("ai/helper/confirm")
-    Observable<ResponseBody> postHistory(@Body ClientMsg date);
-
 
     @GET("ai/helper/aiDrId/{key}")
     Observable<ResponseBody> getAiDrId(@Path("key") String key);
 
-    /**
-     * 测试
-     *
-     * @param key
-     * @return
-     */
-    @GET("ai/helper/warning/{key}")
-    Call<ResponseBody> getTest(@Path("key") String key);
-
-    @GET("test/reindex/{id}")
-    Call<ResponseBody> getReindexSingle(@Path("id") String id);
-
-    @GET("ip_search/bibliographic/{id}")
-    Call<ResponseBody> getById(@Path("id") String id);
 }

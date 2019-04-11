@@ -103,6 +103,7 @@ public class UploadFileController {
         stage.initStyle(StageStyle.TRANSPARENT);
         stage.setAlwaysOnTop(true);
         showPanel(panel_choose.getId());
+
         jumpToLandFlag.addListener((observable, oldVal, newVal) -> {
             if (newVal) {
                 logger.info("jump to land...");
@@ -114,13 +115,18 @@ public class UploadFileController {
     }
 
     /**
-     * 数据清空
+     * 数据重置
      */
     private void resetValues() {
         uploadMsg = null;
         dirToUpload = null;
     }
 
+    /**
+     * 开始上传
+     *
+     * @param mouseEvent
+     */
     @FXML
     public void startUpload(MouseEvent mouseEvent) {
         MouseButton button = mouseEvent.getButton();
@@ -174,6 +180,10 @@ public class UploadFileController {
     }
 
 
+    /**
+     * 取消上传,上传成功确认按钮与上传失败取消按钮亦调用此方法
+     * @param mouseEvent
+     */
     @FXML
     public void cancelUpload(MouseEvent mouseEvent) {
         MouseButton button = mouseEvent.getButton();
@@ -181,10 +191,15 @@ public class UploadFileController {
             logger.info(button.name() + "....");
             resetValues();
             stage.hide();
+            //通知页面刷新
             landingController.sendMsgToJs("uploadComplete");
         }
     }
 
+    /**
+     * 选择待上传文件夹
+     * @param mouseEvent
+     */
     @FXML
     public void chooseDirectory(MouseEvent mouseEvent) {
         MouseButton button = mouseEvent.getButton();
@@ -197,6 +212,19 @@ public class UploadFileController {
                 text_choose_info.setText(dirToUpload.getAbsolutePath());
             }
         }
+    }
+
+    /**
+     * 上传失败重试
+     *
+     * @param mouseEvent
+     */
+    @FXML
+    public void retry(MouseEvent mouseEvent) {
+        logger.info("into retry...");
+        //显示上传中页面
+        showPanel(panel_progress.getId());
+        startUpload(mouseEvent);
     }
 
     /**
@@ -220,11 +248,4 @@ public class UploadFileController {
     }
 
 
-    @FXML
-    public void retry(MouseEvent mouseEvent) {
-        logger.info("into retry...");
-        //显示上传中页面
-        showPanel(panel_progress.getId());
-        startUpload(mouseEvent);
-    }
 }

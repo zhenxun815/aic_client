@@ -125,7 +125,6 @@ public class LandingController {
             if (newValue) {
                 Platform.runLater(() -> {
                     WebEngine webEngine = webView.getEngine();
-                    //initWebAlert(webEngine);
                     webEngine.load(NetworkUtils.toExternalForm(initLandingUrl));
                 });
                 jumpToLandingFlag.set(false);
@@ -157,7 +156,6 @@ public class LandingController {
 
     /**
      * alert
-     *
      * @param message
      */
     private void showAlert(String message) {
@@ -261,6 +259,11 @@ public class LandingController {
         return response;
     }
 
+    /**
+     * 向js传值
+     *
+     * @param msg
+     */
     public void sendMsgToJs(String msg) {
         Object response = webView.getEngine()
                                  .executeScript("callJsFunction(\"" + msg + "\")");

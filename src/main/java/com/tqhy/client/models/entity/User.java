@@ -1,6 +1,9 @@
-package com.tqhy.client.models;
+package com.tqhy.client.models.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 
@@ -15,7 +18,9 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class User  implements Serializable {
 
-    private static final long serialVersionUID = 6855572509422134755L;
+    private static final long serialVersionUID = 1L;
+
     private String userName;
+
     private String passWord;
 }

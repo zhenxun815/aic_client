@@ -1,6 +1,5 @@
 package com.tqhy.client.task;
 
-import com.google.gson.Gson;
 import com.tqhy.client.models.msg.local.UploadMsg;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
@@ -23,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -123,6 +121,7 @@ public class UploadWorkerTask extends Task {
                            completeCount.incrementAndGet();
                            int dirCompleteCount = dirUploadCompleteCount.incrementAndGet();
                            updateProgress(completeCount.get(), total);
+
                            double progress = (completeCount.get() + 0D) / total * 100;
                            logger.info("complete count is: " + completeCount.get() + ", progress is: " + progress);
                            DecimalFormat decimalFormat = new DecimalFormat("#0.0");

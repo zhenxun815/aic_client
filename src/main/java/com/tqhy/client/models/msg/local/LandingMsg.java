@@ -16,5 +16,6 @@ import lombok.ToString;
 public class LandingMsg extends BaseMsg {
 
     private String userName;
+
     private String userPwd;
 }
