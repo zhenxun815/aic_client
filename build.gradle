@@ -8,7 +8,6 @@ buildscript {
     }
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.4.RELEASE"
-        classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
     }
 }
 
@@ -20,7 +19,6 @@ group 'com.tqhy'
 version '1.0.0'
 
 apply plugin: 'java'
-apply plugin: 'javafx-gradle-plugin'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
@@ -28,15 +26,6 @@ sourceCompatibility = 1.8
 
 tasks.withType(JavaCompile) {
     options.encoding = 'utf-8'
-}
-
-task fatJar(type: Jar) {
-    manifest {
-        attributes 'Main-Class': 'com.tqhy.client.Main'
-    }
-    baseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
 }
 
 repositories {
@@ -53,35 +42,36 @@ repositories {
 }
 
 dependencies {
-    //testCompile group: 'junit', name: 'junit', version: '4.12'
 
     /**
      * spring-boot
      */
     testCompile 'org.springframework.boot:spring-boot-starter-test'
 
-
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-configuration-processor'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
+    /**
+     * lombok
+     */
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.6'
     testCompileOnly 'org.projectlombok:lombok:1.18.6'
     annotationProcessor 'org.projectlombok:lombok:1.18.6'
     compileOnly 'org.projectlombok:lombok:1.18.6'
 
-    implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'io.reactivex.rxjava2:rxjava:2.1.14'
 
     /**
-     * retrofit+okhttp
-     * 网络框架
+     * NetWork Structure:
+     * rxJava + Retrofit + OkHttp + Gson
      */
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
     implementation 'net.java.dev.jna:jna:4.5.1'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.14'
 
     /**
      * DCM4CHE
@@ -101,6 +91,4 @@ dependencies {
             classifier = 'windows-x86'
         }
     }
-
-
 }
