@@ -1,7 +1,6 @@
 import com.tqhy.client.task.Dcm2JpgTask;
 import com.tqhy.client.utils.FileUtils;
 import com.tqhy.client.utils.NetworkUtils;
-import com.tqhy.client.utils.SystemUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +68,10 @@ public class UnitTests {
 
     @Test
     public void testSys() {
-
-        System.out.println("arch: " + SystemUtils.getArc());
+        File source = new File("D:\\tq_workspace\\client3\\out\\artifacts\\client3\\bundles\\client3\\app", "opencv_java_64bit.dll");
+        File dest = new File("D:\\tq_workspace\\client3\\out\\artifacts\\client3\\bundles\\client3\\app\\dll", "opencv_java.dll");
+        boolean copyFile = FileUtils.copyFile(source, dest);
+        logger.info("copy: " + copyFile);
+        //System.out.println("arch: " + SystemUtils.getArc());
     }
 }

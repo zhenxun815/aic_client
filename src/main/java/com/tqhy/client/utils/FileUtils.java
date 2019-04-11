@@ -1,12 +1,14 @@
 package com.tqhy.client.utils;
 
-import com.tqhy.client.config.Constants;
 import com.tqhy.client.task.Dcm2JpgTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -235,8 +237,9 @@ public class FileUtils {
 
     /**
      * 获取相对jar包所在文件夹路径的{@link File File}对象
+     *
      * @param relativePath 相对jar包所在文件夹相对路径.以<em>"/"<em/>开头
-     * @param fileName 文件名
+     * @param fileName     文件名
      * @return
      */
     public static File getLocalFile(String relativePath, String fileName) {
@@ -247,4 +250,64 @@ public class FileUtils {
         return localFile;
     }
 
+    /**
+     * 如果目标文件存在则替换之
+     *
+     * @param sourceFile
+     * @param destFile
+     * @return
+     */
+    public static boolean copyFile(File sourceFile, File destFile) {
+
+        logger.info("source file: " + sourceFile.getAbsolutePath() + ", dest file: " + destFile.getAbsolutePath());
+        if (!sourceFile.exists()) {
+            return false;
+        }
+        if (destFile.exists()) {
+            boolean delete = destFile.delete();
+            if (!delete) {
+                return false;
+            }
+        }
+
+        if (createNewFile(destFile)) {
+            try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(sourceFile))) {
+                try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destFile))) {
+                    byte[] buffer = new byte[1024 * 8];
+                    int i = 0;
+                    while ((i = bis.read(buffer)) != -1) {
+                        bos.write(buffer);
+                    }
+                    bos.flush();
+                    return true;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 复制jar包内资源文件到jar包外
+     *
+     * @param resourceName
+     * @param destination
+     * @return
+     */
+    public static boolean copyResource(String resourceName, String destination) {
+        boolean succeess = true;
+        InputStream resourceStream = FileUtils.class.getResourceAsStream(resourceName);
+        logger.info("Copying ->" + resourceName + " to ->" + destination);
+
+        try {
+            Files.copy(resourceStream, Paths.get(destination), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException ex) {
+            logger.error("copy resource error!!", ex);
+            succeess = false;
+        }
+
+        return succeess;
+
+    }
 }

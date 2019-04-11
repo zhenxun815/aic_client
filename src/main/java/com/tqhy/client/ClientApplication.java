@@ -4,14 +4,12 @@ import com.tqhy.client.unique.AlreadyLockedException;
 import com.tqhy.client.unique.JUnique;
 import com.tqhy.client.utils.FXMLUtils;
 import com.tqhy.client.utils.FileUtils;
-import com.tqhy.client.utils.NetworkUtils;
 import com.tqhy.client.utils.SystemUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -48,23 +46,17 @@ public class ClientApplication extends Application {
         springContext = SpringApplication.run(ClientApplication.class);
 
         initLibPath();
-        String appPath = FileUtils.getAppPath();
-        SystemUtils.setLibPath(appPath + "/data");
     }
 
     private void initLibPath() {
         String arc = SystemUtils.getArc();
-        File origin32Dll = FileUtils.getLocalFile("/", "opencv_java_32bit.dll");
-        File origin64Dll = FileUtils.getLocalFile("/", "opencv_java_32bit.dll");
+        logger.info("system arc is: " + arc);
+
+        String dllToCopy = SystemUtils.SYS_ARC_64.equals(arc) ? "/bin/opencv_java_64bit.dll" : "/bin/opencv_java_32bit.dll";
         File destDll = FileUtils.getLocalFile("/", "opencv_java.dll");
-        if (SystemUtils.SYS_ARC_64.equals(arc)) {
-            origin32Dll.delete();
-            origin64Dll.renameTo(destDll);
-        } else if (SystemUtils.SYS_ARC_32.equals(arc)) {
-            origin64Dll.delete();
-            origin32Dll.renameTo(destDll);
-        } else {
-            logger.info("init lib path fail!");
+
+        boolean copyResource = FileUtils.copyResource(dllToCopy, destDll.getAbsolutePath());
+        if (!copyResource) {
             stop();
         }
     }

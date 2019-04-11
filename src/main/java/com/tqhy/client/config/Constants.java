@@ -21,4 +21,8 @@ public class Constants {
     /************************ PATH *************************/
 
     public static final String PATH_SERVER_IP = "serverIP";
+
+    public static final String PATH_TEMP_JPG = "TQHY_TEMP";
+
+
 }

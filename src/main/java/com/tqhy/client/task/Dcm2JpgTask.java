@@ -1,6 +1,7 @@
 package com.tqhy.client.task;
 
 
+import com.tqhy.client.config.Constants;
 import lombok.*;
 import org.dcm4che3.image.BufferedImageUtils;
 import org.dcm4che3.imageio.plugins.dcm.DicomImageReadParam;
@@ -60,21 +61,20 @@ public class Dcm2JpgTask implements Callable<File> {
      *
      * @return 转换后的jgp文件File对象
      */
-    public File convert(File dicomFile) {
-        logger.info("start convert dicom to jpg: " + dicomFile.getAbsolutePath());
+    public File convert(File dcmFile) {
+        logger.info("start convert dicom to jpg: " + dcmFile.getAbsolutePath());
 
         initImageWriter();
-        if (null == dicomFile) {
+        if (null == dcmFile) {
             return null;
         }
-        if (dicomFile.exists()) {
+        if (dcmFile.exists()) {
 
-            try (ImageInputStream iis = ImageIO.createImageInputStream(dicomFile)) {
-                File jpgDir = new File(dicomFile.getParent() + "/TQHY_TEMP");
+            try (ImageInputStream iis = ImageIO.createImageInputStream(dcmFile)) {
+                File jpgDir = new File(dcmFile.getParent(), Constants.PATH_TEMP_JPG);
                 if (!jpgDir.exists()) {
                     jpgDir.mkdir();
                 }
-                File dest = new File(jpgDir, dicomFile.getName() + ".jpg");
                 imageReader = ImageIO.getImageReadersByFormatName("DICOM").next();
                 imageReader.setInput(iis);
                 BufferedImage bi = imageReader.read(0, readParam());
@@ -83,9 +83,8 @@ public class Dcm2JpgTask implements Callable<File> {
                     bi = BufferedImageUtils.convertToIntRGB(bi);
                 }
 
-                if (dest.exists()) {
-                    dest.delete();
-                }
+                File dest = genJpgFile(dcmFile, jpgDir);
+
                 ImageOutputStream ios = ImageIO.createImageOutputStream(dest);
                 try {
                     imageWriter.setOutput(ios);
@@ -102,6 +101,26 @@ public class Dcm2JpgTask implements Callable<File> {
             }
         }
         return null;
+    }
+
+    /**
+     * 生成待写入jpg文件 {@link File File}对象并返回,若已存在则删除已有文件
+     *
+     * @param dcmFile 原始dcm文件
+     * @param jpgDir  生成jpg文件文件夹
+     * @return destJpgFile
+     */
+    private File genJpgFile(File dcmFile, File jpgDir) {
+        String dcmFileName = dcmFile.getName();
+
+        String destFileName =
+                dcmFileName.endsWith("dcm") ? dcmFileName.replace("dcm", "jpg") : dcmFileName.concat(".jpg");
+        File destJpgFile = new File(jpgDir, destFileName);
+
+        if (destJpgFile.exists()) {
+            destJpgFile.delete();
+        }
+        return destJpgFile;
     }
 
     /**

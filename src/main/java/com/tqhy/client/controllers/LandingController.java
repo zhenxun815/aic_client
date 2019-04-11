@@ -1,6 +1,5 @@
 package com.tqhy.client.controllers;
 
-import ch.qos.logback.core.util.FileUtil;
 import com.tqhy.client.config.Constants;
 import com.tqhy.client.models.msg.BaseMsg;
 import com.tqhy.client.models.msg.local.LandingMsg;
@@ -81,6 +80,7 @@ public class LandingController {
         initWebEngine(serverIP);
     }
 
+
     private void initWebEngine(String serverIP) {
         //禁用右键菜单
         //webView.setContextMenuEnabled(false);
@@ -96,6 +96,7 @@ public class LandingController {
     }
 
     private void initWebAlert(WebEngine webEngine) {
+
         webEngine.setOnAlert(event -> {
             String data = event.getData();
             logger.info("alert data is: " + data);
@@ -260,4 +261,10 @@ public class LandingController {
         return response;
     }
 
+    public void sendMsgToJs(String msg) {
+        Object response = webView.getEngine()
+                                 .executeScript("callJsFunction(\"" + msg + "\")");
+        String s = (String) response;
+        logger.info("get response: " + s);
+    }
 }

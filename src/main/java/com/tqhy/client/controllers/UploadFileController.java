@@ -181,6 +181,7 @@ public class UploadFileController {
             logger.info(button.name() + "....");
             resetValues();
             stage.hide();
+            landingController.sendMsgToJs("uploadComplete");
         }
     }
 

@@ -20,7 +20,11 @@
 					projectId: projectId,
 					projectName: projectName
 				}
-				alert('upload;' + projectId + ';' + projectName)
+				//alert('upload;' + projectId + ';' + projectName)
+				let upload = confirm('upload;' + projectId + ';' + projectName)
+				if (upload) {
+					alert('got it!')
+				}
 				/*post_ajax('upload', '/upload/start', requestData, (response) => {
 					let flag = response.flag
 					console.log(`flag is: ${flag}`)
