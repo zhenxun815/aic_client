@@ -7,6 +7,8 @@ import com.tqhy.client.utils.FileUtils;
 import com.tqhy.client.utils.SystemUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Rectangle2D;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,11 +34,28 @@ public class ClientApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         stage = primaryStage;
-        stage.setMinWidth(1080D);
-        stage.setMinHeight(600D);
+        initPrimaryStageSize();
         stage.setOnCloseRequest(event -> System.exit(0));
-
         FXMLUtils.loadWindow(stage, "/static/fxml/main.fxml");
+    }
+
+    private void initPrimaryStageSize() {
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        double minX = visualBounds.getMinX();
+        double minY = visualBounds.getMinY();
+        //double maxX = visualBounds.getMaxX();
+        //double maxY = visualBounds.getMaxY();
+        double width = visualBounds.getWidth();
+        double height = visualBounds.getHeight();
+
+        //logger.info("minX: " + minX + ", minY: " + minY);
+        //logger.info("maxX: " + maxX + ", maxY: " + maxY);
+        //logger.info("width: " + width + ", height: " + height);
+        stage.setX(minX);
+        stage.setY(minY);
+        stage.setWidth(width);
+        stage.setHeight(height);
+        stage.setResizable(false);
     }
 
     @Override
