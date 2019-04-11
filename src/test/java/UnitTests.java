@@ -1,6 +1,7 @@
 import com.tqhy.client.task.Dcm2JpgTask;
 import com.tqhy.client.utils.FileUtils;
 import com.tqhy.client.utils.NetworkUtils;
+import com.tqhy.client.utils.SystemUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +26,16 @@ public class UnitTests {
 
     @Test
     public void testParseDicom() {
-        File dicomDir = new File("F:\\dicom\\12345\\");
-        File[] dicomFiles = dicomDir.listFiles(File::isFile);
 
+        String libPath = System.getProperty("java.library.path");
+        logger.info("lib path: is: " + libPath);
+
+        File dicomDir = new File("F:\\dicom\\4321\\case1\\");
+        File[] dicomFiles = dicomDir.listFiles(File::isFile);
+        logger.info("dicom count is: " + dicomFiles.length);
+        ExecutorService executor = Executors.newFixedThreadPool(4);
         Arrays.stream(dicomFiles)
               .collect(ArrayList<File>::new, (list, dicomFile) -> {
-                  ExecutorService executor = Executors.newSingleThreadExecutor();
                   Future<File> fileFuture = executor.submit(Dcm2JpgTask.of(dicomFile));
                   try {
                       File jpgFile = fileFuture.get();
@@ -60,5 +65,11 @@ public class UnitTests {
     public void testIp() {
         boolean ip = NetworkUtils.isIP("123");
         logger.info("is ip: " + ip);
+    }
+
+    @Test
+    public void testSys() {
+
+        System.out.println("arch: " + SystemUtils.getArc());
     }
 }
