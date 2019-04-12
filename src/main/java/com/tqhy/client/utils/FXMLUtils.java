@@ -5,7 +5,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -33,8 +32,9 @@ public class FXMLUtils {
             fxmlLoader.setControllerFactory(springContext::getBean);
             Parent parentNode = fxmlLoader.load();
             Scene scene = new Scene(parentNode, Color.TRANSPARENT);
-            Font.loadFont(NetworkUtils.toExternalForm("/static/font/msyh.ttf"), 0);
-            scene.getStylesheets().add(NetworkUtils.toExternalForm("/static/css/fx_main.css"));
+            //Font.loadFont(NetworkUtils.toExternalForm("/static/font/arial.ttf"), 0);
+            //Font.loadFont(NetworkUtils.toExternalForm("/static/font/msyh.ttf"), 0);
+            scene.getStylesheets().add(NetworkUtils.toExternalForm("/static/css/fx_root.css"));
             stage.setScene(scene);
             stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title_light.png")));
             stage.show();
