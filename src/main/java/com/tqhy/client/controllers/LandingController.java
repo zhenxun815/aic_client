@@ -75,9 +75,9 @@ public class LandingController {
 
     @FXML
     private void initialize() {
-        initJumpToLanding();
         String serverIP = initServerIP();
         initWebEngine(serverIP);
+        initJumpToLanding();
     }
 
 
