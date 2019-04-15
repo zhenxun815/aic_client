@@ -187,8 +187,8 @@ public class LandingController {
             return response;
         }
 
-        String userName = landingMsg.getUserName();
-        String userPwd = landingMsg.getUserPwd();
+        String userName = landingMsg.getUserName().trim();
+        String userPwd = landingMsg.getUserPwd().trim();
 
         Network.getAicApi()
                .landing(userName, userPwd)
