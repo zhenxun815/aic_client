@@ -1,7 +1,7 @@
 var $ = null
 var layer = null
 
-baseUrlLocal = 'http://localhost:8080'
+baseUrlLocal = 'http://localhost:8081'
 var lay_setting = {
 	type: 1,
 	area: '600px',
@@ -87,7 +87,7 @@ function checkValueFunc() {
 function post_ajax(apiName, ajaxUrl, request, callback) {
 	$.ajax({
 		type: "POST",
-		url: ajaxUrl,
+		url: baseUrlLocal+ajaxUrl,
 		async: true,
 		dataType: "json",
 		contentType: "application/json;charset=utf-8",
@@ -114,16 +114,7 @@ function post_ajax(apiName, ajaxUrl, request, callback) {
 	})
 }
 
-function getStorage(name) {
-	return JSON.parse(localStorage.getItem(name))
-}
 
-function setStorage(name, val) {
-	localStorage.setItem(name, JSON.stringify(val))
-}
 
-function addStorage(name, addVal) {
-	let oldVal = Storage.get(name)
-	let newVal = oldVal.concat(addVal)
-	Storage.set(name, newVal)
-}
+
+

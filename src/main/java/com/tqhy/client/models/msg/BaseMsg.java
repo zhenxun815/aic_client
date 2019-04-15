@@ -6,6 +6,7 @@ import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Yiheng
@@ -22,12 +23,12 @@ public class BaseMsg implements Serializable {
     /**
      * 请求成功,返回正确结果
      */
-    public static final Integer SUCCESS = 0;
+    public static final Integer SUCCESS = 1;
 
     /**
      * 请求成功,未获取正确结果
      */
-    public static final Integer FAIL = 1;
+    public static final Integer FAIL = 0;
 
     /**
      * flag=={@link #SUCCESS SUCCESS},请求成功,返回正确结果
@@ -39,4 +40,5 @@ public class BaseMsg implements Serializable {
      * 响应描述信息
      */
     String desc;
+
 }

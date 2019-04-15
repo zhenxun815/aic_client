@@ -1,10 +1,20 @@
 server:
-    port: 8080
+    port: 8081
 #network
 network:
     url:
-        init: /static/html/init.html
+        init-connection: /static/html/init_connection.html
+        init-landing: /static/html/init_landing.html
         connection: /static/html/connection.html
         activating: /static/html/activating.html
         landing: /static/html/landing.html
 
+path:
+    data: /data/
+
+#log
+logging:
+    path: ./logs/
+    file:
+        max-size: 30MB
+        max-history: 3
