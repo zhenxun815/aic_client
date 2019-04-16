@@ -12,7 +12,6 @@ public class SystemUtils {
 
     static Logger logger = LoggerFactory.getLogger(SystemUtils.class);
 
-
     public static final String SYS_ARC_64 = "amd64";
 
     public static final String SYS_ARC_32 = "X86";

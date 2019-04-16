@@ -2,7 +2,6 @@ package com.tqhy.client.models.msg.server;
 
 import com.tqhy.client.models.msg.BaseMsg;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
