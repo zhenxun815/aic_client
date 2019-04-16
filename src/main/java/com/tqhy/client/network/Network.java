@@ -26,7 +26,8 @@ public class Network {
     public static final String TEST_URL = "http://baidu.com/";
     public static String SERVER_IP;
     public static String TOKEN;
-    public static String BASE_URL = "http://192.168.1.129:8080/";
+    public static String SERVER_BASE_URL = "http://192.168.1.129:8080/";
+    public static String LOCAL_BASE_URL = "http://localhost:8081/";
     private static Logger logger = LoggerFactory.getLogger(Network.class);
 
     /**
@@ -36,11 +37,11 @@ public class Network {
      */
     public static AicApi getAicApi() {
 
-        logger.info("into getAicApi..base url: " + BASE_URL);
+        logger.info("into getAicApi..base url: " + SERVER_BASE_URL);
         if (null == aicApi) {
             Retrofit retrofit = new Retrofit.Builder()
                     .client(okHttpClient)
-                    .baseUrl(BASE_URL)
+                    .baseUrl(SERVER_BASE_URL)
                     .addConverterFactory(gsonConverterFactory)
                     .addCallAdapterFactory(rxJavaCallAdapterFactory)
                     .build();
@@ -49,8 +50,8 @@ public class Network {
         return aicApi;
     }
 
-    public static void setBaseUrl(String ip) {
-        BASE_URL = "http://" + ip + ":8080/";
+    public static void setServerBaseUrl(String ip) {
+        SERVER_BASE_URL = "http://" + ip + ":8080/";
         aicApi = null;
     }
 

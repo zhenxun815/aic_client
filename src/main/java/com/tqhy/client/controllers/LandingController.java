@@ -90,13 +90,13 @@ public class LandingController {
         //禁用右键菜单
         //webView.setContextMenuEnabled(false);
         logger.info("into init webEngine..");
-        String initUrl = StringUtils.isEmpty(serverIP) ? initConnectionUrl : initLandingUrl;
-        String localUrl = NetworkUtils.toExternalForm(initUrl);
-        if (!StringUtils.isEmpty(localUrl)) {
+        String initUrl = StringUtils.isEmpty(serverIP) ? connectionUrl : landingUrl;
+        if (!StringUtils.isEmpty(initUrl)) {
+            webView.setContextMenuEnabled(false);
             WebEngine webEngine = webView.getEngine();
             initWebAlert(webEngine);
-            logger.info("localUrl is: " + localUrl);
-            webEngine.load(localUrl);
+            logger.info("localUrl is: " + initUrl);
+            webEngine.load(Network.LOCAL_BASE_URL + initUrl);
         }
     }
 
@@ -130,7 +130,7 @@ public class LandingController {
             if (newValue) {
                 Platform.runLater(() -> {
                     WebEngine webEngine = webView.getEngine();
-                    webEngine.load(NetworkUtils.toExternalForm(initLandingUrl));
+                    webEngine.load(Network.LOCAL_BASE_URL + landingUrl);
                 });
                 jumpToLandingFlag.set(false);
                 Network.TOKEN = null;
@@ -179,6 +179,7 @@ public class LandingController {
                .landing(userName, userPwd)
                .map(body -> {
                    ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
+                   logger.info("flag is: " + clientMsg.getFlag());
                    response.setFlag(clientMsg.getFlag());
                    response.setDesc(clientMsg.getDesc());
                    List<String> msg = clientMsg.getMsg();
@@ -214,8 +215,8 @@ public class LandingController {
         VerifyMsg response = new VerifyMsg();
         if (NetworkUtils.isIP(serverIP)) {
             Network.SERVER_IP = serverIP;
-            Network.setBaseUrl(serverIP);
-            logger.info("base url is: " + Network.BASE_URL);
+            Network.setServerBaseUrl(serverIP);
+            logger.info("base url is: " + Network.SERVER_BASE_URL);
             try {
                 okhttp3.ResponseBody responseBody = Network.getAicApi()
                                                            .pingServer()
