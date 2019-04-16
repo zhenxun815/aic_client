@@ -1,13 +1,19 @@
 package com.tqhy.client.utils;
 
+import com.tqhy.client.config.Constants;
+import com.tqhy.client.models.msg.BaseMsg;
+import com.tqhy.client.models.msg.server.ClientMsg;
+import com.tqhy.client.network.Network;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,6 +99,42 @@ public class NetworkUtils {
     }
 
     /**
+     * 初始化获取后台IP地址
+     *
+     * @return
+     */
+    public static String initServerIP(String localDataPath) {
+        logger.info("into init webEngine..");
+        File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
+        if (serverIPFile.exists()) {
+            List<String> datas = FileUtils.readLine(serverIPFile, line -> line);
+            String serverIP = datas.size() > 0 ? datas.get(0).trim() : "";
+            if (StringUtils.isEmpty(serverIP) || isNotIP(serverIP)) {
+                return "";
+            }
+
+            Network.setBaseUrl(serverIP);
+            try {
+                ResponseBody body = Network.getAicApi()
+                                           .pingServer()
+                                           .execute()
+                                           .body();
+
+                ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
+                Integer flag = clientMsg.getFlag();
+                logger.info("ping server ip: " + serverIP + ", get flag: " + flag);
+                if (BaseMsg.SUCCESS == flag) {
+                    return serverIP;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return "";
+    }
+
+
+    /**
      * Ip地址判断<br>
      *
      * @param str
@@ -113,6 +155,16 @@ public class NetworkUtils {
 
         return pattern.matcher(str).matches();
 
+    }
+
+    /**
+     * Ip地址判断<br>
+     *
+     * @param str
+     * @return
+     */
+    public static boolean isNotIP(String str) {
+        return !isIP(str);
     }
 
     /**

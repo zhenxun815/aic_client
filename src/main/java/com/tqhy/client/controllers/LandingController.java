@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -61,6 +62,7 @@ public class LandingController {
 
     @Value("${path.data:'/data/'}")
     private String localDataPath;
+
     @Autowired
     HeartBeatService heartBeatService;
 
@@ -75,12 +77,15 @@ public class LandingController {
 
     @FXML
     private void initialize() {
-        String serverIP = initServerIP();
-        initWebEngine(serverIP);
+        initWebEngine(Network.SERVER_IP);
         initJumpToLanding();
     }
 
-
+    /**
+     * 初始化webEngine,根据是否有serverIP判断是否显示测试连接页面
+     *
+     * @param serverIP
+     */
     private void initWebEngine(String serverIP) {
         //禁用右键菜单
         //webView.setContextMenuEnabled(false);
@@ -134,28 +139,8 @@ public class LandingController {
     }
 
     /**
-     * 初始化获取后台IP地址
-     *
-     * @return
-     */
-    private String initServerIP() {
-        logger.info("into init webEngine..");
-        File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
-        if (serverIPFile.exists()) {
-            List<String> datas = FileUtils.readLine(serverIPFile, line -> line);
-            String serverIP = datas.size() > 0 ? datas.get(0).trim() : "";
-            VerifyMsg verifyMsg = new VerifyMsg();
-            verifyMsg.setServerIP(serverIP);
-            VerifyMsg response = activateClient(verifyMsg);
-            if (BaseMsg.SUCCESS == response.getFlag()) {
-                return serverIP;
-            }
-        }
-        return "";
-    }
-
-    /**
      * alert
+     *
      * @param message
      */
     private void showAlert(String message) {
@@ -228,29 +213,29 @@ public class LandingController {
         String serverIP = msg.getServerIP();
         VerifyMsg response = new VerifyMsg();
         if (NetworkUtils.isIP(serverIP)) {
+            Network.SERVER_IP = serverIP;
             Network.setBaseUrl(serverIP);
             logger.info("base url is: " + Network.BASE_URL);
-            Network.getAicApi()
-                   .pingServer()
-                   .map(body -> {
-                       ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
-                       Integer flag = clientMsg.getFlag();
-                       response.setFlag(flag);
-                       return response;
-                   })
-                   .observeOn(Schedulers.io())
-                   .subscribeOn(Schedulers.trampoline())
-                   .doOnError(error -> error.printStackTrace())
-                   .subscribe(res -> {
-                       if (BaseMsg.SUCCESS == res.getFlag()) {
-                           logger.info("ping server: " + serverIP + " success");
-                           Network.SERVER_IP = serverIP;
+            try {
+                okhttp3.ResponseBody responseBody = Network.getAicApi()
+                                                           .pingServer()
+                                                           .execute()
+                                                           .body();
+                ClientMsg clientMsg = GsonUtils.parseResponseToObj(responseBody);
 
+                if (BaseMsg.SUCCESS == clientMsg.getFlag()) {
+                    logger.info("ping server: " + serverIP + " success");
 
-                           File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
-                           FileUtils.writeFile(serverIPFile, serverIP, null, true);
-                       }
-                   });
+                    File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
+                    FileUtils.writeFile(serverIPFile, serverIP, null, true);
+                    response.setFlag(1);
+                    response.setServerIP(Network.SERVER_IP);
+                    return response;
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } else {
             response.setFlag(0);
             response.setDesc("ip地址格式不正确");
