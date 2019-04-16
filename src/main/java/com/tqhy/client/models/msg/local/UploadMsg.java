@@ -3,8 +3,6 @@ package com.tqhy.client.models.msg.local;
 import com.tqhy.client.models.msg.BaseMsg;
 import lombok.*;
 
-import java.io.File;
-
 /**
  * @author Yiheng
  * @create 3/22/2019

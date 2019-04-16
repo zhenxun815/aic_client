@@ -3,10 +3,8 @@ package com.tqhy.client.models.msg;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.FieldNameConstants;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * @author Yiheng

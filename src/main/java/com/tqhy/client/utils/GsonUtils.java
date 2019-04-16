@@ -7,7 +7,6 @@ import okhttp3.ResponseBody;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 /**
  * @author Yiheng
