@@ -1,5 +1,6 @@
 package com.tqhy.client.controllers;
 
+import com.tqhy.client.ClientApplication;
 import com.tqhy.client.models.msg.local.UploadMsg;
 import com.tqhy.client.task.UploadWorkerTask;
 import com.tqhy.client.utils.FXMLUtils;
@@ -43,6 +44,11 @@ public class UploadFileController {
      * 是否跳转登录页面flag
      */
     BooleanProperty jumpToLandFlag = new SimpleBooleanProperty(false);
+
+    /**
+     * 主窗口是否最小化
+     */
+    BooleanProperty mainStageIconified = new SimpleBooleanProperty();
 
     /**
      * 本次上传信息
@@ -111,6 +117,12 @@ public class UploadFileController {
                 Platform.runLater(() -> stage.hide());
                 jumpToLandFlag.set(false);
             }
+        });
+
+        mainStageIconified.bind(ClientApplication.stage.iconifiedProperty());
+        mainStageIconified.addListener((observable, oldVal, newVal) -> {
+            logger.info("main stage iconified state change..." + newVal);
+            stage.setIconified(newVal);
         });
     }
 
@@ -182,6 +194,7 @@ public class UploadFileController {
 
     /**
      * 取消上传,上传成功确认按钮与上传失败取消按钮亦调用此方法
+     *
      * @param mouseEvent
      */
     @FXML
@@ -198,6 +211,7 @@ public class UploadFileController {
 
     /**
      * 选择待上传文件夹
+     *
      * @param mouseEvent
      */
     @FXML
