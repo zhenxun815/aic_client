@@ -113,7 +113,7 @@ public class NetworkUtils {
                 return "";
             }
 
-            Network.setBaseUrl(serverIP);
+            Network.setServerBaseUrl(serverIP);
             try {
                 ResponseBody body = Network.getAicApi()
                                            .pingServer()

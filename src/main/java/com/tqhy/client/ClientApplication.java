@@ -50,11 +50,12 @@ public class ClientApplication extends Application {
         //logger.info("minX: " + minX + ", minY: " + minY);
         //logger.info("maxX: " + maxX + ", maxY: " + maxY);
         //logger.info("width: " + width + ", height: " + height);
-        stage.setX(minX);
-        stage.setY(minY);
+        //stage.setX(minX);
+        //stage.setY(minY);
         stage.setWidth(width);
         stage.setHeight(height);
         stage.setResizable(false);
+        stage.centerOnScreen();
     }
 
     @Override
