@@ -87,8 +87,11 @@
 </div>
 </body>
 <script type="text/javascript">
-
 	let flag = 0
+
+	document.oncontextmenu = function () {
+		return false;
+	}
 
 	function testingConnFunc() {
 		if (checkValueFunc()) {

@@ -92,7 +92,7 @@ public class LandingController {
         logger.info("into init webEngine..");
         String initUrl = StringUtils.isEmpty(serverIP) ? connectionUrl : landingUrl;
         if (!StringUtils.isEmpty(initUrl)) {
-            webView.setContextMenuEnabled(false);
+            //webView.setContextMenuEnabled(false);
             WebEngine webEngine = webView.getEngine();
             initWebAlert(webEngine);
             logger.info("localUrl is: " + initUrl);
