@@ -152,7 +152,7 @@ public class UploadWorkerTask extends Task {
                                                                emitter.onNext(file);
                                                                emitter.onComplete();
                                                            }
-                                         ).observeOn(Schedulers.io())
+                                                          ).observeOn(Schedulers.io())
                                                    .subscribeOn(Schedulers.single())
                                                    .blockingSubscribe(new Observer<File>() {
                                                        @Override
