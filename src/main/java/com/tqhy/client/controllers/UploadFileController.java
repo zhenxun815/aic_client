@@ -2,6 +2,7 @@ package com.tqhy.client.controllers;
 
 import com.tqhy.client.ClientApplication;
 import com.tqhy.client.models.msg.local.UploadMsg;
+import com.tqhy.client.network.Network;
 import com.tqhy.client.task.UploadWorkerTask;
 import com.tqhy.client.utils.FXMLUtils;
 import javafx.application.Platform;
@@ -252,11 +253,12 @@ public class UploadFileController {
         uploadMsg = msg;
         String batchNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
         uploadMsg.setBatchNumber(batchNumber);
-        logger.info("projectName to upload is: " + uploadMsg.getProjectName() + ", batchNumber is: " + batchNumber);
+        uploadMsg.setToken(Network.TOKEN);
+        logger.info("uploadTargetName to upload is: " + uploadMsg.getUploadTargetName() + ", batchNumber is: " + batchNumber);
         Platform.runLater(() -> {
             stage = new Stage();
             FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml");
-            text_choose_desc.setText("将数据导入至: " + uploadMsg.getProjectName());
+            text_choose_desc.setText("将数据导入至: " + uploadMsg.getUploadTargetName());
             text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
         });
     }
