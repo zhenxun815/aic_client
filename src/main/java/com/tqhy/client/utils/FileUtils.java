@@ -25,8 +25,6 @@ import java.util.function.Function;
  */
 public class FileUtils {
 
-    private static final String FILE_TYPE_JPG = "JPG";
-    private static final String FILE_TYPE_DCM = "DCM";
 
     static Logger logger = LoggerFactory.getLogger(FileUtils.class);
 
@@ -67,11 +65,23 @@ public class FileUtils {
                                                      } catch (ExecutionException e) {
                                                          e.printStackTrace();
                                                      }
-                                                 } else {
+                                                 } else if (isJpgFile(file)) {
                                                      list.add(file);
                                                  }
                                              }, ArrayList::addAll);
         return collect;
+    }
+
+
+    /**
+     * 根绝后缀名判断是否jpg文件
+     *
+     * @param fileToJudge
+     * @return
+     */
+    public static boolean isJpgFile(File fileToJudge) {
+        String fileName = fileToJudge.getName().toLowerCase();
+        return fileName.endsWith("jpg") || fileName.endsWith("jpeg");
     }
 
     /**
@@ -245,6 +255,7 @@ public class FileUtils {
     public static File getLocalFile(String relativePath, String fileName) {
         String rootPath = getAppPath();
         String localFilePath = rootPath + relativePath;
+
         logger.info("localFilePath is: " + localFilePath);
         File localFile = new File(localFilePath, fileName);
         return localFile;
