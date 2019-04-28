@@ -1,9 +1,25 @@
 package com.tqhy.client.utils;
 
+import com.tqhy.client.config.Constants;
+import com.tqhy.client.models.msg.BaseMsg;
+import com.tqhy.client.models.msg.server.ClientMsg;
+import com.tqhy.client.network.Network;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * @author Yiheng
@@ -16,11 +32,12 @@ public class NetworkUtils {
 
     /**
      * 将本地路径转为URL对象
+     *
      * @param url
      * @return
      */
     public static String toExternalForm(String url) {
-        System.out.println("url is: " + url);
+        logger.info("url is: " + url);
         URL resource = NetworkUtils.class.getResource(url);
 
         return null == resource ? null : resource.toExternalForm();
@@ -28,6 +45,7 @@ public class NetworkUtils {
 
     /**
      * 获取本地mac地址
+     *
      * @return
      */
     public static String getPhysicalAddress() {
@@ -43,7 +61,7 @@ public class NetworkUtils {
                 //字节转换为整数
                 int temp = mac[i] & 0xff;
                 String str = Integer.toHexString(temp);
-               // logger.info("每8位:" + str);
+                // logger.info("每8位:" + str);
                 if (str.length() == 1) {
                     sb.append("0" + str);
                 } else {
@@ -67,13 +85,144 @@ public class NetworkUtils {
      * @return 本地ip字符串
      */
     public static String getLocalIp() {
-        String ip = null;
+        String ip = "";
+        String hostAddress = "";
         try {
             byte[] addr = InetAddress.getLocalHost().getAddress();
+            hostAddress = InetAddress.getLocalHost().getHostAddress();
             ip = (addr[0] & 0xff) + "." + (addr[1] & 0xff) + "." + (addr[2] & 0xff) + "." + (addr[3] & 0xff);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
+        logger.info("local ip is: " + ip + ", hostAddress is: " + hostAddress);
         return ip;
+    }
+
+    /**
+     * 初始化获取后台IP地址
+     *
+     * @return
+     */
+    public static String initServerIP(String localDataPath) {
+        logger.info("into init webEngine..");
+        File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
+        if (serverIPFile.exists()) {
+            List<String> datas = FileUtils.readLine(serverIPFile, line -> line);
+            String serverIP = datas.size() > 0 ? datas.get(0).trim() : "";
+            if (StringUtils.isEmpty(serverIP) || isNotIP(serverIP)) {
+                return "";
+            }
+
+            Network.setServerBaseUrl(serverIP);
+            try {
+                ResponseBody body = Network.getAicApi()
+                                           .pingServer()
+                                           .execute()
+                                           .body();
+
+                ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
+                Integer flag = clientMsg.getFlag();
+                logger.info("ping server ip: " + serverIP + ", get flag: " + flag);
+                if (BaseMsg.SUCCESS == flag) {
+                    return serverIP;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return "";
+    }
+
+
+    /**
+     * Ip地址判断<br>
+     *
+     * @param str
+     * @return
+     */
+    public static boolean isIP(String str) {
+
+        if (StringUtils.isEmpty(str)) {
+            return false;
+        }
+        // 匹配 1
+        // String regex = "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}";
+        // 匹配 2
+        String regex = "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}";
+
+        // 匹配1 和匹配2均可实现Ip判断的效果
+        Pattern pattern = Pattern.compile(regex);
+
+        return pattern.matcher(str).matches();
+
+    }
+
+    /**
+     * Ip地址判断<br>
+     *
+     * @param str
+     * @return
+     */
+    public static boolean isNotIP(String str) {
+        return !isIP(str);
+    }
+
+    /**
+     * 创建单参数请求,将字符串转换为{@link RequestBody}对象
+     *
+     * @param content
+     * @return
+     */
+    public static RequestBody createRequestParam(String content) {
+        if (content == null) {
+            content = "";
+        }
+        RequestBody body = RequestBody.create(MediaType.parse("multipart/form-data"), content);
+        return body;
+    }
+
+    /**
+     * 创建多参数请求
+     *
+     * @param params
+     * @return
+     */
+    public static Map<String, RequestBody> createRequestParamMap(Map<String, String> params) {
+        HashMap<String, RequestBody> paramMap = new HashMap<>();
+        params.forEach((k, v) -> {
+            RequestBody requestParam = createRequestParam(v);
+            paramMap.put(k, requestParam);
+        });
+        return paramMap;
+    }
+
+
+    /**
+     * 根据待上传文件路径生成上传文件{@link MultipartBody.Part}对象
+     *
+     * @param filePath
+     * @return
+     */
+    public static MultipartBody.Part createFilePart(String partName, String filePath) {
+        File file = new File(filePath);
+        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        MultipartBody.Part part = MultipartBody.Part.createFormData(partName, file.getName(), requestFile);
+        return part;
+    }
+
+    /**
+     * 根据待上传文件路径生成上传文件{@link MultipartBody.Part}对象
+     *
+     * @param uploadFileMap
+     * @return
+     */
+    public static List<MultipartBody.Part> createMultiFilePart(Map<String, String> uploadFileMap) {
+        List<MultipartBody.Part> multiParts = new ArrayList<>();
+        uploadFileMap.forEach((partName, filePath) -> {
+            MultipartBody.Part filePart = createFilePart(partName, filePath);
+            multiParts.add(filePart);
+        });
+
+        return multiParts;
     }
 }

@@ -21,12 +21,17 @@ public class VerifyMsg extends BaseMsg {
     private String serverIP;
 
     /**
+     * 客户端本地IP
+     */
+    private String localIP;
+
+    /**
      * 客户端序列号
      */
-    private String serializableNum;
+    private String token;
 
     /**
      * 激活码
      */
-    private String activationCode;
+    //private String activationCode;
 }

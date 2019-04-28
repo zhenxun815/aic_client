@@ -52,7 +52,7 @@
 						</div>
 						<div class="right">
 							<div class="icon-zone"></div>
-							<p class="word-zone">获取激活码</p>
+							<p class="word-zone">AIC系统</p>
 						</div>
 					</div>
 					<div class="input-box">
@@ -87,7 +87,11 @@
 </div>
 </body>
 <script type="text/javascript">
+	let flag = 0
 
+	document.oncontextmenu = function () {
+		return false;
+	}
 
 	function testingConnFunc() {
 		if (checkValueFunc()) {
@@ -95,6 +99,7 @@
 				'display': 'inline-block'
 			})
 
+			$('#btn_connection').html('连接中...')
 
 			let serverIP = $('#server_ip').val()
 			console.log(`server ip to connect is: ${serverIP}`)
@@ -102,25 +107,23 @@
 
 			post_ajax('connTest', '/verify/connection', requestData, (response) => {
 				//console.log(`response data is: ${JSON.stringify(response)}`)
-				let flag = response.flag
+				flag = response.flag
 				console.log(`flag is: ${flag}`)
-				if (flag == 0) {
-					let serializableNum = response.serializableNum
-					setStorage('serializableNum', serializableNum)
+				if (flag == 1) {
 					$('.spin').hide()
 					$('#btn_connection').html('连接成功')
 				} else {
 					//layOpenFunc1()
+					$('.spin').hide()
 					$('#btn_connection').html('连接失败,点击重试')
-					console.log(`reponse desc : ${response.desc}`)
 				}
 			})
 		}
 	}
 
 	function nextStep() {
-		if (getStorage('serializableNum')) {
-			window.location.href = baseUrlLocal + '/html/activating.html'
+		if (flag) {
+			window.location.href = baseUrlLocal + '/html/landing.html'
 		}
 	}
 </script>
