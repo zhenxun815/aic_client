@@ -16,6 +16,7 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.scene.CacheHint;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.image.Image;
@@ -92,6 +93,9 @@ public class LandingController {
         logger.info("into init webEngine..");
         String initUrl = StringUtils.isEmpty(serverIP) ? connectionUrl : landingUrl;
         if (!StringUtils.isEmpty(initUrl)) {
+            webView.setCache(true);
+            webView.setCacheHint(CacheHint.SPEED);
+
             WebEngine webEngine = webView.getEngine();
             initWebAlert(webEngine);
             logger.info("localUrl is: " + initUrl);
@@ -104,6 +108,8 @@ public class LandingController {
         webEngine.setOnAlert(event -> {
             String data = event.getData();
             logger.info("alert data is: " + data);
+            //alert('upload;case;' + projectId + ';' + projectName)
+            //alert('upload;test;' + taskId + ';' + projectName)
             if (data.startsWith(Constants.CMD_MSG_UPLOAD)) {
                 String[] split = data.split(";");
                 String uploadId = split[1];
