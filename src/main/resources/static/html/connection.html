@@ -52,7 +52,7 @@
 						</div>
 						<div class="right">
 							<div class="icon-zone"></div>
-							<p class="word-zone">服务机组</p>
+							<p class="word-zone">AIC系统</p>
 						</div>
 					</div>
 					<div class="input-box">
@@ -87,8 +87,11 @@
 </div>
 </body>
 <script type="text/javascript">
-
 	let flag = 0
+
+	document.oncontextmenu = function () {
+		return false;
+	}
 
 	function testingConnFunc() {
 		if (checkValueFunc()) {

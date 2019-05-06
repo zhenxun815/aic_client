@@ -35,7 +35,7 @@
 						<input class="input" id="input_uname" placeholder="填写用户名" type="text"/>
 						<p class="callback-message">用户名不能为空</p>
 					</div>
-					<div class="input-box">
+					<div class="input-box user">
 						<h6 class="label">密码</h6>
 						<input class="input" id="input_upwd" placeholder="填写密码" type="password"/>
 						<p id="landing_tips" class="callback-message">密码不能为空</p>
@@ -67,6 +67,11 @@
 </div>
 </body>
 <script type="text/javascript">
+
+	document.oncontextmenu = function () {
+		return false;
+	}
+
 	function confirm() {
 		layCloseFunc()
 	}
@@ -78,13 +83,14 @@
 			let userPwd = $('#input_upwd').val()
 
 			let landInfo = {userName: userName, userPwd: userPwd}
+			console.log(`userName is: ${userName}, userPwd is: ${userPwd}`)
 			post_ajax('land', '/landing', landInfo, (response) => {
 				let flag = response.flag
 				console.log(`flag is: ${flag}`)
 				if (1 == flag) {
 					let token = response.token
 					let localIP = response.localIP
-					//localStorage.setItem("AIC_TOKEN", token)
+					localStorage.setItem("AIC_TOKEN", token)
 					//window.location.href = baseUrlLocal + '/html/test_upload.html'
 					let serverIP = response.serverIP
 					//alert('server ip: '+serverIP)

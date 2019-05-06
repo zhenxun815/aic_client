@@ -57,6 +57,17 @@ public interface AicApi {
     @POST("upload/")
     Observable<ResponseBody> uploadFiles(@PartMap Map<String, RequestBody> params, @Part MultipartBody.Part fileParts);
 
+
+    /**
+     * 多个参数,多文件上传
+     *
+     * @param params
+     * @return
+     */
+    @Multipart
+    @POST("uploadTest/")
+    Observable<ResponseBody> uploadTestFiles(@PartMap Map<String, RequestBody> params, @Part MultipartBody.Part fileParts);
+
     /**
      * 测试后台是否联通
      *

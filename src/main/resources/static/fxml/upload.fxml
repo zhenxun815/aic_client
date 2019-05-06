@@ -31,6 +31,7 @@
                     </Insets>
                 </VBox.margin>
             </Text>
+
             <HBox styleClass="small_btn_container">
                 <Button fx:id="btn_choose" onMouseClicked="#chooseDirectory" styleClass="btn_small">选择文件</Button>
 
@@ -41,14 +42,24 @@
                         </Insets>
                     </HBox.margin>
                 </Text>
+
+                <Text fx:id="text_choose_tip" styleClass="text_tips">仅支持DICOM/JPG/PNG格式文件
+                    <HBox.margin>
+                        <Insets>
+                            <left>10</left>
+                        </Insets>
+                    </HBox.margin>
+                </Text>
             </HBox>
-            <Text fx:id="text_choose_tip" styleClass="text_tips">仅支持DICOM/JPG/PNG格式文件
+
+            <TextField fx:id="text_field_remarks" styleClass="text_remark" promptText="请输入备注信息">
                 <VBox.margin>
                     <Insets>
                         <top>11</top>
                     </Insets>
                 </VBox.margin>
-            </Text>
+            </TextField>
+
             <HBox styleClass="confirm_btn_container">
                 <VBox.margin>
                     <Insets>
