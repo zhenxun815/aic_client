@@ -12,6 +12,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.io.IOException;
+import java.net.URL;
+
 /**
  * @author Yiheng
  * @create 1/29/2019
@@ -29,6 +34,7 @@ public class ClientApplication extends Application {
     public void start(Stage primaryStage) throws Exception {
         stage = primaryStage;
         initPrimaryStageSize();
+        initSystemTray(stage);
         stage.setOnCloseRequest(event -> System.exit(0));
 
         FXMLUtils.loadWindow(stage, "/static/fxml/main.fxml");
@@ -56,6 +62,36 @@ public class ClientApplication extends Application {
         stage.setHeight(height);
         stage.setResizable(false);
         stage.centerOnScreen();
+    }
+
+    /**
+     * 创建系统托盘图标
+     *
+     * @param stage
+     */
+    private void initSystemTray(Stage stage) {
+        try {
+            System.setProperty("java.awt.headless", "false");
+            Toolkit.getDefaultToolkit();
+            if (!java.awt.SystemTray.isSupported()) {
+               logger.info("系统不支持托盘图标,程序退出..");
+                Platform.exit();
+            }
+            //PopupMenu popupMenu = createPopMenu(stage);
+
+            SystemTray systemTray = SystemTray.getSystemTray();
+            String iconPath = ClientApplication.class.getResource("/static/img/logo_systray.png").toExternalForm();
+            URL imageLoc = new URL(iconPath);
+            java.awt.Image image = ImageIO.read(imageLoc);
+            //final TrayIcon trayIcon = new TrayIcon(image, "打开悬浮窗",popupMenu);
+            final TrayIcon trayIcon = new TrayIcon(image, "双击打开主界面");
+
+            systemTray.add(trayIcon);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (AWTException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

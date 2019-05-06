@@ -2,6 +2,7 @@ package com.tqhy.client.controllers;
 
 import com.tqhy.client.ClientApplication;
 import com.tqhy.client.models.msg.local.UploadMsg;
+import com.tqhy.client.network.Network;
 import com.tqhy.client.task.UploadWorkerTask;
 import com.tqhy.client.utils.FXMLUtils;
 import javafx.application.Platform;
@@ -9,6 +10,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
@@ -16,6 +18,7 @@ import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +85,9 @@ public class UploadFileController {
     @FXML
     Text text_choose_info;
 
+
+    @FXML
+    TextField text_field_remarks;
     /**
      * 上传进度百分比提示内容
      */
@@ -149,9 +155,12 @@ public class UploadFileController {
             }
             logger.info("dir to upload: " + dirToUpload.getAbsolutePath());
 
+
             //显示上传中界面
             showPanel(panel_progress.getId());
 
+            String remarks = UploadMsg.UPLOAD_TYPE_CASE.equals(uploadMsg.getUploadType()) ? text_field_remarks.getText() : "test";
+            uploadMsg.setRemarks(remarks);
             UploadWorkerTask workerTask = UploadWorkerTask.with(dirToUpload, uploadMsg);
             workerTask.messageProperty()
                       .addListener((observable, oldVal, newVal) -> {
@@ -252,12 +261,20 @@ public class UploadFileController {
         uploadMsg = msg;
         String batchNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
         uploadMsg.setBatchNumber(batchNumber);
-        logger.info("projectName to upload is: " + uploadMsg.getProjectName() + ", batchNumber is: " + batchNumber);
+        uploadMsg.setToken(Network.TOKEN);
+        logger.info("uploadTargetName to upload is: " + uploadMsg.getUploadTargetName() + ", batchNumber is: " + batchNumber);
         Platform.runLater(() -> {
             stage = new Stage();
             FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml");
-            text_choose_desc.setText("将数据导入至: " + uploadMsg.getProjectName());
+            text_choose_desc.setText("将数据导入至: " + uploadMsg.getUploadTargetName());
             text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
+            @NonNull String uploadType = uploadMsg.getUploadType();
+            //text_field_remarks.setVisible(UploadMsg.UPLOAD_TYPE_CASE.equals(uploadType));
+            if (UploadMsg.UPLOAD_TYPE_CASE.equals(uploadType) && !panel_choose.getChildren().contains(text_field_remarks)) {
+                panel_choose.getChildren().add(text_field_remarks);
+            } else if (UploadMsg.UPLOAD_TYPE_TEST.equals(uploadType) && panel_choose.getChildren().contains(text_field_remarks)) {
+                panel_choose.getChildren().remove(text_field_remarks);
+            }
         });
     }
 

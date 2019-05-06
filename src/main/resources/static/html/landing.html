@@ -83,17 +83,18 @@
 			let userPwd = $('#input_upwd').val()
 
 			let landInfo = {userName: userName, userPwd: userPwd}
+			console.log(`userName is: ${userName}, userPwd is: ${userPwd}`)
 			post_ajax('land', '/landing', landInfo, (response) => {
 				let flag = response.flag
 				console.log(`flag is: ${flag}`)
 				if (1 == flag) {
 					let token = response.token
 					let localIP = response.localIP
-					//localStorage.setItem("AIC_TOKEN", token)
-					//window.location.href = baseUrlLocal + '/html/test_upload.html'
+					localStorage.setItem("AIC_TOKEN", token)
+					window.location.href = baseUrlLocal + '/html/test_upload.html'
 					let serverIP = response.serverIP
 					//alert('server ip: '+serverIP)
-					window.location.href = 'http://' + serverIP + ':8080/index.html?token=' + token + '&localIP=' + localIP
+					//window.location.href = 'http://' + serverIP + ':8080/index.html?token=' + token + '&localIP=' + localIP
 				} else if (203 == flag) {
 					layOpenFunc1()
 				} else {

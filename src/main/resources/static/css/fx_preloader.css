@@ -18,7 +18,7 @@
     -fx-background-repeat: no-repeat;
     -fx-background-size: contain;
     -fx-background-position: center;
-    -fx-background-image: url("/static/img/preloader_logo.png");
+    -fx-background-image: url("/static/img/logo.png");
 }
 
 .text_title {

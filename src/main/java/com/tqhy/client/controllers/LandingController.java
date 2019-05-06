@@ -16,6 +16,7 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.scene.CacheHint;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.image.Image;
@@ -54,12 +55,6 @@ public class LandingController {
     @Value("${network.url.landing:''}")
     private String landingUrl;
 
-    @Value("${network.url.init-landing:''}")
-    private String initLandingUrl;
-
-    @Value("${network.url.init-connection:''}")
-    private String initConnectionUrl;
-
     @Value("${path.data:'/data/'}")
     private String localDataPath;
 
@@ -87,12 +82,12 @@ public class LandingController {
      * @param serverIP
      */
     private void initWebEngine(String serverIP) {
-        //禁用右键菜单
-        //webView.setContextMenuEnabled(false);
         logger.info("into init webEngine..");
         String initUrl = StringUtils.isEmpty(serverIP) ? connectionUrl : landingUrl;
         if (!StringUtils.isEmpty(initUrl)) {
-            //webView.setContextMenuEnabled(false);
+            webView.setCache(true);
+            webView.setCacheHint(CacheHint.SPEED);
+
             WebEngine webEngine = webView.getEngine();
             initWebAlert(webEngine);
             logger.info("localUrl is: " + initUrl);
@@ -105,11 +100,14 @@ public class LandingController {
         webEngine.setOnAlert(event -> {
             String data = event.getData();
             logger.info("alert data is: " + data);
+            //alert('upload;case;' + projectId + ';' + projectName)
+            //alert('upload;test;' + taskId + ';' + projectName)
             if (data.startsWith(Constants.CMD_MSG_UPLOAD)) {
                 String[] split = data.split(";");
-                String projectId = split[1];
-                String projectName = split[2];
-                uploadFileController.openUpload(UploadMsg.with(projectId, projectName));
+                String uploadId = split[1];
+                String uploadType = split[2];
+                String uploadTargetName = split[3];
+                uploadFileController.openUpload(UploadMsg.with(uploadId, uploadType, uploadTargetName));
             } else if (Constants.CMD_MSG_LOGOUT.equals(data)) {
                 heartBeatService.stopBeat();
                 logout();

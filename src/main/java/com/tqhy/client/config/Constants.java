@@ -10,6 +10,8 @@ public class Constants {
     /************************ CMD *************************/
     public static final String CMD_MSG_LOGOUT = "203";
 
+
+    //alert('upload_case;' + uploadId + ';' + uploadTargetName)
     public static final String CMD_MSG_UPLOAD = "upload";
 
     public static final String CMD_MSG_STOP_BEAT = "stop";

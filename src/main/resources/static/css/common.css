@@ -78,7 +78,8 @@ html body .main .left .box {
     width: 3.1063rem;
     height: 1.40556rem;
     background-image: url("../img/logo.png");
-    background-size: 100% .716838rem;
+    background-position-x: center;
+    background-size: 105px, 57px;
     background-repeat: no-repeat;
     font-size: 20px;
     color: #fff;
