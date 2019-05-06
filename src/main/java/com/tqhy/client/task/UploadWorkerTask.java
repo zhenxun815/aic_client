@@ -65,7 +65,6 @@ public class UploadWorkerTask extends Task {
         if (UploadMsg.UPLOAD_TYPE_CASE.equals(uploadType)) {
             uploadCase(uploadMsg);
         } else if (UploadMsg.UPLOAD_TYPE_TEST.equals(uploadType)) {
-
             uploadTest(uploadMsg);
         }
 
@@ -131,6 +130,7 @@ public class UploadWorkerTask extends Task {
             Map<String, RequestBody> requestParamMap = NetworkUtils.createRequestParamMap(map);
 
             boolean upLoad = doUpLoad(caseDir, requestParamMap);
+            logger.info("doUpload [{}]", upLoad);
             if (!upLoad) {
                 break;
             }
@@ -204,13 +204,12 @@ public class UploadWorkerTask extends Task {
                                           }
 
                                       });
-                return true;
             }
+            return true;
         } else {
             updateMessage(PROGRESS_MSG_ERROR);
             return false;
         }
-        return true;
     }
 
     private AtomicInteger fakeUpload(File caseDir) {
