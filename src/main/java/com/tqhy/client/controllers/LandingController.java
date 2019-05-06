@@ -104,10 +104,10 @@ public class LandingController {
             //alert('upload;test;' + taskId + ';' + projectName)
             if (data.startsWith(Constants.CMD_MSG_UPLOAD)) {
                 String[] split = data.split(";");
-                String uploadId = split[1];
-                String uploadType = split[2];
+                String uploadType = split[1];
+                String uploadId = split[2];
                 String uploadTargetName = split[3];
-                uploadFileController.openUpload(UploadMsg.with(uploadId, uploadType, uploadTargetName));
+                uploadFileController.openUpload(UploadMsg.with(uploadType, uploadId, uploadTargetName));
             } else if (Constants.CMD_MSG_LOGOUT.equals(data)) {
                 heartBeatService.stopBeat();
                 logout();
