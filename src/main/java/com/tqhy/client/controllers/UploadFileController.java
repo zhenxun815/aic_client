@@ -266,14 +266,23 @@ public class UploadFileController {
         Platform.runLater(() -> {
             stage = new Stage();
             FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml");
-            text_choose_desc.setText("将数据导入至: " + uploadMsg.getUploadTargetName());
             text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
+
             @NonNull String uploadType = uploadMsg.getUploadType();
             //text_field_remarks.setVisible(UploadMsg.UPLOAD_TYPE_CASE.equals(uploadType));
-            if (UploadMsg.UPLOAD_TYPE_CASE.equals(uploadType) && !panel_choose.getChildren().contains(text_field_remarks)) {
-                panel_choose.getChildren().add(text_field_remarks);
-            } else if (UploadMsg.UPLOAD_TYPE_TEST.equals(uploadType) && panel_choose.getChildren().contains(text_field_remarks)) {
-                panel_choose.getChildren().remove(text_field_remarks);
+            if (UploadMsg.UPLOAD_TYPE_CASE.equals(uploadType)) {
+                if (!panel_choose.getChildren().contains(text_field_remarks)) {
+                    panel_choose.getChildren().add(text_field_remarks);
+                }
+                text_choose_desc.setText("将数据导入至: " + uploadMsg.getUploadTargetName());
+                text_choose_desc.setVisible(true);
+                //logger.info("upload case...target name is: [{}]",uploadMsg.getUploadTargetName());
+            } else if (UploadMsg.UPLOAD_TYPE_TEST.equals(uploadType)) {
+                if (panel_choose.getChildren().contains(text_field_remarks)) {
+                    panel_choose.getChildren().remove(text_field_remarks);
+                }
+                text_choose_desc.setVisible(false);
+                logger.info("upload test...");
             }
         });
     }
