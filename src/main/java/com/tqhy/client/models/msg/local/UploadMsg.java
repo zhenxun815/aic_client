@@ -39,4 +39,6 @@ public class UploadMsg extends BaseMsg {
     private String token;
 
     private String batchNumber;
+
+    private String remarks;
 }

@@ -55,12 +55,6 @@ public class LandingController {
     @Value("${network.url.landing:''}")
     private String landingUrl;
 
-    @Value("${network.url.init-landing:''}")
-    private String initLandingUrl;
-
-    @Value("${network.url.init-connection:''}")
-    private String initConnectionUrl;
-
     @Value("${path.data:'/data/'}")
     private String localDataPath;
 
@@ -88,8 +82,6 @@ public class LandingController {
      * @param serverIP
      */
     private void initWebEngine(String serverIP) {
-        //禁用右键菜单
-        //webView.setContextMenuEnabled(false);
         logger.info("into init webEngine..");
         String initUrl = StringUtils.isEmpty(serverIP) ? connectionUrl : landingUrl;
         if (!StringUtils.isEmpty(initUrl)) {
