@@ -11,18 +11,24 @@ import com.tqhy.client.service.HeartBeatService;
 import com.tqhy.client.utils.FileUtils;
 import com.tqhy.client.utils.GsonUtils;
 import com.tqhy.client.utils.NetworkUtils;
+import com.tqhy.client.utils.PropertyUtils;
 import io.reactivex.schedulers.Schedulers;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.concurrent.Worker;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.CacheHint;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import netscape.javascript.JSObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +39,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * @author Yiheng
@@ -74,6 +81,31 @@ public class LandingController {
     private void initialize() {
         initWebEngine(Network.SERVER_IP);
         initJumpToLanding();
+        modifyLandingPage();
+    }
+
+    /**
+     * @Description: 操作dom来修改页面中的用户名
+     */
+    private void modifyLandingPage() {
+            WebEngine webEngine = webView.getEngine();
+            webEngine.getLoadWorker()
+                    .stateProperty()
+                    .addListener((ov, oldState, newState) -> {
+                        if (Worker.State.SUCCEEDED == newState&&webEngine.getLocation().endsWith("landing.html")) {
+                            //添加webview的键盘监听，根据页面不同执行不同键盘监听行为,URL地址规则更改以后将不可用，放在这里是防止界面未加载之前就回车
+                            webView.setOnKeyPressed(ke -> {
+                                if (ke.getCode().equals(KeyCode.ENTER)) {
+                                        webEngine.executeScript("land()");
+                                    }
+                            });
+                            try {
+                                webEngine.getDocument().getElementById("input_uname").setAttribute("value", PropertyUtils.getUserName());
+                            } catch (IOException e) {
+                                System.out.println("目前没有用户登陆过");
+                            }
+                        }
+                    });;
     }
 
     /**
@@ -92,6 +124,7 @@ public class LandingController {
             initWebAlert(webEngine);
             logger.info("localUrl is: " + initUrl);
             webEngine.load(Network.LOCAL_BASE_URL + initUrl);
+
         }
     }
 
@@ -172,30 +205,31 @@ public class LandingController {
 
         String userName = landingMsg.getUserName().trim();
         String userPwd = landingMsg.getUserPwd().trim();
+        PropertyUtils.setUserName(userName);
 
         Network.getAicApi()
-               .landing(userName, userPwd)
-               .map(body -> {
-                   ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
-                   logger.info("flag is: " + clientMsg.getFlag());
-                   response.setFlag(clientMsg.getFlag());
-                   response.setDesc(clientMsg.getDesc());
-                   List<String> msg = clientMsg.getMsg();
-                   String token = msg.get(0);
-                   logger.info("token is: " + token);
-                   response.setToken(token);
-                   response.setLocalIP(localIp);
-                   response.setServerIP(Network.SERVER_IP);
-                   return response;
-               })
-               .observeOn(Schedulers.io())
-               .subscribeOn(Schedulers.trampoline())
-               .subscribe(res -> {
-                   if (BaseMsg.SUCCESS == res.getFlag()) {
-                       heartBeatService.startBeat(response.getToken());
-                       Network.TOKEN = response.getToken();
-                   }
-               });
+                .landing(userName, userPwd)
+                .map(body -> {
+                    ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
+                    logger.info("flag is: " + clientMsg.getFlag());
+                    response.setFlag(clientMsg.getFlag());
+                    response.setDesc(clientMsg.getDesc());
+                    List<String> msg = clientMsg.getMsg();
+                    String token = msg.get(0);
+                    logger.info("token is: " + token);
+                    response.setToken(token);
+                    response.setLocalIP(localIp);
+                    response.setServerIP(Network.SERVER_IP);
+                    return response;
+                })
+                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.trampoline())
+                .subscribe(res -> {
+                    if (BaseMsg.SUCCESS == res.getFlag()) {
+                        heartBeatService.startBeat(response.getToken());
+                        Network.TOKEN = response.getToken();
+                    }
+                });
 
         return response;
     }
@@ -217,9 +251,9 @@ public class LandingController {
             logger.info("base url is: " + Network.SERVER_BASE_URL);
             try {
                 okhttp3.ResponseBody responseBody = Network.getAicApi()
-                                                           .pingServer()
-                                                           .execute()
-                                                           .body();
+                        .pingServer()
+                        .execute()
+                        .body();
                 ClientMsg clientMsg = GsonUtils.parseResponseToObj(responseBody);
 
                 if (BaseMsg.SUCCESS == clientMsg.getFlag()) {
@@ -250,7 +284,7 @@ public class LandingController {
      */
     public void sendMsgToJs(String msg) {
         Object response = webView.getEngine()
-                                 .executeScript("callJsFunction(\"" + msg + "\")");
+                .executeScript("callJsFunction(\"" + msg + "\")");
         String s = (String) response;
         logger.info("get response: " + s);
     }
