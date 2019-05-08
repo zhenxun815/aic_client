@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * @author Yiheng
@@ -22,5 +23,7 @@ public class User  implements Serializable {
 
     private String userName;
 
-    private String passWord;
+    private String password;
+
+    private LocalDateTime landTime;
 }
