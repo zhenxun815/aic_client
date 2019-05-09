@@ -52,12 +52,20 @@ public class UploadWorkerTask extends Task {
 
     int total;
     AtomicInteger completeCount;
+    AtomicInteger errorCount;
 
     @Override
     protected Object call() throws Exception {
         logger.info("start upload task...");
         completeCount = new AtomicInteger(0);
+        errorCount = new AtomicInteger(0);
         total = FileUtils.getFilesInDir(dirToUpload).size();
+        if (total == 0) {
+            logger.info("total file count is 0!");
+            updateProgress(100, 100);
+            String completeMsg = PROGRESS_MSG_COMPLETE + ";" + completeCount.get() + ";" + errorCount.get();
+            updateMessage(completeMsg);
+        }
         logger.info("total file count is: " + total);
 
         String uploadType = uploadMsg.getUploadType();
@@ -67,8 +75,6 @@ public class UploadWorkerTask extends Task {
         } else if (UploadMsg.UPLOAD_TYPE_TEST.equals(uploadType)) {
             uploadTest(uploadMsg);
         }
-
-
         return null;
     }
 
@@ -89,12 +95,8 @@ public class UploadWorkerTask extends Task {
         map.put("taskId", uploadMsg.getUploadId());
 
         File[] caseDirs = dirToUpload.listFiles(File::isDirectory);
-        if (caseDirs.length == 0) {
-            updateMessage(PROGRESS_MSG_ERROR);
-        } else {
-            logger.info("upload token: {}, dirToUpload: {}, batchNumber: {}", token, dirPathToUpload, batchNumber);
-            upLoadDirs(caseDirs, map);
-        }
+        logger.info("upload token: {}, dirToUpload: {}, batchNumber: {}", token, dirPathToUpload, batchNumber);
+        upLoadDirs(caseDirs, map);
     }
 
     /**
@@ -129,18 +131,15 @@ public class UploadWorkerTask extends Task {
             map.put("caseName", caseName);
             Map<String, RequestBody> requestParamMap = NetworkUtils.createRequestParamMap(map);
 
-            boolean upLoad = doUpLoad(caseDir, requestParamMap);
-            logger.info("doUpload [{}]", upLoad);
-            if (!upLoad) {
-                break;
-            }
+            doUpLoad(caseDir, requestParamMap);
+
             //fakeUpload(dirToUpload);
         }
 
     }
 
 
-    private boolean doUpLoad(File caseDir, Map<String, RequestBody> requestParamMap) {
+    private void doUpLoad(File caseDir, Map<String, RequestBody> requestParamMap) {
         logger.info("into upload case: " + caseDir.getAbsolutePath());
         List<File> filesInCaseDir = FileUtils.getFilesInDir(caseDir);
         List<File> transformedFiles = FileUtils.transAllToJpg(filesInCaseDir);
@@ -180,7 +179,8 @@ public class UploadWorkerTask extends Task {
 
                                           @Override
                                           public void onError(Throwable e) {
-                                              updateMessage(PROGRESS_MSG_ERROR);
+                                              dirUploadCompleteCount.incrementAndGet();
+                                              errorCount.incrementAndGet();
                                               e.printStackTrace();
                                           }
 
@@ -190,11 +190,12 @@ public class UploadWorkerTask extends Task {
                                               int dirCompleteCount = dirUploadCompleteCount.incrementAndGet();
                                               updateProgress(completeCount.get(), total);
 
-                                              double progress = (completeCount.get() + 0D) / total * 100;
+                                              double progress = (completeCount.get() + errorCount.get() + 0D) / total * 100;
                                               logger.info("complete count is: " + completeCount.get() + ", progress is: " + progress);
                                               DecimalFormat decimalFormat = new DecimalFormat("#0.0");
                                               String formatProgress = decimalFormat.format(progress);
-                                              updateMessage(progress == 100.0D ? PROGRESS_MSG_COMPLETE : formatProgress);
+                                              String completeMsg = PROGRESS_MSG_COMPLETE + ";" + completeCount.get() + ";" + errorCount.get();
+                                              updateMessage(progress == 100.0D ? completeMsg : formatProgress);
 
                                               //上传完毕删除生成的jpg临时文件
                                               if (dirCompleteCount == filesInCaseDir.size()) {
@@ -205,10 +206,6 @@ public class UploadWorkerTask extends Task {
 
                                       });
             }
-            return true;
-        } else {
-            updateMessage(PROGRESS_MSG_ERROR);
-            return false;
         }
     }
 
@@ -246,7 +243,7 @@ public class UploadWorkerTask extends Task {
 
                                                        @Override
                                                        public void onError(Throwable e) {
-                                                           updateMessage(PROGRESS_MSG_ERROR);
+                                                           errorCount.incrementAndGet();
                                                            e.printStackTrace();
                                                        }
 
@@ -254,7 +251,7 @@ public class UploadWorkerTask extends Task {
                                                        public void onComplete() {
                                                            completeCount.incrementAndGet();
                                                            updateProgress(completeCount.get(), total);
-                                                           double progress = (completeCount.get() + 0D) / total * 100;
+                                                           double progress = (completeCount.get() + errorCount.get() + 0D) / total * 100;
                                                            logger.info("complete count is: " + completeCount.get() + ", progress is: " + progress);
                                                            updateMessage(progress == 100.0D ? PROGRESS_MSG_COMPLETE : DecimalFormat.getInstance().format(progress));
                                                        }

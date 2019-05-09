@@ -138,7 +138,7 @@
                 </VBox.margin>
             </ImageView>
 
-            <Text fx:id="text_success_desc">数据已导入
+            <Text fx:id="text_success_desc">数据导入完毕
                 <VBox.margin>
                     <Insets>
                         <top>14</top>

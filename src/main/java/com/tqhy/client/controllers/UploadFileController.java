@@ -63,6 +63,10 @@ public class UploadFileController {
      */
     private File dirToUpload;
 
+    /**
+     * 是否可以上传
+     */
+    private boolean uploadReadyFlag;
     @FXML
     VBox panel_choose;
     @FXML
@@ -95,11 +99,16 @@ public class UploadFileController {
     Text text_progress_info;
 
     /**
-     * 上传成功提示内容,显示本次上传批次号
+     * 上传完毕提示内容,显示本次上传批次号
      */
     @FXML
     Text text_success_info;
 
+    /**
+     * 长传完毕显示提示内容
+     */
+    @FXML
+    Text text_success_desc;
     /**
      * 上传进度条
      */
@@ -125,6 +134,8 @@ public class UploadFileController {
             }
         });
 
+        uploadReadyFlag = false;
+
         mainStageIconified.bind(ClientApplication.stage.iconifiedProperty());
         mainStageIconified.addListener((observable, oldVal, newVal) -> {
             logger.info("main stage iconified state change..." + newVal);
@@ -138,6 +149,7 @@ public class UploadFileController {
     private void resetValues() {
         uploadMsg = null;
         dirToUpload = null;
+        uploadReadyFlag = false;
     }
 
     /**
@@ -147,12 +159,17 @@ public class UploadFileController {
      */
     @FXML
     public void startUpload(MouseEvent mouseEvent) {
+        if (!uploadReadyFlag) {
+            return;
+        }
         MouseButton button = mouseEvent.getButton();
         if (MouseButton.PRIMARY.equals(button)) {
             logger.info(button.name() + "....");
             if (null == dirToUpload) {
                 return;
             }
+
+
             logger.info("dir to upload: " + dirToUpload.getAbsolutePath());
 
 
@@ -164,15 +181,15 @@ public class UploadFileController {
             UploadWorkerTask workerTask = UploadWorkerTask.with(dirToUpload, uploadMsg);
             workerTask.messageProperty()
                       .addListener((observable, oldVal, newVal) -> {
-                          if (UploadWorkerTask.PROGRESS_MSG_ERROR.equals(newVal)) {
-                              logger.info("upload progress msg..." + newVal);
-                              //显示上传失败页面
-                              showPanel(panel_fail.getId());
-                              text_progress_info.setText(0 + "%");
-                          } else if (UploadWorkerTask.PROGRESS_MSG_COMPLETE.equals(newVal)) {
+                          if (newVal.startsWith(UploadWorkerTask.PROGRESS_MSG_COMPLETE)) {
                               logger.info("upload progress msg..." + newVal);
                               //显示上传成功页面
                               showPanel(panel_success.getId());
+                              String[] split = newVal.split(";");
+                              String completeCount = split[1];
+                              String errorCount = split[2];
+                              String completeMsg = "上传完毕,成功: " + completeCount + " 条, 失败: " + errorCount + " 条!";
+                              text_success_desc.setText(completeMsg);
                           } else {
                               logger.info("upload progress msg..." + newVal);
                               text_progress_info.setText(newVal + "%");
@@ -230,9 +247,18 @@ public class UploadFileController {
             logger.info(button.name() + "....");
             DirectoryChooser directoryChooser = new DirectoryChooser();
             dirToUpload = directoryChooser.showDialog(stage);
+
             if (null != dirToUpload) {
-                logger.info("choose dirToUpload is: " + dirToUpload.getAbsolutePath());
-                text_choose_info.setText(dirToUpload.getAbsolutePath());
+                File[] caseDirs = dirToUpload.listFiles(File::isDirectory);
+                if (null != caseDirs && caseDirs.length > 0) {
+                    logger.info("choose dirToUpload is: [{}]", dirToUpload.getAbsolutePath());
+                    text_choose_info.setText(dirToUpload.getAbsolutePath());
+                    uploadReadyFlag = true;
+                } else {
+                    logger.info("choose dirToUpload error");
+                    text_choose_info.setText("文件夹路径不合法!");
+                    uploadReadyFlag = false;
+                }
             }
         }
     }
