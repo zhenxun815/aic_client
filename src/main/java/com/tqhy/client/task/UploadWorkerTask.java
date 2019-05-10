@@ -59,7 +59,7 @@ public class UploadWorkerTask extends Task {
         logger.info("start upload task...");
         completeCount = new AtomicInteger(0);
         errorCount = new AtomicInteger(0);
-        total = FileUtils.getFilesInDir(dirToUpload).size();
+        total = FileUtils.getFilesInSubDir(dirToUpload).size();
         if (total == 0) {
             logger.info("total file count is 0!");
             updateProgress(100, 100);
