@@ -37,13 +37,12 @@ public class FileUtils {
 
         File[] files = dir.listFiles();
         ArrayList<File> collect = Arrays.stream(files)
-                                        .filter(filter)
                                         .collect(ArrayList::new, (list, file) -> {
-                                            if (file.isFile()) {
-                                                list.add(file);
-                                            } else if (file.isDirectory()) {
+                                            if (file.isDirectory()) {
                                                 List<File> filesInSubDir = getFilesInDir(file, filter);
                                                 list.addAll(filesInSubDir);
+                                            } else if (filter.test(file)) {
+                                                list.add(file);
                                             }
                                         }, ArrayList::addAll);
         return collect;
