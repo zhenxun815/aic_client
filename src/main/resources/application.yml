@@ -1,5 +1,10 @@
 server:
     port: 8081
+
+#db
+spring:
+    datasource:
+        driver-class-name:
 #network
 network:
     url:

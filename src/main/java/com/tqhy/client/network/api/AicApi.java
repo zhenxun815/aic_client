@@ -81,7 +81,7 @@ public interface AicApi {
     Observable<ResponseBody> landing(@PartMap Map<String, RequestBody> params); */
 
     @POST("login/")
-    Observable<ResponseBody> landing(@Query("userName") String userName, @Query("passWord") String passWord);
+    Observable<ResponseBody> landing(@Query("userName") String userName, @Query("passWord") String password);
 
     /**
      * 与后台保持心跳请求

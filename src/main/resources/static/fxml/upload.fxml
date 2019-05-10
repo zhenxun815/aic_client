@@ -137,14 +137,24 @@
                     </Insets>
                 </VBox.margin>
             </ImageView>
-
-            <Text fx:id="text_success_desc">数据已导入
+            <HBox style="-fx-alignment: center" fx:id="box_complete">
                 <VBox.margin>
                     <Insets>
                         <top>14</top>
                     </Insets>
                 </VBox.margin>
-            </Text>
+                <Text fx:id="text_success_desc">数据导入完毕
+
+                </Text>
+                <Button fx:id="btn_failed_check" onMouseClicked="#checkFailed" styleClass="btn_small">查看失败文件
+                    <HBox.margin>
+                        <Insets>
+                            <left>10</left>
+                        </Insets>
+                    </HBox.margin>
+                </Button>
+            </HBox>
+
             <Text fx:id="text_success_info">导入批次:
                 <VBox.margin>
                     <Insets>

@@ -2,9 +2,11 @@ package com.tqhy.client.utils;
 
 import com.tqhy.client.controllers.PreloaderController;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -73,5 +75,24 @@ public class FXMLUtils {
         scene.getStylesheets().add(NetworkUtils.toExternalForm("/static/css/fx_root.css"));
         stage.setScene(scene);
         stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title_light.png")));
+    }
+
+    /**
+     * 是否展示子元素节点
+     *
+     * @param parent
+     * @param child
+     * @param display 为true则添加,false则移除
+     */
+    public static void displayChildNode(Pane parent, Node child, boolean display) {
+        if (display) {
+            if (!parent.getChildren().contains(child)) {
+                parent.getChildren().add(child);
+            }
+        } else {
+            if (parent.getChildren().contains(child)) {
+                parent.getChildren().remove(child);
+            }
+        }
     }
 }

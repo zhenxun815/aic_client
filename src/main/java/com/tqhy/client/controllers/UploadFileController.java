@@ -5,14 +5,17 @@ import com.tqhy.client.models.msg.local.UploadMsg;
 import com.tqhy.client.network.Network;
 import com.tqhy.client.task.UploadWorkerTask;
 import com.tqhy.client.utils.FXMLUtils;
+import com.tqhy.client.utils.FileUtils;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
@@ -22,11 +25,15 @@ import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutorService;
@@ -63,6 +70,14 @@ public class UploadFileController {
      */
     private File dirToUpload;
 
+    /**
+     * 是否可以上传
+     */
+    private boolean uploadReadyFlag;
+
+    @Value("${path.data:'/data/'}")
+    private String localDataPath;
+
     @FXML
     VBox panel_choose;
     @FXML
@@ -85,7 +100,6 @@ public class UploadFileController {
     @FXML
     Text text_choose_info;
 
-
     @FXML
     TextField text_field_remarks;
     /**
@@ -95,19 +109,31 @@ public class UploadFileController {
     Text text_progress_info;
 
     /**
-     * 上传成功提示内容,显示本次上传批次号
+     * 上传完毕提示内容,显示本次上传批次号
      */
     @FXML
     Text text_success_info;
 
+    /**
+     * 长传完毕显示提示内容
+     */
+    @FXML
+    Text text_success_desc;
     /**
      * 上传进度条
      */
     @FXML
     ProgressBar progress_bar_upload;
 
+    @FXML
+    Button btn_failed_check;
+
+    @FXML
+    HBox box_complete;
+
     @Autowired
     LandingController landingController;
+
 
     @FXML
     public void initialize() {
@@ -125,6 +151,8 @@ public class UploadFileController {
             }
         });
 
+        uploadReadyFlag = false;
+
         mainStageIconified.bind(ClientApplication.stage.iconifiedProperty());
         mainStageIconified.addListener((observable, oldVal, newVal) -> {
             logger.info("main stage iconified state change..." + newVal);
@@ -138,6 +166,7 @@ public class UploadFileController {
     private void resetValues() {
         uploadMsg = null;
         dirToUpload = null;
+        uploadReadyFlag = false;
     }
 
     /**
@@ -147,12 +176,17 @@ public class UploadFileController {
      */
     @FXML
     public void startUpload(MouseEvent mouseEvent) {
+        if (!uploadReadyFlag) {
+            return;
+        }
         MouseButton button = mouseEvent.getButton();
         if (MouseButton.PRIMARY.equals(button)) {
             logger.info(button.name() + "....");
             if (null == dirToUpload) {
                 return;
             }
+
+
             logger.info("dir to upload: " + dirToUpload.getAbsolutePath());
 
 
@@ -161,21 +195,25 @@ public class UploadFileController {
 
             String remarks = UploadMsg.UPLOAD_TYPE_CASE.equals(uploadMsg.getUploadType()) ? text_field_remarks.getText() : "test";
             uploadMsg.setRemarks(remarks);
-            UploadWorkerTask workerTask = UploadWorkerTask.with(dirToUpload, uploadMsg);
+            UploadWorkerTask workerTask = UploadWorkerTask.with(dirToUpload, uploadMsg, localDataPath);
             workerTask.messageProperty()
                       .addListener((observable, oldVal, newVal) -> {
-                          if (UploadWorkerTask.PROGRESS_MSG_ERROR.equals(newVal)) {
-                              logger.info("upload progress msg..." + newVal);
-                              //显示上传失败页面
-                              showPanel(panel_fail.getId());
-                              text_progress_info.setText(0 + "%");
-                          } else if (UploadWorkerTask.PROGRESS_MSG_COMPLETE.equals(newVal)) {
+                          if (newVal.startsWith(UploadWorkerTask.PROGRESS_MSG_COMPLETE)) {
                               logger.info("upload progress msg..." + newVal);
                               //显示上传成功页面
                               showPanel(panel_success.getId());
+                              String[] split = newVal.split(";");
+                              String completeCount = split[1];
+                              String errorCount = split[2];
+                              String completeMsg = "上传完毕,成功: " + completeCount + " 条, 失败: " + errorCount + " 条!";
+                              FXMLUtils.displayChildNode(box_complete, btn_failed_check, Integer.parseInt(errorCount) > 0);
+
+                              text_success_desc.setText(completeMsg);
                           } else {
                               logger.info("upload progress msg..." + newVal);
-                              text_progress_info.setText(newVal + "%");
+                              DecimalFormat decimalFormat = new DecimalFormat("#0.0");
+                              String formatProgress = decimalFormat.format(Double.parseDouble(newVal));
+                              text_progress_info.setText(formatProgress + "%");
                           }
                       });
 
@@ -230,10 +268,32 @@ public class UploadFileController {
             logger.info(button.name() + "....");
             DirectoryChooser directoryChooser = new DirectoryChooser();
             dirToUpload = directoryChooser.showDialog(stage);
+
             if (null != dirToUpload) {
-                logger.info("choose dirToUpload is: " + dirToUpload.getAbsolutePath());
-                text_choose_info.setText(dirToUpload.getAbsolutePath());
+                File[] caseDirs = dirToUpload.listFiles(File::isDirectory);
+                if (null != caseDirs && caseDirs.length > 0) {
+                    logger.info("choose dirToUpload is: [{}]", dirToUpload.getAbsolutePath());
+                    text_choose_info.setText(dirToUpload.getAbsolutePath());
+                    uploadReadyFlag = true;
+                } else {
+                    logger.info("choose dirToUpload error");
+                    text_choose_info.setText("文件夹路径不合法!");
+                    uploadReadyFlag = false;
+                }
             }
+        }
+    }
+
+    @FXML
+    public void checkFailed(MouseEvent mouseEvent) {
+        logger.info("check upload failed files...");
+        String batchNumber = uploadMsg.getBatchNumber();
+        File uploadInfoFile = FileUtils.getLocalFile(localDataPath, batchNumber + ".txt");
+        try {
+            Desktop.getDesktop().open(uploadInfoFile);
+            stage.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -271,16 +331,12 @@ public class UploadFileController {
             @NonNull String uploadType = uploadMsg.getUploadType();
             //text_field_remarks.setVisible(UploadMsg.UPLOAD_TYPE_CASE.equals(uploadType));
             if (UploadMsg.UPLOAD_TYPE_CASE.equals(uploadType)) {
-                if (!panel_choose.getChildren().contains(text_field_remarks)) {
-                    panel_choose.getChildren().add(text_field_remarks);
-                }
+                FXMLUtils.displayChildNode(panel_choose, text_field_remarks, true);
                 text_choose_desc.setText("将数据导入至: " + uploadMsg.getUploadTargetName());
                 text_choose_desc.setVisible(true);
                 //logger.info("upload case...target name is: [{}]",uploadMsg.getUploadTargetName());
             } else if (UploadMsg.UPLOAD_TYPE_TEST.equals(uploadType)) {
-                if (panel_choose.getChildren().contains(text_field_remarks)) {
-                    panel_choose.getChildren().remove(text_field_remarks);
-                }
+                FXMLUtils.displayChildNode(panel_choose, text_field_remarks, false);
                 text_choose_desc.setVisible(false);
                 logger.info("upload test...");
             }
