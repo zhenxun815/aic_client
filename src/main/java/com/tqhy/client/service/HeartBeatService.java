@@ -55,15 +55,15 @@ public class HeartBeatService {
                              .subscribeOn(Schedulers.trampoline())
                              .subscribe(responseBody -> {
                                  String json = responseBody.string();
-                                 //logger.info("heart beat json is: " + json);
+                                 //logger.info("heart beat json is: [{}]",json);
                                  ClientMsg clientMsg = new Gson().fromJson(json, ClientMsg.class);
                                  Integer flag = clientMsg.getFlag();
                                  if (1 == flag) {
-                                     //logger.info("heart beat continue");
+                                     logger.info("heart beat continue...");
                                      status = CMD_MSG_CONTINUE_BEAT;
                                      setJumpToLandingFlag(false);
                                  } else if (Constants.CMD_STATUS_LOGOUT == flag) {
-                                     //logger.info("heart beat stop");
+                                     logger.info("heart beat stop...");
                                      stopBeat();
                                      setJumpToLandingFlag(true);
                                  }
