@@ -38,6 +38,7 @@ public class FileUtils {
 
         File[] files = dir.listFiles();
         ArrayList<File> collect = Arrays.stream(files)
+                                        .filter(file -> !file.isHidden())
                                         .collect(ArrayList::new, (list, file) -> {
                                             if (file.isFile()) {
                                                 list.add(file);
@@ -58,6 +59,7 @@ public class FileUtils {
     public static List<File> getFilesInSubDir(File dir) {
         File[] files = dir.listFiles(File::isDirectory);
         ArrayList<File> collect = Arrays.stream(files)
+                                        .filter(file -> !file.isHidden())
                                         .collect(ArrayList::new,
                                                  (list, file) -> list.addAll(getFilesInDir(file)),
                                                  ArrayList::addAll);
