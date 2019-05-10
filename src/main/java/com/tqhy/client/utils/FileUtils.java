@@ -49,6 +49,21 @@ public class FileUtils {
         return collect;
     }
 
+    /**
+     * 获取子文件下所有文件
+     *
+     * @param dir
+     * @return
+     */
+    public static List<File> getFilesInSubDir(File dir) {
+        File[] files = dir.listFiles(File::isDirectory);
+        ArrayList<File> collect = Arrays.stream(files)
+                                        .collect(ArrayList::new,
+                                                 (list, file) -> list.addAll(getFilesInDir(file)),
+                                                 ArrayList::addAll);
+        return collect;
+    }
+
 
     public static List<File> transAllToJpg(List<File> originFiles) {
         ArrayList<File> collect = originFiles.stream()
