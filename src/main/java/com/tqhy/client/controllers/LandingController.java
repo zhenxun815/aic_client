@@ -258,7 +258,7 @@ public class LandingController {
                 ClientMsg clientMsg = GsonUtils.parseResponseToObj(responseBody);
 
                 if (BaseMsg.SUCCESS == clientMsg.getFlag()) {
-                    logger.info("ping server: " + serverIP + " success");
+                    logger.info("ping server: " + serverIP + " successCount");
 
                     File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
                     FileUtils.writeFile(serverIPFile, serverIP, null, true);
