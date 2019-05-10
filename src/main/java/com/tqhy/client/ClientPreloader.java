@@ -124,7 +124,7 @@ public class ClientPreloader extends Preloader {
                           .takeUntil(flag -> preloaderFlag)
                           .subscribe(type -> {
                               logger.info("interval...");
-                              integer.addAndGet(5);
+                              integer.addAndGet(3);
                               preloaderController.setPreloadProgress(integer.doubleValue() / 100);
                           });
                 break;
