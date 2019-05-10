@@ -9,14 +9,13 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * @author Yiheng
@@ -34,18 +33,33 @@ public class FileUtils {
      * @param dir
      * @return
      */
-    public static List<File> getFilesInDir(File dir) {
+    public static List<File> getFilesInDir(File dir, Predicate<File> filter) {
 
         File[] files = dir.listFiles();
         ArrayList<File> collect = Arrays.stream(files)
                                         .collect(ArrayList::new, (list, file) -> {
-                                            if (file.isFile()) {
-                                                list.add(file);
-                                            } else if (file.isDirectory()) {
-                                                List<File> filesInSubDir = getFilesInDir(file);
+                                            if (file.isDirectory()) {
+                                                List<File> filesInSubDir = getFilesInDir(file, filter);
                                                 list.addAll(filesInSubDir);
+                                            } else if (filter.test(file)) {
+                                                list.add(file);
                                             }
                                         }, ArrayList::addAll);
+        return collect;
+    }
+
+    /**
+     * 获取子文件下所有文件
+     *
+     * @param dir
+     * @return
+     */
+    public static List<File> getFilesInSubDir(File dir, Predicate<File> filter) {
+        File[] files = dir.listFiles(File::isDirectory);
+        ArrayList<File> collect = Arrays.stream(files)
+                                        .collect(ArrayList::new,
+                                                 (list, file) -> list.addAll(getFilesInDir(file, filter)),
+                                                 ArrayList::addAll);
         return collect;
     }
 
@@ -186,14 +200,15 @@ public class FileUtils {
      * @param info     待写入信息
      * @param function 处理写入内容,为null则不做任何处理
      * @param create   当文件不存在时是否创建新文件
+     * @param append   是否追加写入
      */
-    public static void writeFile(File file, String info, @Nullable Function<StringBuilder, StringBuilder> function, boolean create) {
+    public static void writeFile(File file, String info, @Nullable Function<StringBuilder, StringBuilder> function, boolean create, boolean append) {
 
         if (create && !file.exists()) {
             createNewFile(file);
         }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, append))) {
             if (null == function) {
                 writer.write(info);
             } else {
@@ -206,6 +221,31 @@ public class FileUtils {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 不追加写入,重写文件,覆盖已有内容
+     *
+     * @param file
+     * @param info     待写入信息
+     * @param function 处理写入内容,为null则不做任何处理
+     * @param create   当文件不存在时是否创建新文件
+     */
+    public static void writeFile(File file, String info, @Nullable Function<StringBuilder, StringBuilder> function, boolean create) {
+        writeFile(file, info, function, create, false);
+    }
+
+    /**
+     * 向文件追加内容,内部调用{@link FileUtils#writeFile(File, String, Function, boolean, boolean) writeFile} 方法
+     *
+     * @param file
+     * @param info     待写入信息
+     * @param consumer 处理写入内容,为null则不做任何处理
+     * @param create   当文件不存在时是否创建新文件
+     */
+    public static void appendFile(File file, String info, @Nullable Function<StringBuilder, StringBuilder> consumer, boolean create) {
+        writeFile(file, info, consumer, create, true);
+    }
+
 
     /**
      * 创建新文件
@@ -321,4 +361,20 @@ public class FileUtils {
         return succeess;
 
     }
+
+    /**
+     * 文件集合生成文件名为key与文件绝对路径为value的map
+     *
+     * @param files
+     * @return
+     */
+    public static Map<String, String> getFilesInfoMap(List<File> files) {
+        HashMap<String, String> collect = files.stream()
+                                               .collect(HashMap::new, (map, file) -> {
+                                                   String[] fileNameSplit = file.getName().split("\\.");
+                                                   map.put(fileNameSplit[0], file.getAbsolutePath());
+                                               }, HashMap::putAll);
+        return collect;
+    }
+
 }

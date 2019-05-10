@@ -37,7 +37,7 @@ public class Network {
      */
     public static AicApi getAicApi() {
 
-        logger.info("into getAicApi..base url: " + SERVER_BASE_URL);
+        //logger.info("into getAicApi..base url: " + SERVER_BASE_URL);
         if (null == aicApi) {
             Retrofit retrofit = new Retrofit.Builder()
                     .client(okHttpClient)

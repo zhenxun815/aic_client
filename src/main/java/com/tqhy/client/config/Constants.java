@@ -7,6 +7,9 @@ package com.tqhy.client.config;
  */
 public class Constants {
 
+    public static final String NEW_LINE = System.getProperty("line.separator");
+
+
     /************************ CMD *************************/
     public static final String CMD_MSG_LOGOUT = "203";
 
