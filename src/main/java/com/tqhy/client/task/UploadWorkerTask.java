@@ -1,5 +1,6 @@
 package com.tqhy.client.task;
 
+import com.tqhy.client.config.Constants;
 import com.tqhy.client.models.msg.local.UploadMsg;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
@@ -49,23 +50,41 @@ public class UploadWorkerTask extends Task {
     File dirToUpload;
     @NonNull
     UploadMsg uploadMsg;
+    @NonNull
+    String localDataPath;
 
+    /**
+     * 待上传总文件数
+     */
     int total;
-    AtomicInteger completeCount;
-    AtomicInteger errorCount;
+
+    /**
+     * 上传成功文件数
+     */
+    AtomicInteger successCount;
+
+    /**
+     * 上传失败文件数
+     */
+    AtomicInteger failCount;
+
+    /**
+     * 本次上传任务信息记录文件
+     */
+    File uploadInfoFile;
 
     @Override
     protected Object call() throws Exception {
         logger.info("start upload task...");
-        completeCount = new AtomicInteger(0);
-        errorCount = new AtomicInteger(0);
-        total = FileUtils.getFilesInSubDir(dirToUpload).size();
+        initTaskStatus();
+
         if (total == 0) {
             logger.info("total file count is 0!");
             updateProgress(100, 100);
-            String completeMsg = PROGRESS_MSG_COMPLETE + ";" + completeCount.get() + ";" + errorCount.get();
+            String completeMsg = PROGRESS_MSG_COMPLETE + ";" + successCount.get() + ";" + failCount.get();
             updateMessage(completeMsg);
         }
+
         logger.info("total file count is: " + total);
 
         String uploadType = uploadMsg.getUploadType();
@@ -76,6 +95,14 @@ public class UploadWorkerTask extends Task {
             uploadTest(uploadMsg);
         }
         return null;
+    }
+
+    private void initTaskStatus() {
+        successCount = new AtomicInteger(0);
+        failCount = new AtomicInteger(0);
+        total = FileUtils.getFilesInSubDir(dirToUpload, file -> FileUtils.isDcmFile(file) || FileUtils.isJpgFile(file))
+                         .size();
+        uploadInfoFile = FileUtils.getLocalFile(localDataPath, uploadMsg.getBatchNumber() + ".txt");
     }
 
     /**
@@ -141,9 +168,10 @@ public class UploadWorkerTask extends Task {
 
     private void doUpLoad(File caseDir, Map<String, RequestBody> requestParamMap) {
         logger.info("into upload case: " + caseDir.getAbsolutePath());
-        List<File> filesInCaseDir = FileUtils.getFilesInDir(caseDir);
+        List<File> filesInCaseDir = FileUtils.getFilesInDir(caseDir, file -> FileUtils.isJpgFile(file) || FileUtils.isDcmFile(file));
+        Map<String, String> originFilesInfoMap = FileUtils.getFilesInfoMap(filesInCaseDir);
         List<File> transformedFiles = FileUtils.transAllToJpg(filesInCaseDir);
-
+        //Map<String, String> transedFilesInfoMap = FileUtils.getFilesInfoMap(transformedFiles);
         if (transformedFiles.size() > 0) {
             AtomicInteger dirUploadCompleteCount = new AtomicInteger(0);
             for (File file : transformedFiles) {
@@ -179,29 +207,20 @@ public class UploadWorkerTask extends Task {
 
                                           @Override
                                           public void onError(Throwable e) {
-                                              dirUploadCompleteCount.incrementAndGet();
-                                              errorCount.incrementAndGet();
+                                              failCount.incrementAndGet();
+                                              updateUploadStatus();
+                                              deleteTempFiles(dirUploadCompleteCount, filesInCaseDir, caseDir);
+
+                                              String[] fileNameSplit = file.getName().split("\\.");
+                                              FileUtils.appendFile(uploadInfoFile, originFilesInfoMap.get(fileNameSplit[0]), builder -> builder.append(Constants.NEW_LINE), true);
                                               e.printStackTrace();
                                           }
 
                                           @Override
                                           public void onComplete() {
-                                              completeCount.incrementAndGet();
-                                              int dirCompleteCount = dirUploadCompleteCount.incrementAndGet();
-                                              updateProgress(completeCount.get(), total);
-
-                                              double progress = (completeCount.get() + errorCount.get() + 0D) / total * 100;
-                                              logger.info("complete count is: " + completeCount.get() + ", progress is: " + progress);
-                                              DecimalFormat decimalFormat = new DecimalFormat("#0.0");
-                                              String formatProgress = decimalFormat.format(progress);
-                                              String completeMsg = PROGRESS_MSG_COMPLETE + ";" + completeCount.get() + ";" + errorCount.get();
-                                              updateMessage(progress == 100.0D ? completeMsg : formatProgress);
-
-                                              //上传完毕删除生成的jpg临时文件
-                                              if (dirCompleteCount == filesInCaseDir.size()) {
-                                                  File temp = new File(caseDir, "TQHY_TEMP");
-                                                  FileUtils.deleteDir(temp);
-                                              }
+                                              successCount.incrementAndGet();
+                                              updateUploadStatus();
+                                              deleteTempFiles(dirUploadCompleteCount, filesInCaseDir, caseDir);
                                           }
 
                                       });
@@ -209,11 +228,39 @@ public class UploadWorkerTask extends Task {
         }
     }
 
+    /**
+     * 更新上传状态
+     */
+    private void updateUploadStatus() {
+        int completeCount = successCount.get() + failCount.get();
+        double progress = (completeCount + 0D) / total * 100;
+        logger.info("complete count is: " + completeCount + ", progress is: " + progress);
+        updateProgress(completeCount, total);
+
+        String completeMsg = PROGRESS_MSG_COMPLETE + ";" + successCount.get() + ";" + failCount.get();
+        updateMessage(progress == 100.0D ? completeMsg : Double.toString(progress));
+    }
+
+    /**
+     * 删除生成的临时jpg文件
+     *
+     * @param dirUploadCompleteCount
+     * @param filesInCaseDir
+     * @param caseDir
+     */
+    private void deleteTempFiles(AtomicInteger dirUploadCompleteCount, List<File> filesInCaseDir, File caseDir) {
+
+        if (dirUploadCompleteCount.incrementAndGet() == filesInCaseDir.size()) {
+            File temp = new File(caseDir, "TQHY_TEMP");
+            FileUtils.deleteDir(temp);
+        }
+    }
+
     private AtomicInteger fakeUpload(File caseDir) {
         String libPath = System.getProperty("java.library.path");
         logger.info("lib path: is: " + libPath);
 
-        List<File> filesInCaseDir = FileUtils.getFilesInDir(caseDir);
+        List<File> filesInCaseDir = FileUtils.getFilesInDir(caseDir, file -> FileUtils.isJpgFile(file) || FileUtils.isDcmFile(file));
         List<File> transformedFiles = FileUtils.transAllToJpg(filesInCaseDir);
         logger.info("into fakeUpload...");
         AtomicInteger completeCount = new AtomicInteger(0);
@@ -243,7 +290,7 @@ public class UploadWorkerTask extends Task {
 
                                                        @Override
                                                        public void onError(Throwable e) {
-                                                           errorCount.incrementAndGet();
+                                                           failCount.incrementAndGet();
                                                            e.printStackTrace();
                                                        }
 
@@ -251,7 +298,7 @@ public class UploadWorkerTask extends Task {
                                                        public void onComplete() {
                                                            completeCount.incrementAndGet();
                                                            updateProgress(completeCount.get(), total);
-                                                           double progress = (completeCount.get() + errorCount.get() + 0D) / total * 100;
+                                                           double progress = (completeCount.get() + failCount.get() + 0D) / total * 100;
                                                            logger.info("complete count is: " + completeCount.get() + ", progress is: " + progress);
                                                            updateMessage(progress == 100.0D ? PROGRESS_MSG_COMPLETE : DecimalFormat.getInstance().format(progress));
                                                        }
