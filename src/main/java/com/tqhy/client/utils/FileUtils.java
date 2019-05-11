@@ -5,6 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -95,7 +98,24 @@ public class FileUtils {
      */
     public static boolean isJpgFile(File fileToJudge) {
         String fileName = fileToJudge.getName().toLowerCase();
-        return fileName.endsWith("jpg") || fileName.endsWith("jpeg");
+        if (!(fileName.endsWith("jpg") || fileName.endsWith("jpeg"))) {
+            return false;
+        }
+
+        try {
+            ImageInputStream iis = ImageIO.createImageInputStream(fileToJudge);
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+            while (readers.hasNext()) {
+                ImageReader reader = readers.next();
+                String formatName = reader.getFormatName();
+                if ("jpeg".equals(formatName.toLowerCase())) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**
