@@ -51,13 +51,10 @@ public class UnitTests {
 
     @Test
     public void testFileUtils() {
-        // String batchNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
-        //logger.info("batchNumber is: "+batchNumber);
-        String dirToDeletePath = "F:\\dicom\\1234\\case3\\TQHY_TEMP";
-        File dirToDelete = new File(dirToDeletePath);
-        boolean deleteDir = FileUtils.deleteDir(dirToDelete);
-
-        logger.info("delete success: " + deleteDir);
+        String imgPath = "C:\\Users\\qing\\Pictures\\shadow\\error\\test1\\7.jpg";
+        File imgFile = new File(imgPath);
+        boolean isJpgFile = FileUtils.isJpgFile(imgFile);
+        logger.info("is jpg file {}", isJpgFile);
     }
 
     @Test
