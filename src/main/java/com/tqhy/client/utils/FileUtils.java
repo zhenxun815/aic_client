@@ -40,11 +40,9 @@ public class FileUtils {
 
         File[] files = dir.listFiles();
         ArrayList<File> collect = Arrays.stream(files)
+                                        .filter(File::isFile)
                                         .collect(ArrayList::new, (list, file) -> {
-                                            if (file.isDirectory()) {
-                                                List<File> filesInSubDir = getFilesInDir(file, filter);
-                                                list.addAll(filesInSubDir);
-                                            } else if (filter.test(file)) {
+                                            if (filter.test(file)) {
                                                 list.add(file);
                                             }
                                         }, ArrayList::addAll);
@@ -58,8 +56,8 @@ public class FileUtils {
      * @return
      */
     public static List<File> getFilesInSubDir(File dir, Predicate<File> filter) {
-        File[] files = dir.listFiles(File::isDirectory);
-        ArrayList<File> collect = Arrays.stream(files)
+        File[] dirs = dir.listFiles(File::isDirectory);
+        ArrayList<File> collect = Arrays.stream(dirs)
                                         .collect(ArrayList::new,
                                                  (list, file) -> list.addAll(getFilesInDir(file, filter)),
                                                  ArrayList::addAll);

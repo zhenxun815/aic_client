@@ -116,10 +116,17 @@
             <Text fx:id="text_progress_desc" styleClass="text_tips">数据正在上传,请耐心等待...
                 <VBox.margin>
                     <Insets>
-                        <top>30</top>
+                        <top>10</top>
                     </Insets>
                 </VBox.margin>
             </Text>
+            <Button fx:id="btn_stop_upload" onMouseClicked="#stopUpload" styleClass="btn_cancel">终止上传
+                <VBox.margin>
+                    <Insets>
+                        <top>30</top>
+                    </Insets>
+                </VBox.margin>
+            </Button>
         </children>
     </VBox>
 

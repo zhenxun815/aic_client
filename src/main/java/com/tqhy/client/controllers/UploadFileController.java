@@ -134,6 +134,8 @@ public class UploadFileController {
     @Autowired
     LandingController landingController;
 
+    private UploadWorkerTask workerTask;
+
 
     @FXML
     public void initialize() {
@@ -192,10 +194,11 @@ public class UploadFileController {
 
             //显示上传中界面
             showPanel(panel_progress.getId());
-
+            text_progress_info.setText(0.00 + "%");
             String remarks = UploadMsg.UPLOAD_TYPE_CASE.equals(uploadMsg.getUploadType()) ? text_field_remarks.getText() : "test";
             uploadMsg.setRemarks(remarks);
-            UploadWorkerTask workerTask = UploadWorkerTask.with(dirToUpload, uploadMsg, localDataPath);
+            workerTask = UploadWorkerTask.with(dirToUpload, uploadMsg, localDataPath);
+
             workerTask.messageProperty()
                       .addListener((observable, oldVal, newVal) -> {
                           if (newVal.startsWith(UploadWorkerTask.PROGRESS_MSG_COMPLETE)) {
@@ -294,6 +297,16 @@ public class UploadFileController {
             stage.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void stopUpload(MouseEvent mouseEvent) {
+        MouseButton button = mouseEvent.getButton();
+        if (MouseButton.PRIMARY.equals(button)) {
+            logger.info("into stop upload....");
+            workerTask.getStopUploadFlag().set(true);
+            showPanel(panel_choose.getId());
         }
     }
 

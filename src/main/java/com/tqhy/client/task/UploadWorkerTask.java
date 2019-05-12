@@ -45,6 +45,7 @@ public class UploadWorkerTask extends Task {
 
     Logger logger = LoggerFactory.getLogger(UploadWorkerTask.class);
     BooleanProperty jumpToLandFlag = new SimpleBooleanProperty(false);
+    BooleanProperty stopUploadFlag = new SimpleBooleanProperty(false);
 
     @NonNull
     File dirToUpload;
@@ -76,6 +77,7 @@ public class UploadWorkerTask extends Task {
     @Override
     protected Object call() throws Exception {
         logger.info("start upload task...");
+
         initTaskStatus();
 
         if (total == 0) {
@@ -103,6 +105,7 @@ public class UploadWorkerTask extends Task {
         total = FileUtils.getFilesInSubDir(dirToUpload, file -> FileUtils.isDcmFile(file) || FileUtils.isJpgFile(file))
                          .size();
         uploadInfoFile = FileUtils.getLocalFile(localDataPath, uploadMsg.getBatchNumber() + ".txt");
+        stopUploadFlag.setValue(false);
     }
 
     /**
@@ -151,20 +154,17 @@ public class UploadWorkerTask extends Task {
     private void upLoadDirs(File[] caseDirs, HashMap<String, String> map) {
 
         for (File caseDir : caseDirs) {
-            if (jumpToLandFlag.get()) {
-                break;
+            if (stopUploadFlag.get() || jumpToLandFlag.get()) {
+                return;
             }
             String caseName = caseDir.getName();
             map.put("caseName", caseName);
             Map<String, RequestBody> requestParamMap = NetworkUtils.createRequestParamMap(map);
-
             doUpLoad(caseDir, requestParamMap);
 
             //fakeUpload(dirToUpload);
         }
-
     }
-
 
     private void doUpLoad(File caseDir, Map<String, RequestBody> requestParamMap) {
         logger.info("into upload case: " + caseDir.getAbsolutePath());
@@ -176,8 +176,10 @@ public class UploadWorkerTask extends Task {
             AtomicInteger dirUploadCompleteCount = new AtomicInteger(0);
             for (File file : transformedFiles) {
                 logger.info("start upload file: " + file.getAbsolutePath());
-                if (jumpToLandFlag.get()) {
-                    break;
+                if (stopUploadFlag.get() || jumpToLandFlag.get()) {
+                    File temp = new File(caseDir, "TQHY_TEMP");
+                    FileUtils.deleteDir(temp);
+                    return;
                 }
                 MultipartBody.Part filePart = NetworkUtils.createFilePart("file", file.getAbsolutePath());
                 Observable<ResponseBody> responseBodyObservable = null;
