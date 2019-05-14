@@ -120,6 +120,8 @@
 						$('.spin').hide()
 						$('.callback-message').html('连接成功!')
 						$('.callback-message').addClass("show")
+
+						window.location.href = baseUrlLocal + '/html/landing.html'
 					} else {
 						flag = 0
 						//layOpenFunc1()
@@ -132,9 +134,6 @@
 				$('.callback-message').html('ip地址不合法')
 				$('.callback-message').addClass("show")
 			}
-		}
-		if (flag) {
-			window.location.href = baseUrlLocal + '/html/landing.html'
 		}
 	}
 </script>
