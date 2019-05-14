@@ -160,6 +160,14 @@ public class UploadFileController {
             logger.info("main stage iconified state change..." + newVal);
             stage.setIconified(newVal);
         });
+
+        text_field_remarks.setOnKeyPressed(event -> {
+            int length = text_field_remarks.getLength();
+            if (length >= 50) {
+                String remarks = text_field_remarks.getText().substring(0, 50);
+                text_field_remarks.setText(remarks);
+            }
+        });
     }
 
     /**
@@ -196,6 +204,7 @@ public class UploadFileController {
             showPanel(panel_progress.getId());
             text_progress_info.setText(0.00 + "%");
             String remarks = UploadMsg.UPLOAD_TYPE_CASE.equals(uploadMsg.getUploadType()) ? text_field_remarks.getText() : "test";
+            remarks = remarks.length() > 50 ? remarks.substring(0, 50) : remarks;
             uploadMsg.setRemarks(remarks);
             workerTask = UploadWorkerTask.with(dirToUpload, uploadMsg, localDataPath);
 
