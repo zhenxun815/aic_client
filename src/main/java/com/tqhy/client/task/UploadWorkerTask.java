@@ -209,13 +209,13 @@ public class UploadWorkerTask extends Task {
 
                                           @Override
                                           public void onError(Throwable e) {
+                                              logger.error("upload " + file.getAbsolutePath() + " failed", e);
                                               failCount.incrementAndGet();
                                               updateUploadStatus();
                                               deleteTempFiles(dirUploadCompleteCount, filesInCaseDir, caseDir);
 
                                               String[] fileNameSplit = file.getName().split("\\.");
                                               FileUtils.appendFile(uploadInfoFile, originFilesInfoMap.get(fileNameSplit[0]), builder -> builder.append(Constants.NEW_LINE), true);
-                                              e.printStackTrace();
                                           }
 
                                           @Override
