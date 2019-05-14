@@ -52,7 +52,7 @@
                 </Text>
             </HBox>
 
-            <TextField fx:id="text_field_remarks" styleClass="text_remark" promptText="请输入备注信息">
+            <TextField fx:id="text_field_remarks" styleClass="text_remark" promptText="请输入备注信息,最大长度50字">
                 <VBox.margin>
                     <Insets>
                         <top>11</top>
