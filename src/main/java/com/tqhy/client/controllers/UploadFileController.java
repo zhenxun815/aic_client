@@ -1,6 +1,7 @@
 package com.tqhy.client.controllers;
 
 import com.tqhy.client.ClientApplication;
+import com.tqhy.client.config.Constants;
 import com.tqhy.client.models.msg.local.UploadMsg;
 import com.tqhy.client.network.Network;
 import com.tqhy.client.task.UploadWorkerTask;
@@ -11,8 +12,10 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -36,8 +39,11 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /**
  * @author Yiheng
@@ -46,6 +52,7 @@ import java.util.concurrent.Executors;
  */
 @RestController
 public class UploadFileController {
+
 
     Logger logger = LoggerFactory.getLogger(UploadFileController.class);
     Stage stage;
@@ -99,6 +106,18 @@ public class UploadFileController {
      */
     @FXML
     Text text_choose_info;
+
+    /**
+     * 不合法信息展示滚动页面
+     */
+    @FXML
+    public ScrollPane scrollPane;
+
+    /**
+     * 不合法信息
+     */
+    @FXML
+    public Label label_fail_desc;
 
     @FXML
     TextField text_field_remarks;
@@ -168,6 +187,9 @@ public class UploadFileController {
                 text_field_remarks.setText(remarks);
             }
         });
+
+        scrollPane.setFitToWidth(true);
+        label_fail_desc.setWrapText(true);
     }
 
     /**
@@ -282,9 +304,28 @@ public class UploadFileController {
             dirToUpload = directoryChooser.showDialog(stage);
 
             if (null != dirToUpload) {
-                File[] caseDirs = dirToUpload.listFiles(File::isDirectory);
-                if (null != caseDirs && caseDirs.length > 0) {
+                File[] files = dirToUpload.listFiles();
+
+                if (null != files && files.length > 0) {
                     logger.info("choose dirToUpload is: [{}]", dirToUpload.getAbsolutePath());
+                    File[] caseDirs = dirToUpload.listFiles(File::isDirectory);
+                    if (null != caseDirs && caseDirs.length > 0) {
+                        List<File> unvalidDirs = Arrays.stream(caseDirs)
+                                                       .filter(caseDir -> {
+                                                           File[] caseSubDirs = caseDir.listFiles(File::isDirectory);
+                                                           return null != caseSubDirs && caseSubDirs.length > 0;
+                                                       }).collect(Collectors.toList());
+                        if (unvalidDirs.size() > 0) {
+                            StringBuilder paths = unvalidDirs.stream()
+                                                             .collect(StringBuilder::new,
+                                                                      (builder, dir) ->
+                                                                              builder.append(dir.getAbsolutePath())
+                                                                                     .append(Constants.NEW_LINE),
+                                                                      StringBuilder::append);
+                            label_fail_desc.setText(paths.toString());
+                            showPanel(panel_fail.getId());
+                        }
+                    }
                     text_choose_info.setText(dirToUpload.getAbsolutePath());
                     uploadReadyFlag = true;
                 } else {
@@ -327,9 +368,10 @@ public class UploadFileController {
     @FXML
     public void retry(MouseEvent mouseEvent) {
         logger.info("into retry...");
+        resetValues();
         //显示上传中页面
-        showPanel(panel_progress.getId());
-        startUpload(mouseEvent);
+        showPanel(panel_choose.getId());
+
     }
 
     /**

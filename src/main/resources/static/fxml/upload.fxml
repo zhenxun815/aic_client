@@ -182,39 +182,35 @@
     <!--上传失败显示界面-->
     <VBox fx:id="panel_fail" styleClass="pane">
         <children>
-            <ImageView fitHeight="40" fitWidth="40">
-                <image>
-                    <Image url="@../img/fail-circle.png"></Image>
-                </image>
-
+            <Text styleClass="text_title">以下文件夹结构不符合规则
                 <VBox.margin>
                     <Insets>
-                        <top>33</top>
-                    </Insets>
-                </VBox.margin>
-            </ImageView>
-
-            <Text fx:id="text_fail_desc" styleClass="text_tips">数据上传失败
-                <VBox.margin>
-                    <Insets>
-                        <top>33</top>
+                        <top>20</top>
                     </Insets>
                 </VBox.margin>
             </Text>
+            <ScrollPane fx:id="scrollPane"
+                        stylesheets="@../css/fx_scroll_pane.css"
+                        maxHeight="120.0" minViewportHeight="110.0" maxWidth="500.0">
+                <VBox.margin>
+                    <Insets>
+                        <top>14</top>
+                    </Insets>
+                </VBox.margin>
+                <VBox alignment="CENTER">
+                    <Label fx:id="label_fail_desc" styleClass="label_tips" maxWidth="500">
+                    </Label>
+                </VBox>
+            </ScrollPane>
+
             <HBox styleClass="confirm_btn_container">
                 <VBox.margin>
                     <Insets>
-                        <top>33</top>
+                        <top>10</top>
                     </Insets>
                 </VBox.margin>
                 <children>
-                    <Button fx:id="btn_fail_cancel" onMouseClicked="#cancelUpload" styleClass="btn_cancel">取消</Button>
-                    <Button fx:id="btn_fail_retry" onMouseClicked="#retry" styleClass="btn_confirm">重试
-                        <HBox.margin>
-                            <Insets>
-                                <left>75</left>
-                            </Insets>
-                        </HBox.margin>
+                    <Button fx:id="btn_fail_retry" onMouseClicked="#retry" styleClass="btn_confirm">确认
                     </Button>
                 </children>
             </HBox>
