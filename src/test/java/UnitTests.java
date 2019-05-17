@@ -8,10 +8,12 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 /**
  * @author Yiheng
@@ -35,7 +37,7 @@ public class UnitTests {
         ExecutorService executor = Executors.newFixedThreadPool(4);
         Arrays.stream(dicomFiles)
               .collect(ArrayList<File>::new, (list, dicomFile) -> {
-                  Future<File> fileFuture = executor.submit(Dcm2JpgTask.of(dicomFile));
+                  Future<File> fileFuture = executor.submit(Dcm2JpgTask.of(dicomFile, dicomDir));
                   try {
                       File jpgFile = fileFuture.get();
                       System.out.println("trans jpg file finish..." + jpgFile.getAbsolutePath());
@@ -51,10 +53,20 @@ public class UnitTests {
 
     @Test
     public void testFileUtils() {
-        String imgPath = "C:\\Users\\qing\\Pictures\\shadow\\error\\test1\\7.jpg";
+       /* String imgPath = "C:\\Users\\qing\\Pictures\\shadow\\error\\test2\\13.jpeg";
         File imgFile = new File(imgPath);
         boolean isJpgFile = FileUtils.isJpgFile(imgFile);
-        logger.info("is jpg file {}", isJpgFile);
+        logger.info("is jpg file {}", isJpgFile);*/
+
+        String dirPath = "C:\\Users\\qing\\Pictures\\shadow\\error";
+        File dir = new File(dirPath);
+        File[] files = dir.listFiles(File::isFile);
+        List<File> unvalidDirs = Arrays.stream(files)
+                                       .filter(caseDir -> {
+                                           File[] caseSubDirs = caseDir.listFiles(File::isDirectory);
+                                           return null != caseSubDirs && caseSubDirs.length > 0;
+                                       }).collect(Collectors.toList());
+        logger.info("files {}", unvalidDirs.size());
     }
 
     @Test
