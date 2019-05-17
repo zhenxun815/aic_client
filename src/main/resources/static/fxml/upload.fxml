@@ -113,7 +113,7 @@
                     </Text>
                 </children>
             </HBox>
-            <Text fx:id="text_progress_desc" styleClass="text_tips">数据正在上传,请耐心等待...
+            <Text fx:id="text_progress_desc" styleClass="text_tips">
                 <VBox.margin>
                     <Insets>
                         <top>10</top>
@@ -182,7 +182,7 @@
     <!--上传失败显示界面-->
     <VBox fx:id="panel_fail" styleClass="pane">
         <children>
-            <Text styleClass="text_title">以下文件夹结构不符合规则
+            <Text styleClass="text_title" fx:id="text_fail_title">
                 <VBox.margin>
                     <Insets>
                         <top>20</top>

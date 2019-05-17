@@ -36,17 +36,19 @@ public class FileUtils {
      * @param dir
      * @return
      */
-    public static List<File> getFilesInDir(File dir, Predicate<File> filter) {
+    public static HashMap<File, String> getFilesMapInDir(File dir, Predicate<File> filter) {
 
         File[] files = dir.listFiles();
-        ArrayList<File> collect = Arrays.stream(files)
-                                        .filter(File::isFile)
-                                        .collect(ArrayList::new, (list, file) -> {
-                                            if (filter.test(file)) {
-                                                list.add(file);
-                                            }
-                                        }, ArrayList::addAll);
-        return collect;
+        String dirName = dir.getName();
+        logger.info("dir name is: {}", dirName);
+        HashMap<File, String> fileMap = Arrays.stream(files)
+                                              .filter(File::isFile)
+                                              .collect(HashMap::new, (map, file) -> {
+                                                  if (filter.test(file)) {
+                                                      map.put(file, dirName);
+                                                  }
+                                              }, HashMap::putAll);
+        return fileMap;
     }
 
     /**
@@ -55,36 +57,29 @@ public class FileUtils {
      * @param dir
      * @return
      */
-    public static List<File> getFilesInSubDir(File dir, Predicate<File> filter) {
+    public static HashMap<File, String> getFilesMapInSubDir(File dir, Predicate<File> filter) {
         File[] dirs = dir.listFiles(File::isDirectory);
-        ArrayList<File> collect = Arrays.stream(dirs)
-                                        .collect(ArrayList::new,
-                                                 (list, file) -> list.addAll(getFilesInDir(file, filter)),
-                                                 ArrayList::addAll);
-        return collect;
+        HashMap<File, String> fileMap = Arrays.stream(dirs)
+                                              .collect(HashMap::new,
+                                                       (map, file) -> map.putAll(getFilesMapInDir(file, filter)),
+                                                       HashMap::putAll);
+        return fileMap;
     }
 
 
-    public static List<File> transAllToJpg(List<File> originFiles) {
-        ArrayList<File> collect = originFiles.stream()
-                                             .collect(ArrayList::new, (list, file) -> {
-                                                 if (isDcmFile(file)) {
-                                                     ExecutorService executor = Executors.newSingleThreadExecutor();
-                                                     Future<File> jpgFileFuture = executor.submit(Dcm2JpgTask.of(file));
-                                                     try {
-                                                         logger.info("transfer dimcom " + file.getName() + " to jpg!");
-                                                         File jpgFile = jpgFileFuture.get();
-                                                         list.add(jpgFile);
-                                                     } catch (InterruptedException e) {
-                                                         e.printStackTrace();
-                                                     } catch (ExecutionException e) {
-                                                         e.printStackTrace();
-                                                     }
-                                                 } else if (isJpgFile(file)) {
-                                                     list.add(file);
-                                                 }
-                                             }, ArrayList::addAll);
-        return collect;
+    public static File transToJpg(File fileToTrans, File jpgDir) {
+        try {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<File> jpgFileFuture = executor.submit(Dcm2JpgTask.of(fileToTrans, jpgDir));
+            File jpgFile = jpgFileFuture.get();
+            return jpgFile;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        return fileToTrans;
     }
 
 
