@@ -110,14 +110,15 @@ public class UploadWorkerTask extends Task {
         failCount = new AtomicInteger(0);
         jpgDir = new File(dirToUpload, Constants.PATH_TEMP_JPG);
         //批次目录下图片
-        HashMap<File, String> directImgFileMap = FileUtils.getFilesMapInDir(dirToUpload, file -> isDcmFile(file) || FileUtils.isJpgFile(file));
+        HashMap<File, String> directImgFileMap = FileUtils.getFilesMapInDir(dirToUpload, file -> isDcmFile(file) || FileUtils.isJpgFile(file), null);
         HashMap<File, String> subDirImgFileMap = FileUtils.getFilesMapInSubDir(dirToUpload, file -> isDcmFile(file) || FileUtils.isJpgFile(file));
-        totalImgFileMap = new HashMap<>();
-        totalImgFileMap.putAll(directImgFileMap);
-        totalImgFileMap.putAll(subDirImgFileMap);
+        HashMap<File, String> tempTotalFile = totalImgFileMap = new HashMap<>();
+        tempTotalFile.putAll(directImgFileMap);
+        tempTotalFile.putAll(subDirImgFileMap);
+
+        totalImgFileMap = transAllToJpg(tempTotalFile, jpgDir);
         total = totalImgFileMap.values()
                                .size();
-        transAllToJpg(totalImgFileMap, jpgDir);
 
         uploadInfoFile = FileUtils.getLocalFile(localDataPath, uploadMsg.getBatchNumber() + ".txt");
         stopUploadFlag.setValue(false);
@@ -170,6 +171,7 @@ public class UploadWorkerTask extends Task {
         totalImgFileMap.forEach((file, caseName) -> {
             if (shouldStop()) return;
             requestParamMap.put("caseName", caseName);
+            logger.info("case name is: {}", caseName);
             Map<String, RequestBody> requestMap = NetworkUtils.createRequestParamMap(requestParamMap);
             doUpLoad(file, requestMap);
         });
@@ -202,6 +204,12 @@ public class UploadWorkerTask extends Task {
                                       Integer flag = clientMsg.getFlag();
                                       if (203 == flag) {
                                           jumpToLandFlag.set(true);
+                                      }
+                                      if (2 == flag) {
+                                          logger.info("server get file fail...{}", fileToUpload.getAbsolutePath());
+                                          failCount.incrementAndGet();
+                                          successCount.decrementAndGet();
+                                          FileUtils.appendFile(uploadInfoFile, fileToUpload.getAbsolutePath(), builder -> builder.append(Constants.NEW_LINE), true);
                                       }
                                   }
 
@@ -252,7 +260,7 @@ public class UploadWorkerTask extends Task {
         String libPath = System.getProperty("java.library.path");
         logger.info("lib path: is: " + libPath);
 
-        HashMap<File, String> filesMapInDir = FileUtils.getFilesMapInDir(caseDir, file -> FileUtils.isJpgFile(file) || isDcmFile(file));
+        HashMap<File, String> filesMapInDir = FileUtils.getFilesMapInDir(caseDir, file -> FileUtils.isJpgFile(file) || isDcmFile(file), null);
         HashMap<File, String> transformedFilesMap = transAllToJpg(filesMapInDir, jpgDir);
         logger.info("into fakeUpload...");
         AtomicInteger completeCount = new AtomicInteger(0);

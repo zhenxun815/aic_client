@@ -11,6 +11,7 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -18,6 +19,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import lombok.NonNull;
@@ -79,6 +81,8 @@ public class UploadFileController {
     @Value("${path.data:'/data/'}")
     private String localDataPath;
 
+    @FXML
+    VBox panels_parent;
     @FXML
     VBox panel_choose;
     @FXML
@@ -160,12 +164,19 @@ public class UploadFileController {
 
     private UploadWorkerTask workerTask;
 
+    private VBox[] panels;
 
     @FXML
     public void initialize() {
         stage.setResizable(false);
         stage.initStyle(StageStyle.TRANSPARENT);
         stage.setAlwaysOnTop(true);
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+
+        stage.setWidth(visualBounds.getWidth());
+        stage.setHeight(visualBounds.getHeight());
+        stage.centerOnScreen();
+        panels = new VBox[]{panel_choose, panel_progress, panel_fail, panel_success};
         showPanel(panel_choose.getId());
 
         jumpToLandFlag.addListener((observable, oldVal, newVal) -> {
@@ -201,7 +212,6 @@ public class UploadFileController {
      * 数据重置
      */
     private void resetValues() {
-        uploadMsg = null;
         dirToUpload = null;
         uploadReadyFlag = false;
     }
@@ -231,6 +241,7 @@ public class UploadFileController {
             showPanel(panel_progress.getId());
             text_progress_info.setText(0.00 + "%");
             String remarksText = text_field_remarks.getText() == null ? "" : text_field_remarks.getText();
+            logger.info("remark is: {}", remarksText);
             String remarks = UploadMsg.UPLOAD_TYPE_CASE.equals(uploadMsg.getUploadType()) ? remarksText : "";
             remarks = remarks.length() > 50 ? remarks.substring(0, 50) : remarks;
             uploadMsg.setRemarks(remarks);
@@ -279,10 +290,30 @@ public class UploadFileController {
      * @param panelId 待显示界面的id
      */
     private void showPanel(String panelId) {
-        panel_choose.setVisible(panel_choose.getId().equals(panelId));
-        panel_progress.setVisible(panel_progress.getId().equals(panelId));
-        panel_fail.setVisible(panel_fail.getId().equals(panelId));
-        panel_success.setVisible(panel_success.getId().equals(panelId));
+
+        panels_parent.setLayoutX((stage.getWidth() - 600) / 2);
+        panels_parent.setLayoutY((stage.getHeight() - 248) / 2);
+
+        panels_parent.getChildren().removeAll(panels);
+        VBox panelToShow = Arrays.stream(panels)
+                                 .filter(panel -> panel.getId().equals(panelId))
+                                 .findFirst()
+                                 .get();
+        if (panelToShow.getId().equals(panel_choose.getId())) {
+            if (UploadMsg.UPLOAD_TYPE_CASE.equals(uploadMsg.getUploadType())) {
+                FXMLUtils.displayChildNode(panel_choose, text_field_remarks, true);
+                text_choose_desc.setText("将数据导入至: " + uploadMsg.getUploadTargetName());
+                text_choose_desc.setVisible(true);
+                //logger.info("upload case...target name is: [{}]",uploadMsg.getUploadTargetName());
+            } else if (UploadMsg.UPLOAD_TYPE_TEST.equals(uploadMsg.getUploadType())) {
+                FXMLUtils.displayChildNode(panel_choose, text_field_remarks, false);
+                text_choose_desc.setVisible(false);
+                logger.info("upload test...");
+            }
+        }
+
+        panels_parent.getChildren()
+                     .add(panelToShow);
     }
 
 
@@ -413,6 +444,7 @@ public class UploadFileController {
         logger.info("uploadTargetName to upload is: " + uploadMsg.getUploadTargetName() + ", batchNumber is: " + batchNumber);
         Platform.runLater(() -> {
             stage = new Stage();
+
             FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml");
             text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
 

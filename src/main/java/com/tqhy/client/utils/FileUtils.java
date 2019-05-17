@@ -1,6 +1,7 @@
 package com.tqhy.client.utils;
 
 import com.tqhy.client.task.Dcm2JpgTask;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
@@ -36,7 +37,7 @@ public class FileUtils {
      * @param dir
      * @return
      */
-    public static HashMap<File, String> getFilesMapInDir(File dir, Predicate<File> filter) {
+    public static HashMap<File, String> getFilesMapInDir(File dir, Predicate<File> filter, @Nullable String caseName) {
 
         File[] files = dir.listFiles();
         String dirName = dir.getName();
@@ -45,7 +46,9 @@ public class FileUtils {
                                               .filter(File::isFile)
                                               .collect(HashMap::new, (map, file) -> {
                                                   if (filter.test(file)) {
-                                                      map.put(file, dirName);
+                                                      String[] fileNameSplit = file.getName().split("\\.");
+                                                      String name = StringUtils.isEmpty(caseName) ? fileNameSplit[0] : caseName;
+                                                      map.put(file, name);
                                                   }
                                               }, HashMap::putAll);
         return fileMap;
@@ -61,7 +64,7 @@ public class FileUtils {
         File[] dirs = dir.listFiles(File::isDirectory);
         HashMap<File, String> fileMap = Arrays.stream(dirs)
                                               .collect(HashMap::new,
-                                                       (map, file) -> map.putAll(getFilesMapInDir(file, filter)),
+                                                       (map, file) -> map.putAll(getFilesMapInDir(file, filter, file.getName())),
                                                        HashMap::putAll);
         return fileMap;
     }
@@ -72,6 +75,7 @@ public class FileUtils {
             ExecutorService executor = Executors.newSingleThreadExecutor();
             Future<File> jpgFileFuture = executor.submit(Dcm2JpgTask.of(fileToTrans, jpgDir));
             File jpgFile = jpgFileFuture.get();
+            logger.info("file to trans success {}", jpgFile.getAbsolutePath());
             return jpgFile;
         } catch (InterruptedException e) {
             e.printStackTrace();
