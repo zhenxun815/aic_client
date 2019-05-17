@@ -10,4 +10,5 @@
 
 .root {
     -fx-font-family: "Microsoft YaHei", "Microsoft YaHei UI", "Arial";
+    -fx-background-color: rgba(0, 0, 0, 0.8);
 }
