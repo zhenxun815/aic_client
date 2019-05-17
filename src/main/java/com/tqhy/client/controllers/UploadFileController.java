@@ -1,6 +1,7 @@
 package com.tqhy.client.controllers;
 
 import com.tqhy.client.ClientApplication;
+import com.tqhy.client.config.Constants;
 import com.tqhy.client.models.msg.local.UploadMsg;
 import com.tqhy.client.network.Network;
 import com.tqhy.client.task.UploadWorkerTask;
@@ -10,9 +11,7 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -30,14 +29,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /**
  * @author Yiheng
@@ -46,6 +46,7 @@ import java.util.concurrent.Executors;
  */
 @RestController
 public class UploadFileController {
+
 
     Logger logger = LoggerFactory.getLogger(UploadFileController.class);
     Stage stage;
@@ -100,14 +101,37 @@ public class UploadFileController {
     @FXML
     Text text_choose_info;
 
+    /**
+     * 失败提示信息标题
+     */
+    @FXML
+    public Text text_fail_title;
+    /**
+     * 不合法信息展示滚动页面
+     */
+    @FXML
+    public ScrollPane scrollPane;
+
+    /**
+     * 不合法信息
+     */
+    @FXML
+    public Label label_fail_desc;
+    /**
+     * 上传备注信息
+     */
     @FXML
     TextField text_field_remarks;
     /**
-     * 上传进度百分比提示内容
+     * 上传进度百分比
      */
     @FXML
     Text text_progress_info;
-
+    /**
+     * 进度条界面描述信息
+     */
+    @FXML
+    public Text text_progress_desc;
     /**
      * 上传完毕提示内容,显示本次上传批次号
      */
@@ -134,6 +158,8 @@ public class UploadFileController {
     @Autowired
     LandingController landingController;
 
+    private UploadWorkerTask workerTask;
+
 
     @FXML
     public void initialize() {
@@ -158,6 +184,17 @@ public class UploadFileController {
             logger.info("main stage iconified state change..." + newVal);
             stage.setIconified(newVal);
         });
+
+        text_field_remarks.setOnKeyPressed(event -> {
+            int length = text_field_remarks.getLength();
+            if (length >= 50) {
+                String remarks = text_field_remarks.getText().substring(0, 50);
+                text_field_remarks.setText(remarks);
+            }
+        });
+
+        scrollPane.setFitToWidth(true);
+        label_fail_desc.setWrapText(true);
     }
 
     /**
@@ -192,28 +229,38 @@ public class UploadFileController {
 
             //显示上传中界面
             showPanel(panel_progress.getId());
-
-            String remarks = UploadMsg.UPLOAD_TYPE_CASE.equals(uploadMsg.getUploadType()) ? text_field_remarks.getText() : "test";
+            text_progress_info.setText(0.00 + "%");
+            String remarksText = text_field_remarks.getText() == null ? "" : text_field_remarks.getText();
+            String remarks = UploadMsg.UPLOAD_TYPE_CASE.equals(uploadMsg.getUploadType()) ? remarksText : "";
+            remarks = remarks.length() > 50 ? remarks.substring(0, 50) : remarks;
             uploadMsg.setRemarks(remarks);
-            UploadWorkerTask workerTask = UploadWorkerTask.with(dirToUpload, uploadMsg, localDataPath);
+            workerTask = UploadWorkerTask.with(dirToUpload, uploadMsg, localDataPath);
+
             workerTask.messageProperty()
                       .addListener((observable, oldVal, newVal) -> {
-                          if (newVal.startsWith(UploadWorkerTask.PROGRESS_MSG_COMPLETE)) {
-                              logger.info("upload progress msg..." + newVal);
-                              //显示上传成功页面
-                              showPanel(panel_success.getId());
-                              String[] split = newVal.split(";");
-                              String completeCount = split[1];
-                              String errorCount = split[2];
-                              String completeMsg = "上传完毕,成功: " + completeCount + " 条, 失败: " + errorCount + " 条!";
-                              FXMLUtils.displayChildNode(box_complete, btn_failed_check, Integer.parseInt(errorCount) > 0);
+                          DecimalFormat decimalFormat = new DecimalFormat("#0.0");
+                          logger.info("upload progress msg..." + newVal);
+                          String[] msgSplit = newVal.split(";");
+                          switch (msgSplit[0]) {
+                              case UploadWorkerTask.PROGRESS_MSG_COMPLETE:
+                                  //显示上传成功页面
+                                  showPanel(panel_success.getId());
 
-                              text_success_desc.setText(completeMsg);
-                          } else {
-                              logger.info("upload progress msg..." + newVal);
-                              DecimalFormat decimalFormat = new DecimalFormat("#0.0");
-                              String formatProgress = decimalFormat.format(Double.parseDouble(newVal));
-                              text_progress_info.setText(formatProgress + "%");
+                                  String completeCount = msgSplit[1];
+                                  String errorCount = msgSplit[2];
+                                  String completeMsg = "上传完毕,成功: " + completeCount + " 条, 失败: " + errorCount + " 条!";
+                                  FXMLUtils.displayChildNode(box_complete, btn_failed_check, Integer.parseInt(errorCount) > 0);
+                                  text_success_desc.setText(completeMsg);
+                                  break;
+                              case UploadWorkerTask.PROGRESS_MSG_COLLECT:
+                                  text_progress_desc.setText("文件信息采集中,请耐心等待..");
+                                  text_progress_info.setText(decimalFormat.format(Double.parseDouble(msgSplit[1])) + "%");
+                                  break;
+                              case UploadWorkerTask.PROGRESS_MSG_UPLOAD:
+                                  text_progress_desc.setText("文件上传中,请耐心等待..");
+                                  logger.info("upload progress msg..." + newVal);
+                                  text_progress_info.setText(decimalFormat.format(Double.parseDouble(msgSplit[1])) + "%");
+                                  break;
                           }
                       });
 
@@ -270,9 +317,30 @@ public class UploadFileController {
             dirToUpload = directoryChooser.showDialog(stage);
 
             if (null != dirToUpload) {
-                File[] caseDirs = dirToUpload.listFiles(File::isDirectory);
-                if (null != caseDirs && caseDirs.length > 0) {
+                File[] files = dirToUpload.listFiles();
+
+                if (null != files && files.length > 0) {
                     logger.info("choose dirToUpload is: [{}]", dirToUpload.getAbsolutePath());
+                    File[] caseDirs = dirToUpload.listFiles(File::isDirectory);
+                    if (null != caseDirs && caseDirs.length > 0) {
+                        List<File> unvalidDirs = Arrays.stream(caseDirs)
+                                                       .filter(caseDir -> {
+                                                           File[] caseSubDirs = caseDir.listFiles(File::isDirectory);
+                                                           return null != caseSubDirs && caseSubDirs.length > 0;
+                                                       }).collect(Collectors.toList());
+                        if (unvalidDirs.size() > 0) {
+                            String paths = unvalidDirs.stream()
+                                                      .collect(StringBuilder::new,
+                                                               (builder, dir) ->
+                                                                       builder.append(dir.getAbsolutePath())
+                                                                              .append(Constants.NEW_LINE),
+                                                               StringBuilder::append)
+                                                      .toString();
+                            text_fail_title.setText("以下文件夹路径结构不符合规则");
+                            label_fail_desc.setText(paths);
+                            showPanel(panel_fail.getId());
+                        }
+                    }
                     text_choose_info.setText(dirToUpload.getAbsolutePath());
                     uploadReadyFlag = true;
                 } else {
@@ -289,11 +357,30 @@ public class UploadFileController {
         logger.info("check upload failed files...");
         String batchNumber = uploadMsg.getBatchNumber();
         File uploadInfoFile = FileUtils.getLocalFile(localDataPath, batchNumber + ".txt");
-        try {
+        String failedInfos = FileUtils.readLine(uploadInfoFile, line -> line.concat(Constants.NEW_LINE))
+                                      .stream()
+                                      .collect(StringBuilder::new,
+                                               StringBuilder::append,
+                                               StringBuilder::append)
+                                      .toString();
+        text_fail_title.setText("以下文件上传失败");
+        label_fail_desc.setText(failedInfos);
+        showPanel(panel_fail.getId());
+        /*try {
             Desktop.getDesktop().open(uploadInfoFile);
             stage.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }*/
+    }
+
+    @FXML
+    public void stopUpload(MouseEvent mouseEvent) {
+        MouseButton button = mouseEvent.getButton();
+        if (MouseButton.PRIMARY.equals(button)) {
+            logger.info("into stop upload....");
+            workerTask.getStopUploadFlag().set(true);
+            showPanel(panel_choose.getId());
         }
     }
 
@@ -305,9 +392,10 @@ public class UploadFileController {
     @FXML
     public void retry(MouseEvent mouseEvent) {
         logger.info("into retry...");
+        resetValues();
         //显示上传中页面
-        showPanel(panel_progress.getId());
-        startUpload(mouseEvent);
+        showPanel(panel_choose.getId());
+
     }
 
     /**

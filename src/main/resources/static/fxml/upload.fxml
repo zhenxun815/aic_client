@@ -43,7 +43,7 @@
                     </HBox.margin>
                 </Text>
 
-                <Text fx:id="text_choose_tip" styleClass="text_tips">仅支持DICOM/JPG/PNG格式文件
+                <Text fx:id="text_choose_tip" styleClass="text_tips">仅支持DICOM/JPG格式文件
                     <HBox.margin>
                         <Insets>
                             <left>10</left>
@@ -52,7 +52,7 @@
                 </Text>
             </HBox>
 
-            <TextField fx:id="text_field_remarks" styleClass="text_remark" promptText="请输入备注信息">
+            <TextField fx:id="text_field_remarks" styleClass="text_remark" promptText="请输入备注信息,最大长度50字">
                 <VBox.margin>
                     <Insets>
                         <top>11</top>
@@ -113,13 +113,20 @@
                     </Text>
                 </children>
             </HBox>
-            <Text fx:id="text_progress_desc" styleClass="text_tips">数据正在上传,请耐心等待...
+            <Text fx:id="text_progress_desc" styleClass="text_tips">
+                <VBox.margin>
+                    <Insets>
+                        <top>10</top>
+                    </Insets>
+                </VBox.margin>
+            </Text>
+            <Button fx:id="btn_stop_upload" onMouseClicked="#stopUpload" styleClass="btn_cancel">终止上传
                 <VBox.margin>
                     <Insets>
                         <top>30</top>
                     </Insets>
                 </VBox.margin>
-            </Text>
+            </Button>
         </children>
     </VBox>
 
@@ -175,39 +182,35 @@
     <!--上传失败显示界面-->
     <VBox fx:id="panel_fail" styleClass="pane">
         <children>
-            <ImageView fitHeight="40" fitWidth="40">
-                <image>
-                    <Image url="@../img/fail-circle.png"></Image>
-                </image>
-
+            <Text styleClass="text_title" fx:id="text_fail_title">
                 <VBox.margin>
                     <Insets>
-                        <top>33</top>
-                    </Insets>
-                </VBox.margin>
-            </ImageView>
-
-            <Text fx:id="text_fail_desc" styleClass="text_tips">数据上传失败
-                <VBox.margin>
-                    <Insets>
-                        <top>33</top>
+                        <top>20</top>
                     </Insets>
                 </VBox.margin>
             </Text>
+            <ScrollPane fx:id="scrollPane"
+                        stylesheets="@../css/fx_scroll_pane.css"
+                        maxHeight="120.0" minViewportHeight="110.0" maxWidth="500.0">
+                <VBox.margin>
+                    <Insets>
+                        <top>14</top>
+                    </Insets>
+                </VBox.margin>
+                <VBox alignment="CENTER">
+                    <Label fx:id="label_fail_desc" styleClass="label_tips" maxWidth="500">
+                    </Label>
+                </VBox>
+            </ScrollPane>
+
             <HBox styleClass="confirm_btn_container">
                 <VBox.margin>
                     <Insets>
-                        <top>33</top>
+                        <top>10</top>
                     </Insets>
                 </VBox.margin>
                 <children>
-                    <Button fx:id="btn_fail_cancel" onMouseClicked="#cancelUpload" styleClass="btn_cancel">取消</Button>
-                    <Button fx:id="btn_fail_retry" onMouseClicked="#retry" styleClass="btn_confirm">重试
-                        <HBox.margin>
-                            <Insets>
-                                <left>75</left>
-                            </Insets>
-                        </HBox.margin>
+                    <Button fx:id="btn_fail_retry" onMouseClicked="#retry" styleClass="btn_confirm">确认
                     </Button>
                 </children>
             </HBox>

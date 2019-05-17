@@ -56,11 +56,11 @@
 						</div>
 					</div>
 					<div class="input-box">
-						<h6 class="title">请输入AIC设备IP地址,测试连通后，点击下一步</h6>
-						<input class="input" id="server_ip" placeholder="输入AIC设备IP地址，如192.168.1.1" type="text"/>
+						<h6 class="title">请输入AIC设备IP地址,点击下一步跳转登录</h6>
+						<input class="input" id="server_ip" placeholder="输入AIC设备IP地址，如192.168.1.1" type="text"
+						       onkeydown="cleanTips()"/>
 						<p class="callback-message">IP地址不能为空</p>
 						<p class="connect-test">
-							<span class="word" id="btn_connection" onclick="testingConnFunc()">点击测试是否已连通</span>
 							<span class="spin"></span>
 						</p>
 					</div>
@@ -69,7 +69,7 @@
 					<button class="button" id="btn_next" onclick="nextStep()">下一步</button>
 				</div>
 			</div>
-			<p class="copyright" onclick="checkValueFunc()">天启慧眼(北京)信息技术有限公司 </p>
+			<p class="copyright">天启慧眼(北京)信息技术有限公司 </p>
 		</div>
 	</div>
 </div>
@@ -88,42 +88,52 @@
 </body>
 <script type="text/javascript">
 	let flag = 0
-
 	document.oncontextmenu = function () {
 		return false;
 	}
 
-	function testingConnFunc() {
-		if (checkValueFunc()) {
-			$('.connect-test .spin').css({
-				'display': 'inline-block'
-			})
-
-			$('#btn_connection').html('连接中...')
-
-			let serverIP = $('#server_ip').val()
-			console.log(`server ip to connect is: ${serverIP}`)
-			let requestData = {serverIP: serverIP}
-
-			post_ajax('connTest', '/verify/connection', requestData, (response) => {
-				//console.log(`response data is: ${JSON.stringify(response)}`)
-				flag = response.flag
-				console.log(`flag is: ${flag}`)
-				if (flag == 1) {
-					$('.spin').hide()
-					$('#btn_connection').html('连接成功')
-				} else {
-					//layOpenFunc1()
-					$('.spin').hide()
-					$('#btn_connection').html('连接失败,点击重试')
-				}
-			})
-		}
+	function cleanTips() {
+		$('.callback-message').removeClass("show")
 	}
 
 	function nextStep() {
-		if (flag) {
-			window.location.href = baseUrlLocal + '/html/landing.html'
+		flag = 0
+		if (checkValueFunc()) {
+			let serverIP = $('#server_ip').val()
+			let ip_pattern = /^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/g
+			let reg = new RegExp(ip_pattern)
+			let ipValid = reg.test(serverIP)
+			console.log(`server ip to connect is: ${serverIP},valid is: ${ipValid}`)
+
+			if (ipValid) {
+				$('.callback-message').removeClass("show")
+				$('.connect-test .spin').css({
+					'display': 'inline-block'
+				})
+
+				let requestData = {serverIP: serverIP}
+				post_ajax('connTest', '/verify/connection', requestData, (response) => {
+					//console.log(`response data is: ${JSON.stringify(response)}`)
+					flag = response.flag
+					console.log(`flag is: ${flag}`)
+					if (flag == 1) {
+						$('.spin').hide()
+						$('.callback-message').html('连接成功!')
+						$('.callback-message').addClass("show")
+
+						window.location.href = baseUrlLocal + '/html/landing.html'
+					} else {
+						flag = 0
+						//layOpenFunc1()
+						$('.spin').hide()
+						$('.callback-message').html('连接失败,请重试!')
+						$('.callback-message').addClass("show")
+					}
+				})
+			} else {
+				$('.callback-message').html('ip地址不合法')
+				$('.callback-message').addClass("show")
+			}
 		}
 	}
 </script>
