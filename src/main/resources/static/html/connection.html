@@ -57,8 +57,9 @@
 					</div>
 					<div class="input-box">
 						<h6 class="title">请输入AIC设备IP地址,点击下一步跳转登录</h6>
-						<input class="input" id="server_ip" placeholder="输入AIC设备IP地址，如192.168.1.1" type="text"
-						       onkeydown="cleanTips()"/>
+						<input class="input" id="server_ip" onkeydown="cleanTips()"
+						       placeholder="输入AIC设备IP地址，如192.168.1.1"
+						       type="text"/>
 						<p class="callback-message">IP地址不能为空</p>
 						<p class="connect-test">
 							<span class="spin"></span>
@@ -91,6 +92,16 @@
 	document.oncontextmenu = function () {
 		return false;
 	}
+
+	document.body.addEventListener('keyup', ev => {
+		if (ev.keyCode === 13) {
+			$ = layui.jquery;
+			let serverIPLength = $('#server_ip').val().length
+			if (serverIPLength > 0) {
+				land()
+			}
+		}
+	})
 
 	function cleanTips() {
 		$('.callback-message').removeClass("show")
