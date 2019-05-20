@@ -1,6 +1,5 @@
 import com.tqhy.client.task.Dcm2JpgTask;
 import com.tqhy.client.utils.FileUtils;
-import com.tqhy.client.utils.NetworkUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,11 +7,13 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -71,8 +72,9 @@ public class UnitTests {
 
     @Test
     public void testIp() {
-        boolean ip = NetworkUtils.isIP("123");
-        logger.info("is ip: " + ip);
+        File dir = new File("C:\\Users\\qing\\Pictures\\shadow\\jpg\\test2");
+        HashMap<File, String> filesMapInDir = getFilesMapInDir(dir, file -> FileUtils.isDcmFile(file) || FileUtils.isJpgFile(file));
+        filesMapInDir.forEach((k, v) -> logger.info("k is {},v is {}", k, v));
     }
 
     @Test
@@ -82,5 +84,20 @@ public class UnitTests {
         boolean copyFile = FileUtils.copyFile(source, dest);
         logger.info("copy: " + copyFile);
         //System.out.println("arch: " + SystemUtils.getArc());
+    }
+
+    public HashMap<File, String> getFilesMapInDir(File dir, Predicate<File> filter) {
+
+        File[] files = dir.listFiles();
+        String dirName = dir.getName();
+        logger.info("dir name is: {}", dirName);
+        HashMap<File, String> fileMap = Arrays.stream(files)
+                                              .filter(File::isFile)
+                                              .collect(HashMap::new, (map, file) -> {
+                                                  if (filter.test(file)) {
+                                                      map.put(file, dirName);
+                                                  }
+                                              }, HashMap::putAll);
+        return fileMap;
     }
 }
