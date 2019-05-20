@@ -74,7 +74,7 @@ public class Dcm2JpgTask implements Callable<File> {
             try (ImageInputStream iis = ImageIO.createImageInputStream(dcmFile)) {
 
                 if (!jpgDir.exists()) {
-                    jpgDir.mkdir();
+                    jpgDir.mkdirs();
                 }
                 imageReader = ImageIO.getImageReadersByFormatName("DICOM").next();
                 imageReader.setInput(iis);

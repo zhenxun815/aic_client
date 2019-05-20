@@ -80,18 +80,15 @@
 			}
 		});
 	};
-	/*layui.use(['jquery'], function () {
-		layer = layui.layer;
-		$ = layui.jquery;
-
-
-
-	})*/
-
 
 	document.body.addEventListener('keyup', function (e) {
 		if (e.keyCode === 13) {
-			land()
+			$ = layui.jquery;
+			let nameLength = $('#input_uname').val()
+			let pwdLength = $('#input_upwd').val()
+			if (nameLength > 0 && pwdLength.length > 0) {
+				land()
+			}
 		}
 	})
 

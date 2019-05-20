@@ -201,21 +201,13 @@ public class FileUtils {
      * @param temp
      * @return
      */
-    public static boolean deleteDir(File temp) {
+    public static void deleteDir(File temp) {
         logger.info("into delete");
-        if (temp.exists()) {
-            File[] subFiles = temp.listFiles();
-            Arrays.stream(subFiles)
-                  .forEach(subFile -> {
-                      if (subFile.isDirectory()) {
-                          deleteDir(subFile);
-                      } else {
-                          subFile.delete();
-                      }
-                  });
-            return temp.delete();
+        try {
+            org.apache.tomcat.util.http.fileupload.FileUtils.deleteDirectory(temp);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return false;
     }
 
     /**
