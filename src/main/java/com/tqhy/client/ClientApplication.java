@@ -34,10 +34,8 @@ public class ClientApplication extends Application {
     public void start(Stage primaryStage) throws Exception {
         stage = primaryStage;
         initPrimaryStageSize();
-        initSystemTray(stage);
         stage.setOnCloseRequest(event -> System.exit(0));
-
-        FXMLUtils.loadWindow(stage, "/static/fxml/main.fxml");
+        FXMLUtils.loadWindow(ClientApplication.stage, "/static/fxml/main.fxml");
     }
 
     /**
@@ -67,14 +65,13 @@ public class ClientApplication extends Application {
     /**
      * 创建系统托盘图标
      *
-     * @param stage
      */
-    private void initSystemTray(Stage stage) {
+    private void initSystemTray() {
         try {
             System.setProperty("java.awt.headless", "false");
             Toolkit.getDefaultToolkit();
             if (!java.awt.SystemTray.isSupported()) {
-               logger.info("系统不支持托盘图标,程序退出..");
+                logger.info("系统不支持托盘图标,程序退出..");
                 Platform.exit();
             }
             //PopupMenu popupMenu = createPopMenu(stage);
@@ -84,7 +81,7 @@ public class ClientApplication extends Application {
             URL imageLoc = new URL(iconPath);
             java.awt.Image image = ImageIO.read(imageLoc);
             //final TrayIcon trayIcon = new TrayIcon(image, "打开悬浮窗",popupMenu);
-            final TrayIcon trayIcon = new TrayIcon(image, "双击打开主界面");
+            final TrayIcon trayIcon = new TrayIcon(image);
 
             systemTray.add(trayIcon);
         } catch (IOException e) {
@@ -99,6 +96,7 @@ public class ClientApplication extends Application {
         super.init();
         Platform.setImplicitExit(false);
         springContext = SpringApplication.run(ClientApplication.class);
+        initSystemTray();
     }
 
 
