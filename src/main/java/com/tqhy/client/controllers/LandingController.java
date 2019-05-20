@@ -16,16 +16,16 @@ import io.reactivex.schedulers.Schedulers;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.CacheHint;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +43,8 @@ import java.util.List;
  * @since 1.0.0
  */
 @RestController
+@Getter
+@Setter
 public class LandingController {
 
     static Logger logger = LoggerFactory.getLogger(LandingController.class);
@@ -73,64 +75,41 @@ public class LandingController {
      */
     private BooleanProperty jumpToLandingFlag = new SimpleBooleanProperty(false);
 
+    private WebEngine webEngine;
+
     @FXML
     private void initialize() {
-        initWebEngine(Network.SERVER_IP);
+        initWebView();
+        initWebAlert();
         initJumpToLanding();
-        modifyLandingPage();
+        loadPage(Network.SERVER_IP);
+        //webEngine.load("https://www.baidu.com");
     }
 
-    /**
-     * @Description: 操作dom来修改页面中的用户名
-     */
-    private void modifyLandingPage() {
-        WebEngine webEngine = webView.getEngine();
-        webEngine.getLoadWorker()
-                 .stateProperty()
-                 .addListener((ov, oldState, newState) -> {
-                     if (Worker.State.SUCCEEDED == newState && webEngine.getLocation().endsWith("landing.html")) {
-                         //添加webview的键盘监听，根据页面不同执行不同键盘监听行为,URL地址规则更改以后将不可用，放在这里是防止界面未加载之前就回车
-                         webView.setOnKeyPressed(ke -> {
-                             if (ke.getCode().equals(KeyCode.ENTER)) {
-                                 webEngine.executeScript("land()");
-                             }
-                         });
-                         try {
-                             webEngine.getDocument().getElementById("input_uname").setAttribute("value", PropertyUtils.getUserName());
-                         } catch (IOException e) {
-                             System.out.println("目前没有用户登陆过");
-                         }
-                     }
-                 });
-        ;
-    }
-
-    /**
-     * 初始化webEngine,根据是否有serverIP判断是否显示测试连接页面
-     *
-     * @param serverIP
-     */
-    private void initWebEngine(String serverIP) {
-        logger.info("into init webEngine..");
+    private void loadPage(String serverIP) {
         String initUrl = StringUtils.isEmpty(serverIP) ? connectionUrl : landingUrl;
         if (!StringUtils.isEmpty(initUrl)) {
-            webView.setCache(true);
-            webView.setCacheHint(CacheHint.SPEED);
-
-            WebEngine webEngine = webView.getEngine();
-            initWebAlert(webEngine);
             logger.info("localUrl is: " + initUrl);
             webEngine.load(Network.LOCAL_BASE_URL + initUrl);
-
         }
     }
 
-    private void initWebAlert(WebEngine webEngine) {
-        String userAgent = webEngine.getUserAgent();
-        logger.info("user agent is: {} ", userAgent);
-        webEngine.setOnError(errorEvent -> {
-            logger.info("error message is: {}", errorEvent.toString());
-        });
+
+    /**
+     * 初始化webView设置与webEngine对象
+     */
+    public void initWebView() {
+        logger.info("into init webEngine..");
+        webView.setCache(true);
+        webView.setCacheHint(CacheHint.SPEED);
+        logger.info("init webView complete..");
+        this.webEngine = webView.getEngine();
+    }
+
+    /**
+     * 初始化web页面alert事件监听
+     */
+    private void initWebAlert() {
         webEngine.setOnAlert(event -> {
             String data = event.getData();
             logger.info("alert data is: " + data);
@@ -151,7 +130,6 @@ public class LandingController {
         });
     }
 
-
     /**
      * 初始化跳转登录页面逻辑
      */
@@ -160,10 +138,7 @@ public class LandingController {
         jumpToLandingFlag.addListener((observable, oldValue, newValue) -> {
             logger.info("jumpToLandingFlag changed,oldValue is: " + oldValue + ", newValue is: " + newValue);
             if (newValue) {
-                Platform.runLater(() -> {
-                    WebEngine webEngine = webView.getEngine();
-                    webEngine.load(Network.LOCAL_BASE_URL + landingUrl);
-                });
+                Platform.runLater(() -> webEngine.load(Network.LOCAL_BASE_URL + landingUrl));
                 jumpToLandingFlag.set(false);
                 Network.TOKEN = null;
             }
@@ -175,7 +150,7 @@ public class LandingController {
      *
      * @param message
      */
-    private void showAlert(String message) {
+    public void showAlert(String message) {
         Dialog<ButtonType> alert = new Dialog<>();
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title_light.png")));
@@ -189,13 +164,6 @@ public class LandingController {
     public VerifyMsg landing(@RequestBody LandingMsg landingMsg) {
         logger.info("get LandingMsg.." + landingMsg);
         VerifyMsg response = new VerifyMsg();
-
-       /* String physicalAddress = NetworkUtils.getPhysicalAddress();
-        if (StringUtils.isEmpty(physicalAddress)) {
-            response.setFlag(BaseMsg.FAIL);
-            response.setDesc("Mac地址获取失败!");
-            return response;
-        }*/
 
         String localIp = NetworkUtils.getLocalIp();
         if (!NetworkUtils.isIP(localIp)) {
@@ -238,6 +206,12 @@ public class LandingController {
     @GetMapping("/logout")
     public void logout() {
         jumpToLandingFlag.set(true);
+    }
+
+    @GetMapping("/user/name")
+    @ResponseBody
+    public String getUserName() throws IOException {
+        return PropertyUtils.getUserName();
     }
 
 
