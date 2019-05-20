@@ -116,8 +116,8 @@ public class UploadWorkerTask extends Task {
         tempTotalFile.putAll(directImgFileMap);
         tempTotalFile.putAll(subDirImgFileMap);
 
-        total = totalImgFileMap.values()
-                               .size();
+        total = tempTotalFile.values()
+                             .size();
         totalImgFileMap = transAllToJpg(tempTotalFile, jpgDir);
 
         uploadInfoFile = FileUtils.getLocalFile(localDataPath, uploadMsg.getBatchNumber() + ".txt");
@@ -323,7 +323,9 @@ public class UploadWorkerTask extends Task {
                                                                    File file = entry.getKey();
                                                                    String caseName = entry.getValue();
                                                                    if (isDcmFile(file)) {
-                                                                       File jpgFile = transToJpg(file, jpgDir);
+                                                                       File jpgCaseDir = new File(jpgDir, caseName);
+
+                                                                       File jpgFile = transToJpg(file, jpgCaseDir);
                                                                        map.put(jpgFile, caseName);
                                                                    } else {
                                                                        map.put(file, caseName);
