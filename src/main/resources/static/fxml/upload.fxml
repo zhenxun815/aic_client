@@ -9,7 +9,8 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.tqhy.client.controllers.UploadFileController"
-            stylesheets="@../css/fx_upload_pane.css">
+            stylesheets="@../css/fx_upload_pane.css"
+            styleClass="window_root">
     <!--  prefHeight="268.0"
              prefWidth="620.0"
              style="-fx-background-color: transparent;-fx-padding: 10px"
