@@ -1,7 +1,6 @@
 package com.tqhy.client.utils;
 
 import com.tqhy.client.task.Dcm2JpgTask;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
@@ -37,20 +36,49 @@ public class FileUtils {
      * @param dir
      * @return
      */
-    public static HashMap<File, String> getFilesMapInDir(File dir, Predicate<File> filter, @Nullable String caseName) {
-
+    public static HashMap<File, String> getFilesMapInDir(File dir, Predicate<File> filter, String caseName) {
+        logger.info("into get file map in dir...");
         File[] files = dir.listFiles();
         String dirName = dir.getName();
         logger.info("dir name is: {}", dirName);
+        /*HashMap<File, String> fileMap = new HashMap<>();
+        for (File file : files) {
+            if (file.isFile() && filter.test(file)) {
+                String fileName = null;
+                String fileFullName = file.getName().toLowerCase();
+                if (fileFullName.endsWith(".dcm") || fileFullName.endsWith(".jpg") || fileFullName.endsWith(".jpeg")) {
+                    int lastIndex = fileFullName.lastIndexOf(".");
+                    fileName = file.getName().substring(0, lastIndex);
+                } else {
+                    fileName = fileFullName;
+                }
+                String name = null == caseName ? fileName : caseName;
+                fileMap.put(file, name);
+                logger.info("add file map key: {}, value: {}", file.getAbsolutePath(), name);
+            }
+        }*/
         HashMap<File, String> fileMap = Arrays.stream(files)
                                               .filter(File::isFile)
-                                              .collect(HashMap::new, (map, file) -> {
-                                                  if (filter.test(file)) {
-                                                      String[] fileNameSplit = file.getName().split("\\.");
-                                                      String name = StringUtils.isEmpty(caseName) ? fileNameSplit[0] : caseName;
-                                                      map.put(file, name);
-                                                  }
-                                              }, HashMap::putAll);
+                                              .collect(HashMap::new,
+                                                       (map, file) -> {
+                                                           boolean test = filter.test(file);
+                                                           logger.info("test valid img: {}", test);
+                                                           if (test) {
+                                                               String fileFullName = file.getName().toLowerCase();
+                                                               String fileName = null;
+                                                               if (fileFullName.endsWith(".dcm") || fileFullName.endsWith(".jpg") || fileFullName.endsWith(".jpeg")) {
+                                                                   int lastIndex = fileFullName.lastIndexOf(".");
+                                                                   fileName = file.getName().substring(0, lastIndex);
+                                                               } else {
+                                                                   fileName = fileFullName;
+                                                               }
+                                                               String name = null == caseName ? fileName : caseName;
+                                                               map.put(file, name);
+                                                               logger.info("add file map key: {}, value: {}", file.getAbsolutePath(), name);
+                                                           }
+                                                       },
+                                                       HashMap::putAll);
+        logger.info("return fileMap {}", fileMap);
         return fileMap;
     }
 
@@ -61,12 +89,17 @@ public class FileUtils {
      * @return
      */
     public static HashMap<File, String> getFilesMapInSubDir(File dir, Predicate<File> filter) {
+        logger.info("into get file map in sub dir...");
         File[] dirs = dir.listFiles(File::isDirectory);
-        HashMap<File, String> fileMap = Arrays.stream(dirs)
-                                              .collect(HashMap::new,
-                                                       (map, file) -> map.putAll(getFilesMapInDir(file, filter, file.getName())),
-                                                       HashMap::putAll);
-        return fileMap;
+        if (null != dirs) {
+            HashMap<File, String> fileMap = Arrays.stream(dirs)
+                                                  .collect(HashMap::new,
+                                                           (map, file) -> map.putAll(getFilesMapInDir(file, filter, file.getName())),
+                                                           HashMap::putAll);
+            return fileMap;
+        } else {
+            return new HashMap<>();
+        }
     }
 
 
@@ -94,6 +127,7 @@ public class FileUtils {
      * @return
      */
     public static boolean isJpgFile(File fileToJudge) {
+        logger.info("into judge file is jpg...");
         String fileName = fileToJudge.getName().toLowerCase();
         if (!(fileName.endsWith("jpg") || fileName.endsWith("jpeg"))) {
             return false;
@@ -122,6 +156,7 @@ public class FileUtils {
      * @return
      */
     public static boolean isDcmFile(File fileToJudge) {
+        logger.info("into judge file is dcm...");
         byte[] bytes = new byte[132];
         try (FileInputStream in = new FileInputStream(fileToJudge)) {
             int len = readAvailable(in, bytes, 0, 132);

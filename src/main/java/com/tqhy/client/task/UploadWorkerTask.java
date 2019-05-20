@@ -112,13 +112,13 @@ public class UploadWorkerTask extends Task {
         //批次目录下图片
         HashMap<File, String> directImgFileMap = FileUtils.getFilesMapInDir(dirToUpload, file -> isDcmFile(file) || FileUtils.isJpgFile(file), null);
         HashMap<File, String> subDirImgFileMap = FileUtils.getFilesMapInSubDir(dirToUpload, file -> isDcmFile(file) || FileUtils.isJpgFile(file));
-        HashMap<File, String> tempTotalFile = totalImgFileMap = new HashMap<>();
+        HashMap<File, String> tempTotalFile = new HashMap<>();
         tempTotalFile.putAll(directImgFileMap);
         tempTotalFile.putAll(subDirImgFileMap);
 
-        totalImgFileMap = transAllToJpg(tempTotalFile, jpgDir);
         total = totalImgFileMap.values()
                                .size();
+        totalImgFileMap = transAllToJpg(tempTotalFile, jpgDir);
 
         uploadInfoFile = FileUtils.getLocalFile(localDataPath, uploadMsg.getBatchNumber() + ".txt");
         stopUploadFlag.setValue(false);
