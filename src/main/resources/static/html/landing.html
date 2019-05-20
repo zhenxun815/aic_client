@@ -31,13 +31,13 @@
 				<form class="login-zone" onsubmit="return false">
 					<div class="input-box user">
 						<h6 class="label">用户名</h6>
-						<input class="input" id="input_uname" onkeyup="checkInputLength(this)" placeholder="填写用户名"
+						<input class="input" id="input_uname" placeholder="填写用户名"
 						       type="text"/>
 						<p class="callback-message">用户名不能为空</p>
 					</div>
 					<div class="input-box user">
 						<h6 class="label">密码</h6>
-						<input class="input" id="input_upwd" onkeyup="checkInputLength(this)" placeholder="填写密码"
+						<input class="input" id="input_upwd" placeholder="填写密码"
 						       type="password"/>
 						<p class="callback-message" id="landing_tips">密码不能为空</p>
 					</div>
@@ -86,7 +86,7 @@
 
 
 
-	});*/
+	})*/
 
 
 	document.body.addEventListener('keyup', function (e) {
@@ -95,18 +95,17 @@
 		}
 	})
 
-	let inputLengthValid = false
-
-	function checkInputLength(input) {
-		let value = input.value
-		console.log(`input value is ${value},value length is ${value.length}`)
-		if (value.length > 50) {
+	function checkInputLength() {
+		$ = layui.jquery;
+		let nameLength = $('#input_uname').val()
+		let pwdLength = $('#input_upwd').val()
+		if (nameLength.length > 50 || pwdLength.length > 50) {
 			$('#landing_tips').html('输入长度不合法,请重新输入!')
 			$('#landing_tips').show()
-			inputLengthValid = false
+			return false
 		} else {
 			$('#landing_tips').hide()
-			inputLengthValid = true
+			return true
 		}
 	}
 
@@ -116,7 +115,7 @@
 
 	function land() {
 		//localStorage.clear()
-		if (checkValueFunc() && inputLengthValid) {
+		if (checkValueFunc() && checkInputLength()) {
 			let userName = $('#input_uname').val()
 			let userPwd = $('#input_upwd').val()
 
