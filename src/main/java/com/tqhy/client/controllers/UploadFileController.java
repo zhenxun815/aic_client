@@ -386,24 +386,21 @@ public class UploadFileController {
 
     @FXML
     public void checkFailed(MouseEvent mouseEvent) {
-        logger.info("check upload failed files...");
-        String batchNumber = uploadMsg.getBatchNumber();
-        File uploadInfoFile = FileUtils.getLocalFile(localDataPath, batchNumber + ".txt");
-        String failedInfos = FileUtils.readLine(uploadInfoFile, line -> line.concat(Constants.NEW_LINE))
-                                      .stream()
-                                      .collect(StringBuilder::new,
-                                               StringBuilder::append,
-                                               StringBuilder::append)
-                                      .toString();
-        text_fail_title.setText("以下文件上传失败");
-        label_fail_desc.setText(failedInfos);
-        showPanel(panel_fail.getId());
-        /*try {
-            Desktop.getDesktop().open(uploadInfoFile);
-            stage.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+        MouseButton button = mouseEvent.getButton();
+        if (MouseButton.PRIMARY.equals(button)) {
+            logger.info("check upload failed files...");
+            String batchNumber = uploadMsg.getBatchNumber();
+            File uploadInfoFile = FileUtils.getLocalFile(localDataPath, batchNumber + ".txt");
+            String failedInfos = FileUtils.readLine(uploadInfoFile, line -> line.concat(Constants.NEW_LINE))
+                                          .stream()
+                                          .collect(StringBuilder::new,
+                                                   StringBuilder::append,
+                                                   StringBuilder::append)
+                                          .toString();
+            text_fail_title.setText("以下文件上传失败");
+            label_fail_desc.setText(failedInfos);
+            showPanel(panel_fail.getId());
+        }
     }
 
     @FXML
