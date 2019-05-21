@@ -354,14 +354,15 @@ public class UploadFileController {
                 if (null != files && files.length > 0) {
                     logger.info("choose dirToUpload is: [{}]", dirToUpload.getAbsolutePath());
                     File[] caseDirs = dirToUpload.listFiles(File::isDirectory);
+                    uploadReadyFlag = true;
                     if (null != caseDirs && caseDirs.length > 0) {
-                        List<File> unvalidDirs = Arrays.stream(caseDirs)
+                        List<File> invalidDirs = Arrays.stream(caseDirs)
                                                        .filter(caseDir -> {
                                                            File[] caseSubDirs = caseDir.listFiles(File::isDirectory);
                                                            return null != caseSubDirs && caseSubDirs.length > 0;
                                                        }).collect(Collectors.toList());
-                        if (unvalidDirs.size() > 0) {
-                            String paths = unvalidDirs.stream()
+                        if (invalidDirs.size() > 0) {
+                            String paths = invalidDirs.stream()
                                                       .collect(StringBuilder::new,
                                                                (builder, dir) ->
                                                                        builder.append(dir.getAbsolutePath())
@@ -370,11 +371,14 @@ public class UploadFileController {
                                                       .toString();
                             text_fail_title.setText("以下文件夹路径结构不符合规则");
                             label_fail_desc.setText(paths);
+                            text_success_desc.setText("路径不合法,未上传任何文件!");
+                            uploadReadyFlag = false;
+                            label_fail_desc.setText(paths);
                             showPanel(panel_fail.getId());
                         }
                     }
                     text_choose_info.setText(dirToUpload.getAbsolutePath());
-                    uploadReadyFlag = true;
+
                 } else {
                     logger.info("choose dirToUpload error");
                     text_choose_info.setText("文件夹路径不合法!");
@@ -391,14 +395,16 @@ public class UploadFileController {
             logger.info("check upload failed files...");
             String batchNumber = uploadMsg.getBatchNumber();
             File uploadInfoFile = FileUtils.getLocalFile(localDataPath, batchNumber + ".txt");
-            String failedInfos = FileUtils.readLine(uploadInfoFile, line -> line.concat(Constants.NEW_LINE))
-                                          .stream()
-                                          .collect(StringBuilder::new,
-                                                   StringBuilder::append,
-                                                   StringBuilder::append)
-                                          .toString();
-            text_fail_title.setText("以下文件上传失败");
-            label_fail_desc.setText(failedInfos);
+            if (uploadInfoFile.exists()) {
+                String failedInfos = FileUtils.readLine(uploadInfoFile, line -> line.concat(Constants.NEW_LINE))
+                                              .stream()
+                                              .collect(StringBuilder::new,
+                                                       StringBuilder::append,
+                                                       StringBuilder::append)
+                                              .toString();
+                text_fail_title.setText("以下文件上传失败");
+                label_fail_desc.setText(failedInfos);
+            }
             showPanel(panel_fail.getId());
         }
     }
@@ -420,9 +426,25 @@ public class UploadFileController {
      */
     @FXML
     public void showComplete(MouseEvent mouseEvent) {
-        logger.info("into showComplete...");
-        showPanel(panel_complete.getId());
+        MouseButton button = mouseEvent.getButton();
+        if (MouseButton.PRIMARY.equals(button)) {
+            logger.info("into showComplete...");
+            showPanel(panel_complete.getId());
+        }
+    }
 
+    /**
+     * 重新进入文件夹选择页面
+     *
+     * @param mouseEvent
+     */
+    @FXML
+    public void retry(MouseEvent mouseEvent) {
+        MouseButton button = mouseEvent.getButton();
+        if (MouseButton.PRIMARY.equals(button)) {
+            resetValues();
+            showPanel(panel_choose.getId());
+        }
     }
 
     /**

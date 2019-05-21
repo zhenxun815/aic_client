@@ -214,7 +214,14 @@
                         </Insets>
                     </VBox.margin>
                     <children>
-                        <Button fx:id="btn_fail_retry" onMouseClicked="#showComplete" styleClass="btn_confirm">确认
+                        <Button fx:id="btn_fail_confirm" onMouseClicked="#showComplete" styleClass="btn_confirm">确认
+                        </Button>
+                        <Button fx:id="btn_fail_retry" onMouseClicked="#retry" styleClass="btn_cancel">重试
+                            <HBox.margin>
+                                <Insets>
+                                    <left>75</left>
+                                </Insets>
+                            </HBox.margin>
                         </Button>
                     </children>
                 </HBox>
