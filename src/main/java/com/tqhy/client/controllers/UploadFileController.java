@@ -213,6 +213,7 @@ public class UploadFileController {
      */
     private void resetValues() {
         dirToUpload = null;
+        text_choose_info.setText("未选择任何文件!");
         uploadReadyFlag = false;
     }
 
