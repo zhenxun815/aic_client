@@ -88,7 +88,7 @@ public class UploadFileController {
     @FXML
     VBox panel_progress;
     @FXML
-    VBox panel_success;
+    VBox panel_complete;
     @FXML
     VBox panel_fail;
 
@@ -176,7 +176,7 @@ public class UploadFileController {
         stage.setWidth(visualBounds.getWidth());
         stage.setHeight(visualBounds.getHeight());
         stage.centerOnScreen();
-        panels = new VBox[]{panel_choose, panel_progress, panel_fail, panel_success};
+        panels = new VBox[]{panel_choose, panel_progress, panel_fail, panel_complete};
         showPanel(panel_choose.getId());
 
         jumpToLandFlag.addListener((observable, oldVal, newVal) -> {
@@ -256,7 +256,7 @@ public class UploadFileController {
                           switch (msgSplit[0]) {
                               case UploadWorkerTask.PROGRESS_MSG_COMPLETE:
                                   //显示上传成功页面
-                                  showPanel(panel_success.getId());
+                                  showPanel(panel_complete.getId());
 
                                   String completeCount = msgSplit[1];
                                   String errorCount = msgSplit[2];
@@ -386,24 +386,21 @@ public class UploadFileController {
 
     @FXML
     public void checkFailed(MouseEvent mouseEvent) {
-        logger.info("check upload failed files...");
-        String batchNumber = uploadMsg.getBatchNumber();
-        File uploadInfoFile = FileUtils.getLocalFile(localDataPath, batchNumber + ".txt");
-        String failedInfos = FileUtils.readLine(uploadInfoFile, line -> line.concat(Constants.NEW_LINE))
-                                      .stream()
-                                      .collect(StringBuilder::new,
-                                               StringBuilder::append,
-                                               StringBuilder::append)
-                                      .toString();
-        text_fail_title.setText("以下文件上传失败");
-        label_fail_desc.setText(failedInfos);
-        showPanel(panel_fail.getId());
-        /*try {
-            Desktop.getDesktop().open(uploadInfoFile);
-            stage.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+        MouseButton button = mouseEvent.getButton();
+        if (MouseButton.PRIMARY.equals(button)) {
+            logger.info("check upload failed files...");
+            String batchNumber = uploadMsg.getBatchNumber();
+            File uploadInfoFile = FileUtils.getLocalFile(localDataPath, batchNumber + ".txt");
+            String failedInfos = FileUtils.readLine(uploadInfoFile, line -> line.concat(Constants.NEW_LINE))
+                                          .stream()
+                                          .collect(StringBuilder::new,
+                                                   StringBuilder::append,
+                                                   StringBuilder::append)
+                                          .toString();
+            text_fail_title.setText("以下文件上传失败");
+            label_fail_desc.setText(failedInfos);
+            showPanel(panel_fail.getId());
+        }
     }
 
     @FXML
@@ -422,11 +419,9 @@ public class UploadFileController {
      * @param mouseEvent
      */
     @FXML
-    public void retry(MouseEvent mouseEvent) {
-        logger.info("into retry...");
-        resetValues();
-        //显示上传中页面
-        showPanel(panel_choose.getId());
+    public void showComplete(MouseEvent mouseEvent) {
+        logger.info("into showComplete...");
+        showPanel(panel_complete.getId());
 
     }
 
