@@ -88,7 +88,7 @@ public class UploadFileController {
     @FXML
     VBox panel_progress;
     @FXML
-    VBox panel_success;
+    VBox panel_complete;
     @FXML
     VBox panel_fail;
 
@@ -176,7 +176,7 @@ public class UploadFileController {
         stage.setWidth(visualBounds.getWidth());
         stage.setHeight(visualBounds.getHeight());
         stage.centerOnScreen();
-        panels = new VBox[]{panel_choose, panel_progress, panel_fail, panel_success};
+        panels = new VBox[]{panel_choose, panel_progress, panel_fail, panel_complete};
         showPanel(panel_choose.getId());
 
         jumpToLandFlag.addListener((observable, oldVal, newVal) -> {
@@ -256,7 +256,7 @@ public class UploadFileController {
                           switch (msgSplit[0]) {
                               case UploadWorkerTask.PROGRESS_MSG_COMPLETE:
                                   //显示上传成功页面
-                                  showPanel(panel_success.getId());
+                                  showPanel(panel_complete.getId());
 
                                   String completeCount = msgSplit[1];
                                   String errorCount = msgSplit[2];
@@ -419,11 +419,9 @@ public class UploadFileController {
      * @param mouseEvent
      */
     @FXML
-    public void retry(MouseEvent mouseEvent) {
-        logger.info("into retry...");
-        resetValues();
-        //显示上传中页面
-        showPanel(panel_choose.getId());
+    public void showComplete(MouseEvent mouseEvent) {
+        logger.info("into showComplete...");
+        showPanel(panel_complete.getId());
 
     }
 

@@ -135,7 +135,7 @@
         </VBox>
 
         <!--上传成功显示页面-->
-        <VBox fx:id="panel_success" styleClass="pane">
+        <VBox fx:id="panel_complete" styleClass="pane">
             <children>
                 <ImageView fitHeight="40" fitWidth="40">
                     <image>
@@ -214,7 +214,7 @@
                         </Insets>
                     </VBox.margin>
                     <children>
-                        <Button fx:id="btn_fail_retry" onMouseClicked="#retry" styleClass="btn_confirm">确认
+                        <Button fx:id="btn_fail_retry" onMouseClicked="#showComplete" styleClass="btn_confirm">确认
                         </Button>
                     </children>
                 </HBox>
