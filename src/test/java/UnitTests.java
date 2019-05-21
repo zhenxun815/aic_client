@@ -62,12 +62,12 @@ public class UnitTests {
         String dirPath = "C:\\Users\\qing\\Pictures\\shadow\\error";
         File dir = new File(dirPath);
         File[] files = dir.listFiles(File::isFile);
-        List<File> unvalidDirs = Arrays.stream(files)
+        List<File> invalidDirs = Arrays.stream(files)
                                        .filter(caseDir -> {
                                            File[] caseSubDirs = caseDir.listFiles(File::isDirectory);
                                            return null != caseSubDirs && caseSubDirs.length > 0;
                                        }).collect(Collectors.toList());
-        logger.info("files {}", unvalidDirs.size());
+        logger.info("files {}", invalidDirs.size());
     }
 
     @Test
