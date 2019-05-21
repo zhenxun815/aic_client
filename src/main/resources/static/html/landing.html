@@ -82,11 +82,13 @@
 	};
 
 	document.body.addEventListener('keyup', function (e) {
+		console.log('into key up event listener..')
 		if (e.keyCode === 13) {
 			$ = layui.jquery;
-			let nameLength = $('#input_uname').val()
-			let pwdLength = $('#input_upwd').val()
-			if (nameLength > 0 && pwdLength.length > 0) {
+			let nameLength = $('#input_uname').val().length
+			let pwdLength = $('#input_upwd').val().length
+			console.log(`name length ${nameLength}, pwd length ${pwdLength}`)
+			if (nameLength > 0 && pwdLength > 0) {
 				land()
 			}
 		}
