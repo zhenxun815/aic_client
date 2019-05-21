@@ -96,9 +96,9 @@
 
 	function checkInputLength() {
 		$ = layui.jquery;
-		let nameLength = $('#input_uname').val()
-		let pwdLength = $('#input_upwd').val()
-		if (nameLength.length > 50 || pwdLength.length > 50) {
+		let nameLength = $('#input_uname').val().length
+		let pwdLength = $('#input_upwd').val().length
+		if (nameLength > 50 || pwdLength > 50) {
 			$('#landing_tips').html('输入长度不合法,请重新输入!')
 			$('#landing_tips').show()
 			return false
