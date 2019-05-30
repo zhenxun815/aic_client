@@ -19,21 +19,30 @@
     <VBox fx:id="panels_parent">
         <VBox fx:id="panel_choose" styleClass="pane">
             <children>
-                <Text fx:id="text_choose_title" styleClass="text_title">导入数据
-                    <VBox.margin>
-                        <Insets>
-                            <top>30</top>
-                        </Insets>
-                    </VBox.margin>
-                </Text>
-                <Text fx:id="text_choose_desc" styleClass="text_tips">将数据导入至:
+                <Text styleClass="text_title">导入数据
                     <VBox.margin>
                         <Insets>
                             <top>25</top>
-                            <bottom>10</bottom>
                         </Insets>
                     </VBox.margin>
                 </Text>
+                <HBox styleClass="small_btn_container">
+                    <VBox.margin>
+                        <Insets>
+                            <top>15</top>
+                            <bottom>10</bottom>
+                        </Insets>
+                    </VBox.margin>
+                    <Text fx:id="text_choose_desc" styleClass="text_tips">将数据导入至:
+                    </Text>
+                    <TextField fx:id="text_field_max" styleClass="text_max" promptText="输入最大上传样本数">
+                        <HBox.margin>
+                            <Insets>
+                                <left>20</left>
+                            </Insets>
+                        </HBox.margin>
+                    </TextField>
+                </HBox>
 
                 <HBox styleClass="small_btn_container">
                     <Button fx:id="btn_choose" onMouseClicked="#chooseDirectory" styleClass="btn_small">选择文件</Button>

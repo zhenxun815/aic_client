@@ -37,10 +37,10 @@ public class FileUtils {
      * @return
      */
     public static HashMap<File, String> getFilesMapInDir(File dir, Predicate<File> filter, String caseName) {
-        logger.info("into get file map in dir...");
+        //logger.info("into get file map in dir...");
         File[] files = dir.listFiles();
         String dirName = dir.getName();
-        logger.info("dir name is: {}", dirName);
+        //logger.info("dir name is: {}", dirName);
         /*HashMap<File, String> fileMap = new HashMap<>();
         for (File file : files) {
             if (file.isFile() && filter.test(file)) {
@@ -62,7 +62,7 @@ public class FileUtils {
                                               .collect(HashMap::new,
                                                        (map, file) -> {
                                                            boolean test = filter.test(file);
-                                                           logger.info("test valid img: {}", test);
+                                                           //logger.info("test valid img: {}", test);
                                                            if (test) {
                                                                String fileFullName = file.getName().toLowerCase();
                                                                String fileName = null;
@@ -74,7 +74,7 @@ public class FileUtils {
                                                                }
                                                                String name = null == caseName ? fileName : caseName;
                                                                map.put(file, name);
-                                                               logger.info("add file map key: {}, value: {}", file.getAbsolutePath(), name);
+                                                               //logger.info("add file map key: {}, value: {}", file.getAbsolutePath(), name);
                                                            }
                                                        },
                                                        HashMap::putAll);
@@ -89,7 +89,7 @@ public class FileUtils {
      * @return
      */
     public static HashMap<File, String> getFilesMapInSubDir(File dir, Predicate<File> filter) {
-        logger.info("into get file map in sub dir...");
+        // logger.info("into get file map in sub dir...");
         File[] dirs = dir.listFiles(File::isDirectory);
         if (null != dirs) {
             HashMap<File, String> fileMap = Arrays.stream(dirs)

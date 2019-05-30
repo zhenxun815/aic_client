@@ -25,8 +25,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static com.tqhy.client.utils.FileUtils.isDcmFile;
 import static com.tqhy.client.utils.FileUtils.transToJpg;
@@ -53,11 +55,15 @@ public class UploadWorkerTask extends Task {
 
     @NonNull
     File dirToUpload;
+
     @NonNull
     UploadMsg uploadMsg;
+
     @NonNull
     String localDataPath;
 
+    @NonNull
+    int maxUploadCaseCount;
     /**
      * 待上传总文件数
      */
@@ -77,14 +83,14 @@ public class UploadWorkerTask extends Task {
      * 本次上传任务信息记录文件
      */
     File uploadInfoFile;
-    private HashMap<File, String> totalImgFileMap;
+    private HashMap<File, String> uploadImgFileMap;
     private File jpgDir;
 
     @Override
     protected Object call() throws Exception {
         logger.info("start upload task...");
 
-        initTaskStatus();
+        prepareTask();
 
         if (total == 0) {
             logger.info("total file count is 0!");
@@ -105,7 +111,7 @@ public class UploadWorkerTask extends Task {
         return null;
     }
 
-    private void initTaskStatus() {
+    private void prepareTask() {
         successCount = new AtomicInteger(0);
         failCount = new AtomicInteger(0);
         jpgDir = new File(dirToUpload, Constants.PATH_TEMP_JPG);
@@ -116,9 +122,34 @@ public class UploadWorkerTask extends Task {
         tempTotalFile.putAll(directImgFileMap);
         tempTotalFile.putAll(subDirImgFileMap);
 
-        total = tempTotalFile.values()
-                             .size();
-        totalImgFileMap = transAllToJpg(tempTotalFile, jpgDir);
+        List<String> caseNames = tempTotalFile.values()
+                                              .stream()
+                                              .distinct()
+                                              .collect(Collectors.toList());
+
+        if (maxUploadCaseCount > 0 && maxUploadCaseCount < caseNames.size()) {
+            HashMap<File, String> tempUploadFile = new HashMap<>();
+            List<String> uploadCaseNames = caseNames.stream()
+                                                    .limit(maxUploadCaseCount)
+                                                    .collect(Collectors.toList());
+            logger.info("upload case count is: {}", uploadCaseNames.size());
+
+            tempTotalFile.forEach((file, caseName) -> {
+                if (uploadCaseNames.contains(caseName)) {
+                    tempUploadFile.put(file, caseName);
+                }
+            });
+
+           /* tempUploadFile.forEach((file, caseName) -> {
+                logger.info("file {} case name {}", file.getAbsolutePath(), caseName);
+            });*/
+            total = tempUploadFile.values().size();
+            uploadImgFileMap = transAllToJpg(tempUploadFile, jpgDir);
+
+        } else {
+            total = tempTotalFile.values().size();
+            uploadImgFileMap = transAllToJpg(tempTotalFile, jpgDir);
+        }
 
         uploadInfoFile = FileUtils.getLocalFile(localDataPath, uploadMsg.getBatchNumber() + ".txt");
         stopUploadFlag.setValue(false);
@@ -168,7 +199,7 @@ public class UploadWorkerTask extends Task {
     }
 
     private void upLoadDir(HashMap<String, String> requestParamMap) {
-        totalImgFileMap.forEach((file, caseName) -> {
+        uploadImgFileMap.forEach((file, caseName) -> {
             if (shouldStop()) return;
             requestParamMap.put("caseName", caseName);
             logger.info("case name is: {}", caseName);
@@ -334,6 +365,7 @@ public class UploadWorkerTask extends Task {
                                                                    updateProgress(completeCount.get(), total);
                                                                    String uploadMsg = PROGRESS_MSG_COLLECT + ";" + progress;
                                                                    updateMessage(uploadMsg);
+
                                                                },
                                                                HashMap::putAll);
 

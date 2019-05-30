@@ -74,6 +74,12 @@ public class UploadFileController {
     private File dirToUpload;
 
     /**
+     * 上传最大样本数
+     */
+    @FXML
+    public TextField text_field_max;
+
+    /**
      * 是否可以上传
      */
     private boolean uploadReadyFlag;
@@ -165,6 +171,7 @@ public class UploadFileController {
     private UploadWorkerTask workerTask;
 
     private VBox[] panels;
+    private int maxUploadCaseCount;
 
     @FXML
     public void initialize() {
@@ -195,7 +202,7 @@ public class UploadFileController {
             logger.info("main stage iconified state change..." + newVal);
             stage.setIconified(newVal);
         });
-
+        text_field_max.setFocusTraversable(false);
         text_field_remarks.setOnKeyPressed(event -> {
             int length = text_field_remarks.getLength();
             if (length >= 50) {
@@ -214,7 +221,62 @@ public class UploadFileController {
     private void resetValues() {
         dirToUpload = null;
         text_choose_info.setText("未选择任何文件!");
+        text_field_max.setText(null);
         uploadReadyFlag = false;
+    }
+
+
+    /**
+     * 选择待上传文件夹
+     *
+     * @param mouseEvent
+     */
+    @FXML
+    public void chooseDirectory(MouseEvent mouseEvent) {
+        MouseButton button = mouseEvent.getButton();
+        if (MouseButton.PRIMARY.equals(button)) {
+            logger.info(button.name() + "....");
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            dirToUpload = directoryChooser.showDialog(stage);
+
+            if (null != dirToUpload) {
+                File[] files = dirToUpload.listFiles();
+
+                if (null != files && files.length > 0) {
+                    logger.info("choose dirToUpload is: [{}]", dirToUpload.getAbsolutePath());
+                    File[] caseDirs = dirToUpload.listFiles(File::isDirectory);
+                    uploadReadyFlag = true;
+                    if (null != caseDirs && caseDirs.length > 0) {
+                        List<File> invalidDirs = Arrays.stream(caseDirs)
+                                                       .filter(caseDir -> {
+                                                           File[] caseSubDirs = caseDir.listFiles(File::isDirectory);
+                                                           return null != caseSubDirs && caseSubDirs.length > 0;
+                                                       }).collect(Collectors.toList());
+                        if (invalidDirs.size() > 0) {
+                            String paths = invalidDirs.stream()
+                                                      .collect(StringBuilder::new,
+                                                               (builder, dir) ->
+                                                                       builder.append(dir.getAbsolutePath())
+                                                                              .append(Constants.NEW_LINE),
+                                                               StringBuilder::append)
+                                                      .toString();
+                            text_fail_title.setText("以下文件夹路径结构不符合规则");
+                            label_fail_desc.setText(paths);
+                            text_success_desc.setText("路径不合法,未上传任何文件!");
+                            uploadReadyFlag = false;
+                            label_fail_desc.setText(paths);
+                            showPanel(panel_fail.getId());
+                        }
+                    }
+                    text_choose_info.setText(dirToUpload.getAbsolutePath());
+
+                } else {
+                    logger.info("choose dirToUpload error");
+                    text_choose_info.setText("文件夹路径不合法!");
+                    uploadReadyFlag = false;
+                }
+            }
+        }
     }
 
     /**
@@ -234,9 +296,9 @@ public class UploadFileController {
                 return;
             }
 
-
-            logger.info("dir to upload: " + dirToUpload.getAbsolutePath());
-
+            String max = text_field_max.getText();
+            maxUploadCaseCount = max.matches("[0-9]+") ? Integer.parseInt(max) : -1;
+            logger.info("dir to upload: {}, max upload count {}", dirToUpload.getAbsolutePath(), maxUploadCaseCount);
 
             //显示上传中界面
             showPanel(panel_progress.getId());
@@ -246,7 +308,7 @@ public class UploadFileController {
             String remarks = UploadMsg.UPLOAD_TYPE_CASE.equals(uploadMsg.getUploadType()) ? remarksText : "";
             remarks = remarks.length() > 50 ? remarks.substring(0, 50) : remarks;
             uploadMsg.setRemarks(remarks);
-            workerTask = UploadWorkerTask.with(dirToUpload, uploadMsg, localDataPath);
+            workerTask = UploadWorkerTask.with(dirToUpload, uploadMsg, localDataPath, maxUploadCaseCount);
 
             workerTask.messageProperty()
                       .addListener((observable, oldVal, newVal) -> {
@@ -332,59 +394,6 @@ public class UploadFileController {
             stage.hide();
             //通知页面刷新
             landingController.sendMsgToJs("uploadComplete");
-        }
-    }
-
-    /**
-     * 选择待上传文件夹
-     *
-     * @param mouseEvent
-     */
-    @FXML
-    public void chooseDirectory(MouseEvent mouseEvent) {
-        MouseButton button = mouseEvent.getButton();
-        if (MouseButton.PRIMARY.equals(button)) {
-            logger.info(button.name() + "....");
-            DirectoryChooser directoryChooser = new DirectoryChooser();
-            dirToUpload = directoryChooser.showDialog(stage);
-
-            if (null != dirToUpload) {
-                File[] files = dirToUpload.listFiles();
-
-                if (null != files && files.length > 0) {
-                    logger.info("choose dirToUpload is: [{}]", dirToUpload.getAbsolutePath());
-                    File[] caseDirs = dirToUpload.listFiles(File::isDirectory);
-                    uploadReadyFlag = true;
-                    if (null != caseDirs && caseDirs.length > 0) {
-                        List<File> invalidDirs = Arrays.stream(caseDirs)
-                                                       .filter(caseDir -> {
-                                                           File[] caseSubDirs = caseDir.listFiles(File::isDirectory);
-                                                           return null != caseSubDirs && caseSubDirs.length > 0;
-                                                       }).collect(Collectors.toList());
-                        if (invalidDirs.size() > 0) {
-                            String paths = invalidDirs.stream()
-                                                      .collect(StringBuilder::new,
-                                                               (builder, dir) ->
-                                                                       builder.append(dir.getAbsolutePath())
-                                                                              .append(Constants.NEW_LINE),
-                                                               StringBuilder::append)
-                                                      .toString();
-                            text_fail_title.setText("以下文件夹路径结构不符合规则");
-                            label_fail_desc.setText(paths);
-                            text_success_desc.setText("路径不合法,未上传任何文件!");
-                            uploadReadyFlag = false;
-                            label_fail_desc.setText(paths);
-                            showPanel(panel_fail.getId());
-                        }
-                    }
-                    text_choose_info.setText(dirToUpload.getAbsolutePath());
-
-                } else {
-                    logger.info("choose dirToUpload error");
-                    text_choose_info.setText("文件夹路径不合法!");
-                    uploadReadyFlag = false;
-                }
-            }
         }
     }
 

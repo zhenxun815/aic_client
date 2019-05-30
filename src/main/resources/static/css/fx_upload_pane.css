@@ -24,6 +24,13 @@
     -fx-fill: #9F9F9F;
 }
 
+.text_max {
+    -fx-max-width: 130px;
+    -fx-border-color: #FE6225;
+    -fx-border-width: 0 0 1 0;
+    -fx-background-color: transparent;
+}
+
 .text_remark {
     -fx-max-width: 350px;
     -fx-border-color: #FE6225;

@@ -30,4 +30,5 @@ public class Constants {
     public static final String PATH_TEMP_JPG = "TQHY_TEMP";
 
 
+    public static final String CMD_NOT_UPLOAD = "NOT_UPLOAD";
 }
