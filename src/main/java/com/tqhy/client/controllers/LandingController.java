@@ -1,5 +1,6 @@
 package com.tqhy.client.controllers;
 
+import com.tqhy.client.ClientApplication;
 import com.tqhy.client.config.Constants;
 import com.tqhy.client.models.msg.BaseMsg;
 import com.tqhy.client.models.msg.local.LandingMsg;
@@ -23,6 +24,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.image.Image;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import lombok.Getter;
 import lombok.Setter;
@@ -59,6 +61,9 @@ public class LandingController {
 
     @Value("${network.url.landing:''}")
     private String landingUrl;
+
+    @Value("${network.url.test:''}")
+    private String testUrl;
 
     @Value("${path.data:'/data/'}")
     private String localDataPath;
@@ -116,11 +121,20 @@ public class LandingController {
             //alert('upload;case;' + projectId + ';' + projectName)
             //alert('upload;test;' + taskId + ';' + projectName)
             if (data.startsWith(Constants.CMD_MSG_UPLOAD)) {
-                String[] split = data.split(";");
+                String[] split = data.split(Constants.MSG_SPLITTER);
                 String uploadType = split[1];
                 String uploadId = split[2];
                 String uploadTargetName = split[3];
                 uploadFileController.openUpload(UploadMsg.with(uploadType, uploadId, uploadTargetName));
+            } else if (data.startsWith(Constants.CMD_MSG_DOWNLOAD)) {
+                DirectoryChooser downloadDirChooser = new DirectoryChooser();
+                File downloadDir = downloadDirChooser.showDialog(ClientApplication.stage);
+                if (downloadDir.exists()) {
+                    String[] split = data.split(Constants.MSG_SPLITTER);
+                    String imgUrls = split[1];
+
+                }
+
             } else if (Constants.CMD_MSG_LOGOUT.equals(data)) {
                 heartBeatService.stopBeat();
                 logout();

@@ -1,3 +1,4 @@
+import com.tqhy.client.ClientApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -11,7 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @since 1.0.0
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = ClientApplication.class)
 public class SpringTest {
 
     Logger logger = LoggerFactory.getLogger(SpringTest.class);
@@ -20,4 +21,6 @@ public class SpringTest {
     public void test() {
         logger.info("spring test...");
     }
+
+
 }

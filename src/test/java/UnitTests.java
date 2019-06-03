@@ -1,10 +1,18 @@
+import com.tqhy.client.models.msg.server.ClientMsg;
+import com.tqhy.client.network.Network;
 import com.tqhy.client.task.Dcm2JpgTask;
 import com.tqhy.client.utils.FileUtils;
+import com.tqhy.client.utils.GsonUtils;
+import okhttp3.ResponseBody;
+import okio.BufferedSink;
+import okio.Okio;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,18 +35,18 @@ public class UnitTests {
     Logger logger = LoggerFactory.getLogger(UnitTests.class);
 
     @Test
-    public void testParseDicom() {
+    public void testParseDcm() {
 
         String libPath = System.getProperty("java.library.path");
         logger.info("lib path: is: " + libPath);
 
-        File dicomDir = new File("F:\\dicom\\4321\\case1\\");
-        File[] dicomFiles = dicomDir.listFiles(File::isFile);
-        logger.info("dicom count is: " + dicomFiles.length);
+        File dcmDir = new File("F:\\dicom\\4321\\case1\\");
+        File[] dcmFiles = dcmDir.listFiles(File::isFile);
+        logger.info("dcm count is: " + dcmFiles.length);
         ExecutorService executor = Executors.newFixedThreadPool(4);
-        Arrays.stream(dicomFiles)
+        Arrays.stream(dcmFiles)
               .collect(ArrayList<File>::new, (list, dicomFile) -> {
-                  Future<File> fileFuture = executor.submit(Dcm2JpgTask.of(dicomFile, dicomDir));
+                  Future<File> fileFuture = executor.submit(Dcm2JpgTask.of(dicomFile, dcmDir));
                   try {
                       File jpgFile = fileFuture.get();
                       System.out.println("trans jpg file finish..." + jpgFile.getAbsolutePath());
@@ -99,5 +107,48 @@ public class UnitTests {
                                                   }
                                               }, HashMap::putAll);
         return fileMap;
+    }
+
+    @Test
+    public void testNet() {
+        try {
+            ResponseBody responseBody = Network.getAicApi()
+                                               .pingServer()
+                                               .execute()
+                                               .body();
+            ClientMsg clientMsg = GsonUtils.parseResponseToObj(responseBody);
+            logger.info("client msg {}", clientMsg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testDownLoad() {
+        String downloadUrl = "/home/tqhy/aic/file/15cc97aaa6964fc5b6caf00020d575a4/20190517174054644/b798abe6e1b1318ee36b0dcb3fb9e4d3/fd9c69eb905feede1a7fc2fdfcf0fbdb.jpg";
+
+        Network.getAicApi()
+               .download(downloadUrl)
+               //.observeOn(Schedulers.io())
+               //.subscribeOn(Schedulers.io())
+               .subscribe(response -> {
+                   String header = response.headers().get("Content-Disposition");
+                   logger.info("header is {}", header);
+                   String[] split = header.split("filename=");
+                   String fileName = split[1];
+                   File file = new File("C:\\Users\\qing\\Pictures\\shadow", fileName);
+
+                   BufferedSink sink = null;
+                   try {
+                       sink = Okio.buffer(Okio.sink(file));
+                       sink.writeAll(response.body().source());
+                       sink.close();
+                   } catch (FileNotFoundException e) {
+                       e.printStackTrace();
+                   } catch (IOException e) {
+                       e.printStackTrace();
+                   }
+               });
+        //logger.info("response is: {}", response.string());
     }
 }

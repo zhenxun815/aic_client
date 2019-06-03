@@ -1,5 +1,7 @@
 package com.tqhy.client.utils;
-import sun.misc.*;
+
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

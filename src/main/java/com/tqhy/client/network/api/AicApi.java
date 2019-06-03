@@ -5,6 +5,7 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.http.*;
 
 import java.util.List;
@@ -16,6 +17,18 @@ import java.util.Map;
  * @since 1.0.0
  */
 public interface AicApi {
+
+
+    /**
+     * 文件下载
+     *
+     * @param imgUrlString
+     * @return
+     */
+    @Streaming
+    @Headers("Authorization: admin")
+    @GET("util/getDownload")
+    Observable<Response<ResponseBody>> download(@Query("imgUrlString") String imgUrlString);
 
     /**
      * 单个参数,单个文件上传
@@ -85,6 +98,7 @@ public interface AicApi {
 
     /**
      * 与后台保持心跳请求
+     *
      * @param token
      * @return
      */
