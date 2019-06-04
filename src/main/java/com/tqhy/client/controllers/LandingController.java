@@ -1,8 +1,8 @@
 package com.tqhy.client.controllers;
 
-import com.tqhy.client.ClientApplication;
 import com.tqhy.client.config.Constants;
 import com.tqhy.client.models.entity.DownloadInfo;
+import com.tqhy.client.models.entity.SaveDatas;
 import com.tqhy.client.models.enums.DownloadTaskApi;
 import com.tqhy.client.models.enums.SaveTaskType;
 import com.tqhy.client.models.msg.BaseMsg;
@@ -12,10 +12,7 @@ import com.tqhy.client.network.Network;
 import com.tqhy.client.service.HeartBeatService;
 import com.tqhy.client.task.DownloadTask;
 import com.tqhy.client.task.SaveFileTask;
-import com.tqhy.client.utils.FileUtils;
-import com.tqhy.client.utils.GsonUtils;
-import com.tqhy.client.utils.NetworkUtils;
-import com.tqhy.client.utils.PropertyUtils;
+import com.tqhy.client.utils.*;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import javafx.application.Platform;
@@ -28,7 +25,6 @@ import javafx.scene.control.Dialog;
 import javafx.scene.image.Image;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import lombok.Getter;
 import lombok.Setter;
@@ -121,80 +117,113 @@ public class LandingController {
      */
     private void initWebAlert() {
         webEngine.setOnAlert(event -> {
-            String data = event.getData();
+            String data = event.getData() + Constants.MSG_SPLITTER;
             logger.info("alert data is: " + data);
-            //alert('upload;case;' + projectId + ';' + projectName)
-            //alert('upload;test;' + taskId + ';' + projectName)
-            if (data.startsWith(Constants.CMD_MSG_UPLOAD)) {
-                String[] split = data.split(Constants.MSG_SPLITTER);
-                String uploadType = split[1];
-                String uploadId = split[2];
-                String uploadTargetName = split[3];
-                uploadFileController.openUpload(UploadMsg.with(uploadType, uploadId, uploadTargetName));
-            } else if (data.startsWith(Constants.CMD_MSG_DOWNLOAD)) {
-                DirectoryChooser downloadDirChooser = new DirectoryChooser();
-                File downloadDir = downloadDirChooser.showDialog(ClientApplication.stage);
-                if (null == downloadDir) {
-                    return;
-                }
 
-                String[] split = data.split(Constants.MSG_SPLITTER);
-                String downloadInfoStr = split[1];
-                Optional<DownloadInfo> downloadInfoOptional = GsonUtils.parseJsonToObj(downloadInfoStr, DownloadInfo.class);
-                if (downloadInfoOptional.isPresent()) {
-                    DownloadInfo downloadInfo = downloadInfoOptional.get();
-                    Observable.fromCallable(DownloadTask.of(DownloadMsg.of(DownloadTaskApi.DOWNLOAD_PDF, downloadDir, downloadInfo)))
-                              .subscribeOn(Schedulers.io())
-                              .observeOn(Schedulers.io())
-                              .subscribe(downloadMsgObservable ->
-                                                 downloadMsgObservable.subscribe(downloadMsg -> {
-                                                     Integer downloadFlag = downloadMsg.getFlag();
-                                                     if (BaseMsg.SUCCESS == downloadFlag) {
-                                                         logger.info("download success");
-                                                         showAlert("下载完毕");
-                                                     } else {
-                                                         logger.info("download fail");
-                                                         showAlert("下载失败");
-                                                     }
-                                                 }));
-                } else {
-                    showAlert("下载失败");
-                }
+            String[] split = data.split(Constants.MSG_SPLITTER);
+            switch (split[0]) {
+                case Constants.CMD_MSG_UPLOAD:
+                    //alert('upload;case;' + projectId + ';' + projectName)
+                    //alert('upload;test;' + taskId + ';' + projectName)
 
-            } else if (data.startsWith(Constants.CMD_MSG_SAVE)) {
-                DirectoryChooser saveDirChooser = new DirectoryChooser();
-                File saveDir = saveDirChooser.showDialog(ClientApplication.stage);
+                    String uploadType = split[1];
+                    String uploadId = split[2];
+                    String uploadTargetName = split[3];
+                    uploadFileController.openUpload(UploadMsg.with(uploadType, uploadId, uploadTargetName));
+                    break;
+                case Constants.CMD_MSG_DOWNLOAD:
+                    //download;{"fileName":"taskName","imgUrlString":"imgUrl1;imgUrl2"}
+                    String downloadInfoStr = split[1];
+                    Optional<DownloadInfo> downloadInfoOptional = GsonUtils.parseJsonToObj(downloadInfoStr, DownloadInfo.class);
+                    onDownloadOption(downloadInfoOptional);
+                    break;
+                case Constants.CMD_MSG_SAVE:
+                    /*save;{"fileName":"projectName",
+                        "head":[{"title":"分类名称","key":"name","__id":"gCYIMF"},{"title":"已标注","key":"value","__id":"gcSMlC"},{"title":"占比","key":"per","__id":"37ZTmj"}],
+                        "body":[{"name":"temp","value":2,"per":"8%"},{"name":"牙","value":11,"per":"44%"}]
+                        }*/
 
-                if (null == saveDir) {
-                    return;
-                }
-                String[] split = data.split(Constants.MSG_SPLITTER);
-                //String dataToSave = split[1];
-                String dataToSave = "{'head':[{'title':'分类名称','key':'name','__id':'gCYIMF'},{'title':'已标注','key':'value','__id':'gcSMlC'},{'title':'占比','key':'per','__id':'37ZTmj'}],\n" +
-                        "'body':[{'name':'temp','value':2,'per':'8%'},{'name':'temp_son','value':1,'per':'4%'},{'name':'颈椎','value':10,'per':'40%'},{'name':'牙','value':11,'per':'44%'},{'name':'temp_son_son','value':1,'per':'4%'}]\n" +
-                        "}";
-                Observable.fromCallable(SaveFileTask.of(SaveDataMsg.of(SaveTaskType.SAVE_REPORT_TO_CSV, saveDir, dataToSave)))
-                          .subscribeOn(Schedulers.io())
-                          .observeOn(Schedulers.io())
-                          .subscribe(saveDataMsgObservable -> {
-                              saveDataMsgObservable.subscribe(saveDataMsg -> {
-                                  Integer saveFlag = saveDataMsg.getFlag();
-                                  if (BaseMsg.SUCCESS == saveFlag) {
-                                      logger.info("download success");
-                                      showAlert("保存完毕");
-                                  } else {
-                                      logger.info("download fail");
-                                      showAlert("保存失败");
-                                  }
-                              });
-                          });
-            } else if (Constants.CMD_MSG_LOGOUT.equals(data)) {
-                heartBeatService.stopBeat();
-                logout();
-            } else {
-                showAlert(data);
+                    //String dataToSave = split[1];
+                    String dataToSave = "{'head':[{'title':'分类名称','key':'name','__id':'gCYIMF'},{'title':'已标注','key':'value','__id':'gcSMlC'},{'title':'占比','key':'per','__id':'37ZTmj'}],\n" +
+                            "'body':[{'name':'temp','value':2,'per':'8%'},{'name':'temp_son','value':1,'per':'4%'},{'name':'颈椎','value':10,'per':'40%'},{'name':'牙','value':11,'per':'44%'},{'name':'temp_son_son','value':1,'per':'4%'}]\n" +
+                            "}";
+
+                    Optional<SaveDatas> saveDataOptional = GsonUtils.parseJsonToObj(dataToSave, SaveDatas.class);
+                    onSaveDataOption(saveDataOptional);
+                    break;
+                case Constants.CMD_MSG_LOGOUT:
+                    heartBeatService.stopBeat();
+                    logout();
+                    break;
+                default:
+                    showAlert(data);
             }
         });
+    }
+
+    /**
+     * 执行保存指令
+     */
+    private void onSaveDataOption(Optional<SaveDatas> saveDataOptional) {
+
+        File saveDir = FXMLUtils.chooseDir(null);
+        if (null == saveDir) {
+            return;
+        }
+
+        if (saveDataOptional.isPresent()) {
+            SaveDatas saveDatas = saveDataOptional.get();
+            Observable.fromCallable(SaveFileTask.of(SaveDataMsg.of(SaveTaskType.SAVE_REPORT_TO_CSV, saveDir, saveDatas)))
+                      .subscribeOn(Schedulers.io())
+                      .observeOn(Schedulers.io())
+                      .subscribe(saveDataMsgObservable -> {
+                          saveDataMsgObservable.subscribe(saveDataMsg -> {
+                              Integer saveFlag = saveDataMsg.getFlag();
+                              if (BaseMsg.SUCCESS == saveFlag) {
+                                  logger.info("save success");
+                                  showAlert("保存完毕");
+                              } else {
+                                  logger.info("save fail");
+                                  showAlert("保存失败");
+                              }
+                          });
+                      });
+        } else {
+            logger.info("save optional is null");
+            showAlert("保存失败");
+        }
+    }
+
+    /**
+     * 执行下载指令
+     *
+     * @param downloadInfoOptional
+     */
+    private void onDownloadOption(Optional<DownloadInfo> downloadInfoOptional) {
+        File downloadDir = FXMLUtils.chooseDir(null);
+        if (null == downloadDir) {
+            return;
+        }
+
+        if (downloadInfoOptional.isPresent()) {
+            DownloadInfo downloadInfo = downloadInfoOptional.get();
+            Observable.fromCallable(DownloadTask.of(DownloadMsg.of(DownloadTaskApi.DOWNLOAD_PDF, downloadDir, downloadInfo)))
+                      .subscribeOn(Schedulers.io())
+                      .observeOn(Schedulers.io())
+                      .subscribe(downloadMsgObservable ->
+                                         downloadMsgObservable.subscribe(downloadMsg -> {
+                                             Integer downloadFlag = downloadMsg.getFlag();
+                                             if (BaseMsg.SUCCESS == downloadFlag) {
+                                                 logger.info("download success");
+                                                 showAlert("下载完毕");
+                                             } else {
+                                                 logger.info("download fail");
+                                                 showAlert("下载失败");
+                                             }
+                                         }));
+        } else {
+            showAlert("下载失败");
+        }
     }
 
     /**
