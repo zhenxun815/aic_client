@@ -2,6 +2,7 @@ package com.tqhy.client.controllers;
 
 import com.tqhy.client.ClientApplication;
 import com.tqhy.client.config.Constants;
+import com.tqhy.client.models.enums.DownloadTaskApi;
 import com.tqhy.client.models.msg.BaseMsg;
 import com.tqhy.client.models.msg.local.DownloadMsg;
 import com.tqhy.client.models.msg.local.LandingMsg;
@@ -139,8 +140,8 @@ public class LandingController {
                     HashMap<String, String> requestParamMap = new HashMap<>();
                     requestParamMap.put("imgUrlString", imgUrls);
                     requestParamMap.put("saveFileDir", downloadDir.getAbsolutePath());
-                    String apiName = DownloadTask.API_NAME_DOWNLOAD_PDF;
-                    Observable.fromCallable(DownloadTask.of(DownloadMsg.of(apiName, requestParamMap)))
+
+                    Observable.fromCallable(DownloadTask.of(DownloadMsg.of(DownloadTaskApi.DOWNLOAD_PDF, requestParamMap)))
                               .subscribeOn(Schedulers.io())
                               .observeOn(Schedulers.io())
                               .subscribe(downloadMsgObservable ->
@@ -155,6 +156,10 @@ public class LandingController {
                                                      }
                                                  }));
                 }
+
+            } else if (data.startsWith(Constants.CMD_MSG_SAVE)) {
+                String[] split = data.split(Constants.MSG_SPLITTER);
+                String dataToSave = split[1];
 
             } else if (Constants.CMD_MSG_LOGOUT.equals(data)) {
                 heartBeatService.stopBeat();

@@ -1,5 +1,6 @@
 package com.tqhy.client.models.msg.local;
 
+import com.tqhy.client.models.enums.DownloadTaskApi;
 import com.tqhy.client.models.msg.BaseMsg;
 import lombok.*;
 
@@ -19,7 +20,7 @@ public class DownloadMsg extends BaseMsg {
      * 下载请求的接口名
      */
     @NonNull
-    private String apiName;
+    private DownloadTaskApi downloadTaskApi;
 
     /**
      * 下载请求参数

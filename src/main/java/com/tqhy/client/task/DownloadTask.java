@@ -31,19 +31,20 @@ public class DownloadTask implements Callable<Observable<DownloadMsg>> {
 
     Logger logger = LoggerFactory.getLogger(DownloadMsg.class);
 
-    public static final String API_NAME_DOWNLOAD_PDF = "DOWNLOAD_PDF";
 
     @NonNull
     private DownloadMsg downloadMsg;
 
     @Override
     public Observable<DownloadMsg> call() throws Exception {
-        @NonNull String apiName = downloadMsg.getApiName();
-        @NonNull Map<String, String> requestParamMap = downloadMsg.getRequestParamMap();
-        if (API_NAME_DOWNLOAD_PDF.equals(apiName)) {
-            return downloadPdf(requestParamMap);
+        Map<String, String> requestParamMap = downloadMsg.getRequestParamMap();
+        switch (downloadMsg.getDownloadTaskApi()) {
+            case DOWNLOAD_PDF:
+                return downloadPdf(requestParamMap);
+            default:
+                return Observable.just(downloadMsg);
         }
-        return Observable.just(downloadMsg);
+
     }
 
     private Observable<DownloadMsg> downloadPdf(Map<String, String> requestParamMap) {
