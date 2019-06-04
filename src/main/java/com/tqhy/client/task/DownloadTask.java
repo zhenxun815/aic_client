@@ -1,5 +1,6 @@
 package com.tqhy.client.task;
 
+import com.tqhy.client.models.entity.DownloadInfo;
 import com.tqhy.client.models.msg.BaseMsg;
 import com.tqhy.client.models.msg.local.DownloadMsg;
 import com.tqhy.client.network.Network;
@@ -16,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 /**
@@ -37,28 +37,23 @@ public class DownloadTask implements Callable<Observable<DownloadMsg>> {
 
     @Override
     public Observable<DownloadMsg> call() throws Exception {
-        Map<String, String> requestParamMap = downloadMsg.getRequestParamMap();
+        DownloadInfo downloadInfo = downloadMsg.getDownloadInfo();
+        File downloadDir = downloadMsg.getDownloadDir();
         switch (downloadMsg.getDownloadTaskApi()) {
             case DOWNLOAD_PDF:
-                return downloadPdf(requestParamMap);
+                return downloadPdf(downloadDir, downloadInfo);
             default:
                 return Observable.just(downloadMsg);
         }
-
     }
 
-    private Observable<DownloadMsg> downloadPdf(Map<String, String> requestParamMap) {
-        String imgUrlStr = requestParamMap.get("imgUrlString");
-        String saveFileDir = requestParamMap.get("saveFileDir");
+    private Observable<DownloadMsg> downloadPdf(File downloadDir, DownloadInfo downloadInfo) {
+        String imgUrlStr = downloadInfo.getImgUrlString();
+        String saveFileName = downloadInfo.getFileName();
         return Network.getAicApi()
                       .download(imgUrlStr)
                       .map(response -> {
-                          String header = response.headers().get("Content-Disposition");
-                          logger.info("header is {}", header);
-                          String[] split = header.split("filename=");
-                          String fileName = split[1];
-                          File file = new File(saveFileDir, fileName);
-
+                          File file = new File(downloadDir, saveFileName + ".pdf");
                           BufferedSink sink = null;
                           try {
                               sink = Okio.buffer(Okio.sink(file));
