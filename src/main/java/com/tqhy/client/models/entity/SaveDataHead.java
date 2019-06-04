@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @ToString
-public class Title implements Serializable {
+public class SaveDataHead implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String title;

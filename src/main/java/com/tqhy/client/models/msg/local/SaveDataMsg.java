@@ -1,5 +1,6 @@
 package com.tqhy.client.models.msg.local;
 
+import com.tqhy.client.models.entity.SaveDatas;
 import com.tqhy.client.models.enums.SaveTaskType;
 import com.tqhy.client.models.msg.BaseMsg;
 import lombok.*;
@@ -24,5 +25,5 @@ public class SaveDataMsg extends BaseMsg {
     private File saveDir;
 
     @NonNull
-    private String dataToSave;
+    private SaveDatas dataToSave;
 }

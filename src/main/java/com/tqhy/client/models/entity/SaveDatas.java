@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Yiheng
@@ -14,11 +15,12 @@ import java.io.Serializable;
 @Getter
 @Setter
 @ToString
-public class Report implements Serializable {
+public class SaveDatas implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    private String name;
+    private String fileName;
 
-    private String value;
+    private List<SaveDataHead> head;
 
-    private String per;
+    private List<SaveDataBody> body;
 }

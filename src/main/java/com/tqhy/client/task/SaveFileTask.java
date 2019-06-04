@@ -1,13 +1,12 @@
 package com.tqhy.client.task;
 
 import com.tqhy.client.config.Constants;
-import com.tqhy.client.models.entity.Report;
-import com.tqhy.client.models.entity.Reports;
-import com.tqhy.client.models.entity.Title;
+import com.tqhy.client.models.entity.SaveDataBody;
+import com.tqhy.client.models.entity.SaveDataHead;
+import com.tqhy.client.models.entity.SaveDatas;
 import com.tqhy.client.models.msg.BaseMsg;
 import com.tqhy.client.models.msg.local.SaveDataMsg;
 import com.tqhy.client.utils.FileUtils;
-import com.tqhy.client.utils.GsonUtils;
 import io.reactivex.Observable;
 import lombok.Getter;
 import lombok.NonNull;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Callable;
 
 /**
@@ -39,53 +37,48 @@ public class SaveFileTask implements Callable<Observable<SaveDataMsg>> {
 
     @Override
     public Observable<SaveDataMsg> call() throws Exception {
-        String dataToSave = saveDataMsg.getDataToSave();
+
         File saveDir = saveDataMsg.getSaveDir();
+        SaveDatas dataToSave = saveDataMsg.getDataToSave();
+        String fileName = dataToSave.getFileName();
+        String saveDataStr = getReportsSaveString(dataToSave);
 
         switch (saveDataMsg.getSaveType()) {
             case SAVE_REPORT_TO_CSV:
-                Optional<Reports> reportsOptional = GsonUtils.parseJsonToObj(dataToSave, Reports.class);
-
-                if (reportsOptional.isPresent()) {
-                    Reports reports = reportsOptional.get();
-                    String fileName = reports.getFileName();
-                    File saveFile = new File(saveDir, fileName + ".csv");
-                    String saveDataStr = getReportsSaveString(reports);
-                    return Observable.just(saveDataMsg)
-                                     .map(msg -> {
-                                         FileUtils.writeFile(saveFile, saveDataStr, null, true);
-                                         msg.setFlag(BaseMsg.SUCCESS);
-                                         return msg;
-                                     });
-                }
-                return genTaskFailObservable();
+                File saveFile = new File(saveDir, fileName + ".csv");
+                return Observable.just(saveDataMsg)
+                                 .map(msg -> {
+                                     FileUtils.writeFile(saveFile, saveDataStr, null, true);
+                                     msg.setFlag(BaseMsg.SUCCESS);
+                                     return msg;
+                                 });
             default:
                 return genTaskFailObservable();
         }
     }
 
     /**
-     * 将{@link Reports}对象转换为保存到csv文件字符串
+     * 将{@link SaveDatas}对象转换为保存到csv文件字符串
      *
-     * @param reports
+     * @param saveDatas
      * @return
      */
-    private String getReportsSaveString(Reports reports) {
-        List<Title> head = reports.getHead();
-        List<Report> body = reports.getBody();
+    private String getReportsSaveString(SaveDatas saveDatas) {
+        List<SaveDataHead> head = saveDatas.getHead();
+        List<SaveDataBody> body = saveDatas.getBody();
         StringBuilder headBuilder = head.stream()
                                         .collect(StringBuilder::new,
-                                                 (builder, title) -> builder.append(title.getTitle()).append(Constants.VALUE_SPLITTER),
+                                                 (builder, saveDataHead) -> builder.append(saveDataHead.getTitle()).append(Constants.VALUE_SPLITTER),
                                                  StringBuilder::append);
 
         StringBuilder reportsBuilder = body.stream()
                                            .collect(StringBuilder::new,
-                                                    (builder, report) -> {
-                                                        builder.append(report.getName())
+                                                    (builder, saveDataBody) -> {
+                                                        builder.append(saveDataBody.getName())
                                                                .append(Constants.VALUE_SPLITTER)
-                                                               .append(report.getValue())
+                                                               .append(saveDataBody.getValue())
                                                                .append(Constants.VALUE_SPLITTER)
-                                                               .append(report.getPer())
+                                                               .append(saveDataBody.getPer())
                                                                .append(Constants.NEW_LINE);
                                                     },
                                                     StringBuilder::append);
