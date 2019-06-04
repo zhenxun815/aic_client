@@ -2,16 +2,16 @@ package com.tqhy.client.controllers;
 
 import com.tqhy.client.ClientApplication;
 import com.tqhy.client.config.Constants;
+import com.tqhy.client.models.entity.DownloadInfo;
 import com.tqhy.client.models.enums.DownloadTaskApi;
+import com.tqhy.client.models.enums.SaveTaskType;
 import com.tqhy.client.models.msg.BaseMsg;
-import com.tqhy.client.models.msg.local.DownloadMsg;
-import com.tqhy.client.models.msg.local.LandingMsg;
-import com.tqhy.client.models.msg.local.UploadMsg;
-import com.tqhy.client.models.msg.local.VerifyMsg;
+import com.tqhy.client.models.msg.local.*;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
 import com.tqhy.client.service.HeartBeatService;
 import com.tqhy.client.task.DownloadTask;
+import com.tqhy.client.task.SaveFileTask;
 import com.tqhy.client.utils.FileUtils;
 import com.tqhy.client.utils.GsonUtils;
 import com.tqhy.client.utils.NetworkUtils;
@@ -41,8 +41,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Yiheng
@@ -134,14 +134,16 @@ public class LandingController {
             } else if (data.startsWith(Constants.CMD_MSG_DOWNLOAD)) {
                 DirectoryChooser downloadDirChooser = new DirectoryChooser();
                 File downloadDir = downloadDirChooser.showDialog(ClientApplication.stage);
-                if (downloadDir.exists()) {
-                    String[] split = data.split(Constants.MSG_SPLITTER);
-                    String imgUrls = split[1];
-                    HashMap<String, String> requestParamMap = new HashMap<>();
-                    requestParamMap.put("imgUrlString", imgUrls);
-                    requestParamMap.put("saveFileDir", downloadDir.getAbsolutePath());
+                if (null == downloadDir) {
+                    return;
+                }
 
-                    Observable.fromCallable(DownloadTask.of(DownloadMsg.of(DownloadTaskApi.DOWNLOAD_PDF, requestParamMap)))
+                String[] split = data.split(Constants.MSG_SPLITTER);
+                String downloadInfoStr = split[1];
+                Optional<DownloadInfo> downloadInfoOptional = GsonUtils.parseJsonToObj(downloadInfoStr, DownloadInfo.class);
+                if (downloadInfoOptional.isPresent()) {
+                    DownloadInfo downloadInfo = downloadInfoOptional.get();
+                    Observable.fromCallable(DownloadTask.of(DownloadMsg.of(DownloadTaskApi.DOWNLOAD_PDF, downloadDir, downloadInfo)))
                               .subscribeOn(Schedulers.io())
                               .observeOn(Schedulers.io())
                               .subscribe(downloadMsgObservable ->
@@ -155,12 +157,37 @@ public class LandingController {
                                                          showAlert("下载失败");
                                                      }
                                                  }));
+                } else {
+                    showAlert("下载失败");
                 }
 
             } else if (data.startsWith(Constants.CMD_MSG_SAVE)) {
-                String[] split = data.split(Constants.MSG_SPLITTER);
-                String dataToSave = split[1];
+                DirectoryChooser saveDirChooser = new DirectoryChooser();
+                File saveDir = saveDirChooser.showDialog(ClientApplication.stage);
 
+                if (null == saveDir) {
+                    return;
+                }
+                String[] split = data.split(Constants.MSG_SPLITTER);
+                //String dataToSave = split[1];
+                String dataToSave = "{'head':[{'title':'分类名称','key':'name','__id':'gCYIMF'},{'title':'已标注','key':'value','__id':'gcSMlC'},{'title':'占比','key':'per','__id':'37ZTmj'}],\n" +
+                        "'body':[{'name':'temp','value':2,'per':'8%'},{'name':'temp_son','value':1,'per':'4%'},{'name':'颈椎','value':10,'per':'40%'},{'name':'牙','value':11,'per':'44%'},{'name':'temp_son_son','value':1,'per':'4%'}]\n" +
+                        "}";
+                Observable.fromCallable(SaveFileTask.of(SaveDataMsg.of(SaveTaskType.SAVE_REPORT_TO_CSV, saveDir, dataToSave)))
+                          .subscribeOn(Schedulers.io())
+                          .observeOn(Schedulers.io())
+                          .subscribe(saveDataMsgObservable -> {
+                              saveDataMsgObservable.subscribe(saveDataMsg -> {
+                                  Integer saveFlag = saveDataMsg.getFlag();
+                                  if (BaseMsg.SUCCESS == saveFlag) {
+                                      logger.info("download success");
+                                      showAlert("保存完毕");
+                                  } else {
+                                      logger.info("download fail");
+                                      showAlert("保存失败");
+                                  }
+                              });
+                          });
             } else if (Constants.CMD_MSG_LOGOUT.equals(data)) {
                 heartBeatService.stopBeat();
                 logout();
@@ -301,7 +328,7 @@ public class LandingController {
      */
     public void sendMsgToJs(String msg) {
         Object response = webView.getEngine()
-                                 .executeScript("callJsFunction(\"" + msg + "\")");
+                                 .executeScript("callJsFunction('" + msg + "')");
         String s = (String) response;
         logger.info("get response: " + s);
     }
