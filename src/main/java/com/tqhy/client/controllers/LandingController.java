@@ -3,16 +3,19 @@ package com.tqhy.client.controllers;
 import com.tqhy.client.ClientApplication;
 import com.tqhy.client.config.Constants;
 import com.tqhy.client.models.msg.BaseMsg;
+import com.tqhy.client.models.msg.local.DownloadMsg;
 import com.tqhy.client.models.msg.local.LandingMsg;
 import com.tqhy.client.models.msg.local.UploadMsg;
 import com.tqhy.client.models.msg.local.VerifyMsg;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
 import com.tqhy.client.service.HeartBeatService;
+import com.tqhy.client.task.DownloadTask;
 import com.tqhy.client.utils.FileUtils;
 import com.tqhy.client.utils.GsonUtils;
 import com.tqhy.client.utils.NetworkUtils;
 import com.tqhy.client.utils.PropertyUtils;
+import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -37,6 +40,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -132,7 +136,24 @@ public class LandingController {
                 if (downloadDir.exists()) {
                     String[] split = data.split(Constants.MSG_SPLITTER);
                     String imgUrls = split[1];
-
+                    HashMap<String, String> requestParamMap = new HashMap<>();
+                    requestParamMap.put("imgUrlString", imgUrls);
+                    requestParamMap.put("saveFileDir", downloadDir.getAbsolutePath());
+                    String apiName = DownloadTask.API_NAME_DOWNLOAD_PDF;
+                    Observable.fromCallable(DownloadTask.of(DownloadMsg.of(apiName, requestParamMap)))
+                              .subscribeOn(Schedulers.io())
+                              .observeOn(Schedulers.io())
+                              .subscribe(downloadMsgObservable ->
+                                                 downloadMsgObservable.subscribe(downloadMsg -> {
+                                                     Integer downloadFlag = downloadMsg.getFlag();
+                                                     if (BaseMsg.SUCCESS == downloadFlag) {
+                                                         logger.info("download success");
+                                                         showAlert("下载完毕");
+                                                     } else {
+                                                         logger.info("download fail");
+                                                         showAlert("下载失败");
+                                                     }
+                                                 }));
                 }
 
             } else if (Constants.CMD_MSG_LOGOUT.equals(data)) {
@@ -165,12 +186,14 @@ public class LandingController {
      * @param message
      */
     public void showAlert(String message) {
-        Dialog<ButtonType> alert = new Dialog<>();
-        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title_light.png")));
-        alert.getDialogPane().setContentText(message);
-        alert.getDialogPane().getButtonTypes().add(ButtonType.OK);
-        alert.showAndWait();
+        Platform.runLater(() -> {
+            Dialog<ButtonType> alert = new Dialog<>();
+            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title_light.png")));
+            alert.getDialogPane().setContentText(message);
+            alert.getDialogPane().getButtonTypes().add(ButtonType.OK);
+            alert.showAndWait();
+        });
     }
 
     @PostMapping("/landing")
