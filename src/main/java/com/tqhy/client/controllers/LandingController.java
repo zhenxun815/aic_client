@@ -143,10 +143,7 @@ public class LandingController {
                         "body":[{"name":"temp","value":2,"per":"8%"},{"name":"牙","value":11,"per":"44%"}]
                         }*/
 
-                    //String dataToSave = split[1];
-                    String dataToSave = "{'head':[{'title':'分类名称','key':'name','__id':'gCYIMF'},{'title':'已标注','key':'value','__id':'gcSMlC'},{'title':'占比','key':'per','__id':'37ZTmj'}],\n" +
-                            "'body':[{'name':'temp','value':2,'per':'8%'},{'name':'temp_son','value':1,'per':'4%'},{'name':'颈椎','value':10,'per':'40%'},{'name':'牙','value':11,'per':'44%'},{'name':'temp_son_son','value':1,'per':'4%'}]\n" +
-                            "}";
+                    String dataToSave = split[1];
 
                     Optional<SaveDatas> saveDataOptional = GsonUtils.parseJsonToObj(dataToSave, SaveDatas.class);
                     onSaveDataOption(saveDataOptional);
