@@ -318,7 +318,8 @@ public class LandingController {
         logger.info("get request.." + msg);
         String serverIP = msg.getServerIP();
         VerifyMsg response = new VerifyMsg();
-        if (NetworkUtils.isIP(serverIP)) {
+        NetworkUtils.isIP(serverIP);
+        if (true) {
             Network.SERVER_IP = serverIP;
             Network.setServerBaseUrl(serverIP);
             logger.info("base url is: " + Network.SERVER_BASE_URL);

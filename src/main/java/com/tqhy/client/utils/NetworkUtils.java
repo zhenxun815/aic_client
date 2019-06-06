@@ -109,7 +109,7 @@ public class NetworkUtils {
         if (serverIPFile.exists()) {
             List<String> datas = FileUtils.readLine(serverIPFile, line -> line);
             String serverIP = datas.size() > 0 ? datas.get(0).trim() : "";
-            if (StringUtils.isEmpty(serverIP) || isNotIP(serverIP)) {
+            if (StringUtils.isEmpty(serverIP)) {
                 return "";
             }
 
