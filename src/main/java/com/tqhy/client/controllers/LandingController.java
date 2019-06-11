@@ -2,6 +2,7 @@ package com.tqhy.client.controllers;
 
 import com.tqhy.client.config.Constants;
 import com.tqhy.client.models.entity.DownloadInfo;
+import com.tqhy.client.models.entity.SaveDataBody;
 import com.tqhy.client.models.entity.SaveDatas;
 import com.tqhy.client.models.enums.DownloadTaskApi;
 import com.tqhy.client.models.enums.SaveTaskType;
@@ -132,10 +133,10 @@ public class LandingController {
                     uploadFileController.openUpload(UploadMsg.with(uploadType, uploadId, uploadTargetName));
                     break;
                 case Constants.CMD_MSG_DOWNLOAD:
-                    //download;{"fileName":"taskName","imgUrlString":"imgUrl1;imgUrl2"}
+                    //download;{"fileName":"taskName","imgUrlString":"imgUrl1,imgUrl2"}
                     int index = data.indexOf(Constants.MSG_SPLITTER);
                     String jsonStr = data.substring(index + 1);
-                   
+
                     Optional<DownloadInfo> downloadInfoOptional = GsonUtils.parseJsonToObj(jsonStr, DownloadInfo.class);
                     onDownloadOption(downloadInfoOptional);
                     break;
@@ -164,14 +165,20 @@ public class LandingController {
      * 执行保存指令
      */
     private void onSaveDataOption(Optional<SaveDatas> saveDataOptional) {
-
-        File saveDir = FXMLUtils.chooseDir(null);
-        if (null == saveDir) {
-            return;
-        }
-
         if (saveDataOptional.isPresent()) {
             SaveDatas saveDatas = saveDataOptional.get();
+            List<SaveDataBody> body = saveDatas.getBody();
+
+            if (null == body || body.size() == 0) {
+                logger.info("save body is empty...");
+                return;
+            }
+
+            File saveDir = FXMLUtils.chooseDir(null);
+            if (null == saveDir) {
+                return;
+            }
+
             Observable.fromCallable(SaveFileTask.of(SaveDataMsg.of(SaveTaskType.SAVE_REPORT_TO_CSV, saveDir, saveDatas)))
                       .subscribeOn(Schedulers.io())
                       .observeOn(Schedulers.io())
@@ -199,13 +206,19 @@ public class LandingController {
      * @param downloadInfoOptional
      */
     private void onDownloadOption(Optional<DownloadInfo> downloadInfoOptional) {
-        File downloadDir = FXMLUtils.chooseDir(null);
-        if (null == downloadDir) {
-            return;
-        }
-
+       
         if (downloadInfoOptional.isPresent()) {
             DownloadInfo downloadInfo = downloadInfoOptional.get();
+            String imgUrlString = downloadInfo.getImgUrlString();
+            if (StringUtils.isEmpty(imgUrlString)) {
+                return;
+            }
+
+            File downloadDir = FXMLUtils.chooseDir(null);
+            if (null == downloadDir) {
+                return;
+            }
+
             Observable.fromCallable(DownloadTask.of(DownloadMsg.of(DownloadTaskApi.DOWNLOAD_PDF, downloadDir, downloadInfo)))
                       .subscribeOn(Schedulers.io())
                       .observeOn(Schedulers.io())
