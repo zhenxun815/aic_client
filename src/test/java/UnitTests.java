@@ -1,3 +1,6 @@
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+import com.tqhy.client.models.entity.DownloadInfo;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
 import com.tqhy.client.task.Dcm2JpgTask;
@@ -13,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -150,5 +154,16 @@ public class UnitTests {
                    }
                });
         //logger.info("response is: {}", response.string());
+    }
+
+    @Test
+    public void testJson() {
+        String str = "download;{\"fileName\":\"猫猫狗狗\",\"imgUrlString\":\"/home/tqhy/tf/train/dd6e323d1eee4487be6034ea383e053c/validate_img_result/1000/1679091c5a880faf6fb5e6087eb1b2dc.jpg;/home/tqhy/tf/train/dd6e323d1eee4487be6034ea383e053c/validate_img_result/1000/8e296a067a37563370ded05f5a3bf3ec.jpg\"}";
+        String replace = str.replace("download;", "");
+        logger.info("replace is {}", replace);
+        JsonReader jsonReader = new JsonReader(new StringReader(replace));
+        jsonReader.setLenient(true);
+        DownloadInfo downloadInfo = new Gson().fromJson(jsonReader, DownloadInfo.class);
+        logger.info("download info is: {}", downloadInfo);
     }
 }
