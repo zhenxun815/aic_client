@@ -133,8 +133,10 @@ public class LandingController {
                     break;
                 case Constants.CMD_MSG_DOWNLOAD:
                     //download;{"fileName":"taskName","imgUrlString":"imgUrl1;imgUrl2"}
-                    String downloadInfoStr = split[1];
-                    Optional<DownloadInfo> downloadInfoOptional = GsonUtils.parseJsonToObj(downloadInfoStr, DownloadInfo.class);
+                    int index = data.indexOf(Constants.MSG_SPLITTER);
+                    String jsonStr = data.substring(index + 1);
+                   
+                    Optional<DownloadInfo> downloadInfoOptional = GsonUtils.parseJsonToObj(jsonStr, DownloadInfo.class);
                     onDownloadOption(downloadInfoOptional);
                     break;
                 case Constants.CMD_MSG_SAVE:
