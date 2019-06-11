@@ -211,6 +211,7 @@ public class LandingController {
             DownloadInfo downloadInfo = downloadInfoOptional.get();
             String imgUrlString = downloadInfo.getImgUrlString();
             if (StringUtils.isEmpty(imgUrlString)) {
+                logger.info("download img url is empty");
                 return;
             }
 
