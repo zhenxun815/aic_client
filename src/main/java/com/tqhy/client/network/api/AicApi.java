@@ -89,6 +89,14 @@ public interface AicApi {
     @GET("ping")
     Call<ResponseBody> pingServer();
 
+    /**
+     * 通知后台上传完成
+     *
+     * @return
+     */
+    @GET("uploadTestEnd")
+    Call<ResponseBody> uploadTestEnd(@Query("batchNumber") String batchNumber);
+
     /*@Multipart
     @POST("login/")
     Observable<ResponseBody> landing(@PartMap Map<String, RequestBody> params); */
