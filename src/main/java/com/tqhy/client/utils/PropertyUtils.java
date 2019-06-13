@@ -1,5 +1,7 @@
 package com.tqhy.client.utils;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -14,40 +16,48 @@ import java.util.Properties;
  * @description 需要获取配置文件的绝对路径，对配置文件的修改才会持久化
  */
 public class PropertyUtils {
-    public static void setUserName(String name){
+
+    public static void setUserName(String name) {
         File file = new File("config.properties");
-        String path=file.getAbsolutePath();
+        String path = file.getAbsolutePath();
         //这里自动获取的绝对路径不对，要用下面一行做一下修改
-        path=path.replace("config.properties","src\\main\\resources\\config.properties");
+        path = path.replace("config.properties", "src\\main\\resources\\config.properties");
         Properties properties = new Properties();
 
         try {
+            File propertyFile = new File(path);
+            if (!propertyFile.exists()) {
+                FileUtils.createNewFile(propertyFile);
+            }
             properties.load(new FileInputStream(path));
             FileOutputStream fos = new FileOutputStream(path);
             properties.setProperty("username", name);
-            properties.store(fos,"update the username");//配置文件中可以生成修改日志，可以没有
+            properties.store(fos, "update the username");//配置文件中可以生成修改日志，可以没有
             fos.close();
         } catch (IOException e) {
             System.out.println("can't load properties file");
             e.printStackTrace();
         }
     }
-    public static String getUserName() throws IOException {
-        File file = new File("config.properties");
-        String path=file.getAbsolutePath();
-        //这里自动获取的绝对路径不对，要用下面一行做一下修改
-        path=path.replace("config.properties","src\\main\\resources\\config.properties");
-        Properties properties = new Properties();
-        properties.load(new FileInputStream(path));
 
-        String username=properties.getProperty("username");
-        return username;
-    }
-    public static void main(String[] args){
+    public static String getUserName() {
+        File file = new File("config.properties");
+        String path = file.getAbsolutePath();
+        //这里自动获取的绝对路径不对，要用下面一行做一下修改
+        path = path.replace("config.properties", "src\\main\\resources\\config.properties");
+        File propertyFile = new File(path);
+        if (!propertyFile.exists()) {
+            FileUtils.createNewFile(propertyFile);
+            return "";
+        }
+        Properties properties = new Properties();
         try {
-            System.out.println(getUserName());
+            properties.load(new FileInputStream(path));
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        String username = properties.getProperty("username");
+        return StringUtils.isEmpty(username) ? "" : username;
     }
 }
