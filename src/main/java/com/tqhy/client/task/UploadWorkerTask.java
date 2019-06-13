@@ -108,6 +108,13 @@ public class UploadWorkerTask extends Task {
         } else if (UploadMsg.UPLOAD_TYPE_TEST.equals(uploadType)) {
             uploadTest(uploadMsg);
         }
+
+        ResponseBody body = Network.getAicApi()
+                                   .uploadTestEnd(uploadMsg.getBatchNumber())
+                                   .execute()
+                                   .body();
+        String uploadEndRes = body.string();
+        logger.info("uploadEndRes is {}", uploadEndRes);
         return null;
     }
 
@@ -200,7 +207,9 @@ public class UploadWorkerTask extends Task {
 
     private void upLoadDir(HashMap<String, String> requestParamMap) {
         uploadImgFileMap.forEach((file, caseName) -> {
-            if (shouldStop()) return;
+            if (shouldStop()) {
+                return;
+            }
             requestParamMap.put("caseName", caseName);
             logger.info("case name is: {}", caseName);
             Map<String, RequestBody> requestMap = NetworkUtils.createRequestParamMap(requestParamMap);
