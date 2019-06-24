@@ -3,6 +3,7 @@ package com.tqhy.client.utils;
 import com.tqhy.client.ClientApplication;
 import com.tqhy.client.controllers.PreloaderController;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -10,6 +11,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -75,7 +77,10 @@ public class FXMLUtils {
      * @param parentNode
      */
     private static void loadScene(Stage stage, Parent parentNode) {
-        Scene scene = new Scene(parentNode, Color.TRANSPARENT);
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        double width = visualBounds.getWidth();
+        double height = visualBounds.getHeight();
+        Scene scene = new Scene(parentNode, width, height, Color.TRANSPARENT);
         scene.getStylesheets().add(NetworkUtils.toExternalForm("/static/css/fx_root.css"));
         stage.setScene(scene);
         stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title_light.png")));
