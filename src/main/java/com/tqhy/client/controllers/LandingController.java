@@ -2,6 +2,7 @@ package com.tqhy.client.controllers;
 
 import com.tqhy.client.config.Constants;
 import com.tqhy.client.models.entity.DownloadInfo;
+import com.tqhy.client.models.entity.SaveDataBody;
 import com.tqhy.client.models.entity.SaveDatas;
 import com.tqhy.client.models.enums.DownloadTaskApi;
 import com.tqhy.client.models.enums.SaveTaskType;
@@ -132,9 +133,11 @@ public class LandingController {
                     uploadFileController.openUpload(UploadMsg.with(uploadType, uploadId, uploadTargetName));
                     break;
                 case Constants.CMD_MSG_DOWNLOAD:
-                    //download;{"fileName":"taskName","imgUrlString":"imgUrl1;imgUrl2"}
-                    String downloadInfoStr = split[1];
-                    Optional<DownloadInfo> downloadInfoOptional = GsonUtils.parseJsonToObj(downloadInfoStr, DownloadInfo.class);
+                    //download;{"fileName":"taskName","imgUrlString":"imgUrl1,imgUrl2"}
+                    int index = data.indexOf(Constants.MSG_SPLITTER);
+                    String jsonStr = data.substring(index + 1);
+
+                    Optional<DownloadInfo> downloadInfoOptional = GsonUtils.parseJsonToObj(jsonStr, DownloadInfo.class);
                     onDownloadOption(downloadInfoOptional);
                     break;
                 case Constants.CMD_MSG_SAVE:
@@ -143,10 +146,7 @@ public class LandingController {
                         "body":[{"name":"temp","value":2,"per":"8%"},{"name":"牙","value":11,"per":"44%"}]
                         }*/
 
-                    //String dataToSave = split[1];
-                    String dataToSave = "{'head':[{'title':'分类名称','key':'name','__id':'gCYIMF'},{'title':'已标注','key':'value','__id':'gcSMlC'},{'title':'占比','key':'per','__id':'37ZTmj'}],\n" +
-                            "'body':[{'name':'temp','value':2,'per':'8%'},{'name':'temp_son','value':1,'per':'4%'},{'name':'颈椎','value':10,'per':'40%'},{'name':'牙','value':11,'per':'44%'},{'name':'temp_son_son','value':1,'per':'4%'}]\n" +
-                            "}";
+                    String dataToSave = split[1];
 
                     Optional<SaveDatas> saveDataOptional = GsonUtils.parseJsonToObj(dataToSave, SaveDatas.class);
                     onSaveDataOption(saveDataOptional);
@@ -165,14 +165,20 @@ public class LandingController {
      * 执行保存指令
      */
     private void onSaveDataOption(Optional<SaveDatas> saveDataOptional) {
-
-        File saveDir = FXMLUtils.chooseDir(null);
-        if (null == saveDir) {
-            return;
-        }
-
         if (saveDataOptional.isPresent()) {
             SaveDatas saveDatas = saveDataOptional.get();
+            List<SaveDataBody> body = saveDatas.getBody();
+
+            if (null == body || body.size() == 0) {
+                logger.info("save body is empty...");
+                return;
+            }
+
+            File saveDir = FXMLUtils.chooseDir(null);
+            if (null == saveDir) {
+                return;
+            }
+
             Observable.fromCallable(SaveFileTask.of(SaveDataMsg.of(SaveTaskType.SAVE_REPORT_TO_CSV, saveDir, saveDatas)))
                       .subscribeOn(Schedulers.io())
                       .observeOn(Schedulers.io())
@@ -200,13 +206,20 @@ public class LandingController {
      * @param downloadInfoOptional
      */
     private void onDownloadOption(Optional<DownloadInfo> downloadInfoOptional) {
-        File downloadDir = FXMLUtils.chooseDir(null);
-        if (null == downloadDir) {
-            return;
-        }
 
         if (downloadInfoOptional.isPresent()) {
             DownloadInfo downloadInfo = downloadInfoOptional.get();
+            String imgUrlString = downloadInfo.getImgUrlString();
+            if (StringUtils.isEmpty(imgUrlString)) {
+                logger.info("download img url is empty");
+                return;
+            }
+
+            File downloadDir = FXMLUtils.chooseDir(null);
+            if (null == downloadDir) {
+                return;
+            }
+
             Observable.fromCallable(DownloadTask.of(DownloadMsg.of(DownloadTaskApi.DOWNLOAD_PDF, downloadDir, downloadInfo)))
                       .subscribeOn(Schedulers.io())
                       .observeOn(Schedulers.io())
@@ -318,34 +331,28 @@ public class LandingController {
         logger.info("get request.." + msg);
         String serverIP = msg.getServerIP();
         VerifyMsg response = new VerifyMsg();
-        NetworkUtils.isIP(serverIP);
-        if (true) {
-            Network.SERVER_IP = serverIP;
-            Network.setServerBaseUrl(serverIP);
-            logger.info("base url is: " + Network.SERVER_BASE_URL);
-            try {
-                okhttp3.ResponseBody responseBody = Network.getAicApi()
-                                                           .pingServer()
-                                                           .execute()
-                                                           .body();
-                ClientMsg clientMsg = GsonUtils.parseResponseToObj(responseBody);
+        Network.SERVER_IP = serverIP;
+        Network.setServerBaseUrl(serverIP);
+        logger.info("base url is: " + Network.SERVER_BASE_URL);
+        try {
+            okhttp3.ResponseBody responseBody = Network.getAicApi()
+                                                       .pingServer()
+                                                       .execute()
+                                                       .body();
+            ClientMsg clientMsg = GsonUtils.parseResponseToObj(responseBody);
 
-                if (BaseMsg.SUCCESS == clientMsg.getFlag()) {
-                    logger.info("ping server: " + serverIP + " successCount");
+            if (BaseMsg.SUCCESS == clientMsg.getFlag()) {
+                logger.info("ping server: " + serverIP + " successCount");
 
-                    File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
-                    FileUtils.writeFile(serverIPFile, serverIP, null, true);
-                    response.setFlag(1);
-                    response.setServerIP(Network.SERVER_IP);
-                    return response;
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
+                File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
+                FileUtils.writeFile(serverIPFile, serverIP, null, true);
+                response.setFlag(1);
+                response.setServerIP(Network.SERVER_IP);
+                return response;
             }
-        } else {
-            response.setFlag(0);
-            response.setDesc("ip地址格式不正确");
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return response;
