@@ -131,6 +131,8 @@
 					let serverIP = response.serverIP
 					//alert('server ip: '+serverIP)
 					window.location.href = 'http://' + serverIP + ':8080/index.html?token=' + token + '&localIP=' + localIP
+					// jsp version
+					// window.location.href = 'http://' + serverIP + ':8080/aic/project/index?token=' + token
 				} else if (203 == flag) {
 					layOpenFunc1()
 				} else {
