@@ -111,34 +111,40 @@
 		flag = 0
 		if (checkValueFunc()) {
 			let serverIP = $('#server_ip').val()
-			let ip_pattern = /^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/g
+			let ip_pattern = /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\:[0-9]+/g
 			let reg = new RegExp(ip_pattern)
+			let ipValid = reg.test(serverIP)
 			console.log(`server ip to connect is: ${serverIP},valid is: ${ipValid}`)
 
-			$('.callback-message').removeClass("show")
-			$('.connect-test .spin').css({
-				'display': 'inline-block'
-			})
+			if (ipValid) {
+				$('.callback-message').removeClass("show")
+				$('.connect-test .spin').css({
+					'display': 'inline-block'
+				})
 
-			let requestData = {serverIP: serverIP}
-			post_ajax('connTest', '/verify/connection', requestData, (response) => {
-				//console.log(`response data is: ${JSON.stringify(response)}`)
-				flag = response.flag
-				console.log(`flag is: ${flag}`)
-				if (flag == 1) {
-					$('.spin').hide()
-					$('.callback-message').html('连接成功!')
-					$('.callback-message').addClass("show")
+				let requestData = {serverIP: serverIP}
+				post_ajax('connTest', '/verify/connection', requestData, (response) => {
+					//console.log(`response data is: ${JSON.stringify(response)}`)
+					flag = response.flag
+					console.log(`flag is: ${flag}`)
+					if (flag == 1) {
+						$('.spin').hide()
+						$('.callback-message').html('连接成功!')
+						$('.callback-message').addClass("show")
 
-					window.location.href = baseUrlLocal + '/html/landing.html'
-				} else {
-					flag = 0
-					//layOpenFunc1()
-					$('.spin').hide()
-					$('.callback-message').html('连接失败,请重试!')
-					$('.callback-message').addClass("show")
-				}
-			})
+						window.location.href = baseUrlLocal + '/html/landing.html'
+					} else {
+						flag = 0
+						//layOpenFunc1()
+						$('.spin').hide()
+						$('.callback-message').html('连接失败,请重试!')
+						$('.callback-message').addClass("show")
+					}
+				})
+			} else {
+				$('.callback-message').html('ip地址不合法')
+				$('.callback-message').addClass("show")
+			}
 		}
 	}
 </script>
