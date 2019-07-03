@@ -23,6 +23,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import lombok.NonNull;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +83,7 @@ public class UploadFileController {
     /**
      * 是否可以上传
      */
-    private boolean uploadReadyFlag;
+    private boolean uploadReady;
 
     @Value("${path.data:'/data/'}")
     private String localDataPath;
@@ -195,7 +196,7 @@ public class UploadFileController {
             }
         });
 
-        uploadReadyFlag = false;
+        uploadReady = false;
 
         mainStageIconified.bind(ClientApplication.stage.iconifiedProperty());
         mainStageIconified.addListener((observable, oldVal, newVal) -> {
@@ -222,7 +223,7 @@ public class UploadFileController {
         dirToUpload = null;
         text_choose_info.setText("未选择任何文件!");
         text_field_max.setText(null);
-        uploadReadyFlag = false;
+        uploadReady = false;
     }
 
 
@@ -245,7 +246,7 @@ public class UploadFileController {
                 if (null != files && files.length > 0) {
                     logger.info("choose dirToUpload is: [{}]", dirToUpload.getAbsolutePath());
                     File[] caseDirs = dirToUpload.listFiles(File::isDirectory);
-                    uploadReadyFlag = true;
+                    uploadReady = true;
                     if (null != caseDirs && caseDirs.length > 0) {
                         List<File> invalidDirs = Arrays.stream(caseDirs)
                                                        .filter(caseDir -> {
@@ -263,7 +264,7 @@ public class UploadFileController {
                             text_fail_title.setText("以下文件夹路径结构不符合规则");
                             label_fail_desc.setText(paths);
                             text_success_desc.setText("路径不合法,未上传任何文件!");
-                            uploadReadyFlag = false;
+                            uploadReady = false;
                             label_fail_desc.setText(paths);
                             showPanel(panel_fail.getId());
                         }
@@ -273,7 +274,7 @@ public class UploadFileController {
                 } else {
                     logger.info("choose dirToUpload error");
                     text_choose_info.setText("文件夹路径不合法!");
-                    uploadReadyFlag = false;
+                    uploadReady = false;
                 }
             }
         }
@@ -286,7 +287,7 @@ public class UploadFileController {
      */
     @FXML
     public void startUpload(MouseEvent mouseEvent) {
-        if (!uploadReadyFlag) {
+        if (!uploadReady) {
             return;
         }
         MouseButton button = mouseEvent.getButton();
@@ -295,6 +296,10 @@ public class UploadFileController {
             if (null == dirToUpload) {
                 return;
             }
+            String batchNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+            uploadMsg.setBatchNumber(batchNumber);
+            text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
+            logger.info("upload batch number is {}", batchNumber);
 
             String max = text_field_max.getText();
             maxUploadCaseCount = max.matches("[0-9]+") ? Integer.parseInt(max) : -1;
@@ -393,7 +398,10 @@ public class UploadFileController {
             resetValues();
             stage.hide();
             //通知页面刷新
-            landingController.sendMsgToJs("uploadComplete");
+            String batchNumber = uploadMsg.getBatchNumber();
+            if (StringUtils.isNotEmpty(batchNumber)) {
+                landingController.sendMsgToJs("callJsFunction", batchNumber);
+            }
         }
     }
 
@@ -429,7 +437,7 @@ public class UploadFileController {
     }
 
     /**
-     * 上传失败重试
+     * 显示上传完毕界面
      *
      * @param mouseEvent
      */
@@ -465,15 +473,15 @@ public class UploadFileController {
     public void openUpload(@RequestBody UploadMsg msg) {
 
         uploadMsg = msg;
-        String batchNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
-        uploadMsg.setBatchNumber(batchNumber);
+        // String batchNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+        // uploadMsg.setBatchNumber(batchNumber);
         uploadMsg.setToken(Network.TOKEN);
-        logger.info("uploadTargetName to upload is: " + uploadMsg.getUploadTargetName() + ", batchNumber is: " + batchNumber);
+        logger.info("uploadTargetName to upload is: {}", uploadMsg.getUploadTargetName());
         Platform.runLater(() -> {
             stage = new Stage();
 
             FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml");
-            text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
+            // text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
 
             @NonNull String uploadType = uploadMsg.getUploadType();
             //text_field_remarks.setVisible(UploadMsg.UPLOAD_TYPE_CASE.equals(uploadType));

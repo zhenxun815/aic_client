@@ -363,9 +363,9 @@ public class LandingController {
      *
      * @param msg
      */
-    public void sendMsgToJs(String msg) {
+    public void sendMsgToJs(String funcName, String msg) {
         Object response = webView.getEngine()
-                                 .executeScript("callJsFunction('" + msg + "')");
+                                 .executeScript(funcName + "('" + msg + "')");
         String s = (String) response;
         logger.info("get response: " + s);
     }
