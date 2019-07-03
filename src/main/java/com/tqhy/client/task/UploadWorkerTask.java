@@ -107,12 +107,12 @@ public class UploadWorkerTask extends Task {
             uploadCase(uploadMsg);
         } else if (UploadMsg.UPLOAD_TYPE_TEST.equals(uploadType)) {
             uploadTest(uploadMsg);
-            ResponseBody body = Network.getAicApi()
+            /*ResponseBody body = Network.getAicApi()
                                        .uploadTestEnd(uploadMsg.getBatchNumber())
                                        .execute()
                                        .body();
             String uploadEndRes = body.string();
-            logger.info("uploadEndRes is {}", uploadEndRes);
+            logger.info("uploadEndRes is {}", uploadEndRes);*/
         }
 
         return null;

@@ -111,7 +111,7 @@
 		flag = 0
 		if (checkValueFunc()) {
 			let serverIP = $('#server_ip').val()
-			let ip_pattern = /^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/g
+			let ip_pattern = /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\:[0-9]+)?/g
 			let reg = new RegExp(ip_pattern)
 			let ipValid = reg.test(serverIP)
 			console.log(`server ip to connect is: ${serverIP},valid is: ${ipValid}`)

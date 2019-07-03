@@ -206,7 +206,7 @@ public class LandingController {
      * @param downloadInfoOptional
      */
     private void onDownloadOption(Optional<DownloadInfo> downloadInfoOptional) {
-       
+
         if (downloadInfoOptional.isPresent()) {
             DownloadInfo downloadInfo = downloadInfoOptional.get();
             String imgUrlString = downloadInfo.getImgUrlString();
@@ -331,33 +331,28 @@ public class LandingController {
         logger.info("get request.." + msg);
         String serverIP = msg.getServerIP();
         VerifyMsg response = new VerifyMsg();
-        if (NetworkUtils.isIP(serverIP)) {
-            Network.SERVER_IP = serverIP;
-            Network.setServerBaseUrl(serverIP);
-            logger.info("base url is: " + Network.SERVER_BASE_URL);
-            try {
-                okhttp3.ResponseBody responseBody = Network.getAicApi()
-                                                           .pingServer()
-                                                           .execute()
-                                                           .body();
-                ClientMsg clientMsg = GsonUtils.parseResponseToObj(responseBody);
+        Network.SERVER_IP = serverIP;
+        Network.setServerBaseUrl(serverIP);
+        logger.info("base url is: " + Network.SERVER_BASE_URL);
+        try {
+            okhttp3.ResponseBody responseBody = Network.getAicApi()
+                                                       .pingServer()
+                                                       .execute()
+                                                       .body();
+            ClientMsg clientMsg = GsonUtils.parseResponseToObj(responseBody);
 
-                if (BaseMsg.SUCCESS == clientMsg.getFlag()) {
-                    logger.info("ping server: " + serverIP + " successCount");
+            if (BaseMsg.SUCCESS == clientMsg.getFlag()) {
+                logger.info("ping server: " + serverIP + " successCount");
 
-                    File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
-                    FileUtils.writeFile(serverIPFile, serverIP, null, true);
-                    response.setFlag(1);
-                    response.setServerIP(Network.SERVER_IP);
-                    return response;
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
+                File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
+                FileUtils.writeFile(serverIPFile, serverIP, null, true);
+                response.setFlag(1);
+                response.setServerIP(Network.SERVER_IP);
+                return response;
             }
-        } else {
-            response.setFlag(0);
-            response.setDesc("ip地址格式不正确");
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return response;
@@ -368,9 +363,9 @@ public class LandingController {
      *
      * @param msg
      */
-    public void sendMsgToJs(String msg) {
+    public void sendMsgToJs(String funcName, String msg) {
         Object response = webView.getEngine()
-                                 .executeScript("callJsFunction('" + msg + "')");
+                                 .executeScript(funcName + "('" + msg + "')");
         String s = (String) response;
         logger.info("get response: " + s);
     }

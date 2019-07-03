@@ -109,7 +109,7 @@ public class NetworkUtils {
         if (serverIPFile.exists()) {
             List<String> datas = FileUtils.readLine(serverIPFile, line -> line);
             String serverIP = datas.size() > 0 ? datas.get(0).trim() : "";
-            if (StringUtils.isEmpty(serverIP) || isNotIP(serverIP)) {
+            if (StringUtils.isEmpty(serverIP)) {
                 return "";
             }
 
@@ -145,7 +145,7 @@ public class NetworkUtils {
         if (StringUtils.isEmpty(str)) {
             return false;
         }
-        String regex = "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}";
+        String regex = "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}(\\:[0-9]+)?";
         Pattern pattern = Pattern.compile(regex);
 
         return pattern.matcher(str).matches();
