@@ -370,12 +370,12 @@ public class UploadFileController {
         if (panelToShow.getId().equals(panel_choose.getId())) {
             if (UploadMsg.UPLOAD_TYPE_CASE.equals(uploadMsg.getUploadType())) {
                 FXMLUtils.displayChildNode(panel_choose, text_field_remarks, true);
-                text_choose_desc.setText("将数据导入至: " + uploadMsg.getUploadTargetName());
-                text_choose_desc.setVisible(true);
+                //text_choose_desc.setText("将数据导入至: " + uploadMsg.getUploadTargetName());
+                //text_choose_desc.setVisible(true);
                 //logger.info("upload case...target name is: [{}]",uploadMsg.getUploadTargetName());
             } else if (UploadMsg.UPLOAD_TYPE_TEST.equals(uploadMsg.getUploadType())) {
                 FXMLUtils.displayChildNode(panel_choose, text_field_remarks, false);
-                text_choose_desc.setVisible(false);
+                //text_choose_desc.setVisible(false);
                 logger.info("upload test...");
             }
         }
@@ -484,15 +484,14 @@ public class UploadFileController {
             // text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
 
             @NonNull String uploadType = uploadMsg.getUploadType();
-            //text_field_remarks.setVisible(UploadMsg.UPLOAD_TYPE_CASE.equals(uploadType));
+            text_choose_desc.setText("将数据上传至: " + uploadMsg.getUploadTargetName());
             if (UploadMsg.UPLOAD_TYPE_CASE.equals(uploadType)) {
                 FXMLUtils.displayChildNode(panel_choose, text_field_remarks, true);
-                text_choose_desc.setText("将数据导入至: " + uploadMsg.getUploadTargetName());
-                text_choose_desc.setVisible(true);
+                //text_choose_desc.setVisible(true);
                 //logger.info("upload case...target name is: [{}]",uploadMsg.getUploadTargetName());
             } else if (UploadMsg.UPLOAD_TYPE_TEST.equals(uploadType)) {
                 FXMLUtils.displayChildNode(panel_choose, text_field_remarks, false);
-                text_choose_desc.setVisible(false);
+                //text_choose_desc.setVisible(false);
                 logger.info("upload test...");
             }
         });
