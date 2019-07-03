@@ -3,8 +3,6 @@ package com.tqhy.client;
 import com.tqhy.client.utils.FXMLUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.geometry.Rectangle2D;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,48 +31,30 @@ public class ClientApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         stage = primaryStage;
-        initPrimaryStageSize();
-        initSystemTray(stage);
         stage.setOnCloseRequest(event -> System.exit(0));
+        FXMLUtils.loadWindow(ClientApplication.stage, "/static/fxml/main.fxml");
+        initPrimaryStageSize();
 
-        FXMLUtils.loadWindow(stage, "/static/fxml/main.fxml");
     }
 
     /**
      * 初始最大化窗口,固定窗体大小
      */
     private void initPrimaryStageSize() {
-
-        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
-        double minX = visualBounds.getMinX();
-        double minY = visualBounds.getMinY();
-        //double maxX = visualBounds.getMaxX();
-        //double maxY = visualBounds.getMaxY();
-        double width = visualBounds.getWidth();
-        double height = visualBounds.getHeight();
-
-        //logger.info("minX: " + minX + ", minY: " + minY);
-        //logger.info("maxX: " + maxX + ", maxY: " + maxY);
-        //logger.info("width: " + width + ", height: " + height);
-        //stage.setX(minX);
-        //stage.setY(minY);
-        stage.setWidth(width);
-        stage.setHeight(height);
-        stage.setResizable(false);
+        stage.setMaximized(true);
         stage.centerOnScreen();
+        stage.setResizable(false);
     }
 
     /**
      * 创建系统托盘图标
-     *
-     * @param stage
      */
-    private void initSystemTray(Stage stage) {
+    private void initSystemTray() {
         try {
             System.setProperty("java.awt.headless", "false");
             Toolkit.getDefaultToolkit();
             if (!java.awt.SystemTray.isSupported()) {
-               logger.info("系统不支持托盘图标,程序退出..");
+                logger.info("系统不支持托盘图标,程序退出..");
                 Platform.exit();
             }
             //PopupMenu popupMenu = createPopMenu(stage);
@@ -84,7 +64,7 @@ public class ClientApplication extends Application {
             URL imageLoc = new URL(iconPath);
             java.awt.Image image = ImageIO.read(imageLoc);
             //final TrayIcon trayIcon = new TrayIcon(image, "打开悬浮窗",popupMenu);
-            final TrayIcon trayIcon = new TrayIcon(image, "双击打开主界面");
+            final TrayIcon trayIcon = new TrayIcon(image);
 
             systemTray.add(trayIcon);
         } catch (IOException e) {
@@ -99,6 +79,7 @@ public class ClientApplication extends Application {
         super.init();
         Platform.setImplicitExit(false);
         springContext = SpringApplication.run(ClientApplication.class);
+        initSystemTray();
     }
 
 

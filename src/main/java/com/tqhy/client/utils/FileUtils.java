@@ -36,19 +36,50 @@ public class FileUtils {
      * @param dir
      * @return
      */
-    public static List<File> getFilesInDir(File dir, Predicate<File> filter) {
-
+    public static HashMap<File, String> getFilesMapInDir(File dir, Predicate<File> filter, String caseName) {
+        //logger.info("into get file map in dir...");
         File[] files = dir.listFiles();
-        ArrayList<File> collect = Arrays.stream(files)
-                                        .collect(ArrayList::new, (list, file) -> {
-                                            if (file.isDirectory()) {
-                                                List<File> filesInSubDir = getFilesInDir(file, filter);
-                                                list.addAll(filesInSubDir);
-                                            } else if (filter.test(file)) {
-                                                list.add(file);
-                                            }
-                                        }, ArrayList::addAll);
-        return collect;
+        String dirName = dir.getName();
+        //logger.info("dir name is: {}", dirName);
+        /*HashMap<File, String> fileMap = new HashMap<>();
+        for (File file : files) {
+            if (file.isFile() && filter.test(file)) {
+                String fileName = null;
+                String fileFullName = file.getName().toLowerCase();
+                if (fileFullName.endsWith(".dcm") || fileFullName.endsWith(".jpg") || fileFullName.endsWith(".jpeg")) {
+                    int lastIndex = fileFullName.lastIndexOf(".");
+                    fileName = file.getName().substring(0, lastIndex);
+                } else {
+                    fileName = fileFullName;
+                }
+                String name = null == caseName ? fileName : caseName;
+                fileMap.put(file, name);
+                logger.info("add file map key: {}, value: {}", file.getAbsolutePath(), name);
+            }
+        }*/
+        HashMap<File, String> fileMap = Arrays.stream(files)
+                                              .filter(File::isFile)
+                                              .collect(HashMap::new,
+                                                       (map, file) -> {
+                                                           boolean test = filter.test(file);
+                                                           //logger.info("test valid img: {}", test);
+                                                           if (test) {
+                                                               String fileFullName = file.getName().toLowerCase();
+                                                               String fileName = null;
+                                                               if (fileFullName.endsWith(".dcm") || fileFullName.endsWith(".jpg") || fileFullName.endsWith(".jpeg")) {
+                                                                   int lastIndex = fileFullName.lastIndexOf(".");
+                                                                   fileName = file.getName().substring(0, lastIndex);
+                                                               } else {
+                                                                   fileName = fileFullName;
+                                                               }
+                                                               String name = null == caseName ? fileName : caseName;
+                                                               map.put(file, name);
+                                                               //logger.info("add file map key: {}, value: {}", file.getAbsolutePath(), name);
+                                                           }
+                                                       },
+                                                       HashMap::putAll);
+        logger.info("return fileMap {}", fileMap);
+        return fileMap;
     }
 
     /**
@@ -57,36 +88,35 @@ public class FileUtils {
      * @param dir
      * @return
      */
-    public static List<File> getFilesInSubDir(File dir, Predicate<File> filter) {
-        File[] files = dir.listFiles(File::isDirectory);
-        ArrayList<File> collect = Arrays.stream(files)
-                                        .collect(ArrayList::new,
-                                                 (list, file) -> list.addAll(getFilesInDir(file, filter)),
-                                                 ArrayList::addAll);
-        return collect;
+    public static HashMap<File, String> getFilesMapInSubDir(File dir, Predicate<File> filter) {
+        // logger.info("into get file map in sub dir...");
+        File[] dirs = dir.listFiles(File::isDirectory);
+        if (null != dirs) {
+            HashMap<File, String> fileMap = Arrays.stream(dirs)
+                                                  .collect(HashMap::new,
+                                                           (map, file) -> map.putAll(getFilesMapInDir(file, filter, file.getName())),
+                                                           HashMap::putAll);
+            return fileMap;
+        } else {
+            return new HashMap<>();
+        }
     }
 
 
-    public static List<File> transAllToJpg(List<File> originFiles) {
-        ArrayList<File> collect = originFiles.stream()
-                                             .collect(ArrayList::new, (list, file) -> {
-                                                 if (isDcmFile(file)) {
-                                                     ExecutorService executor = Executors.newSingleThreadExecutor();
-                                                     Future<File> jpgFileFuture = executor.submit(Dcm2JpgTask.of(file));
-                                                     try {
-                                                         logger.info("transfer dimcom " + file.getName() + " to jpg!");
-                                                         File jpgFile = jpgFileFuture.get();
-                                                         list.add(jpgFile);
-                                                     } catch (InterruptedException e) {
-                                                         e.printStackTrace();
-                                                     } catch (ExecutionException e) {
-                                                         e.printStackTrace();
-                                                     }
-                                                 } else if (isJpgFile(file)) {
-                                                     list.add(file);
-                                                 }
-                                             }, ArrayList::addAll);
-        return collect;
+    public static File transToJpg(File fileToTrans, File jpgDir) {
+        try {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<File> jpgFileFuture = executor.submit(Dcm2JpgTask.of(fileToTrans, jpgDir));
+            File jpgFile = jpgFileFuture.get();
+            logger.info("file to trans success {}", jpgFile.getAbsolutePath());
+            return jpgFile;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        return fileToTrans;
     }
 
 
@@ -97,6 +127,7 @@ public class FileUtils {
      * @return
      */
     public static boolean isJpgFile(File fileToJudge) {
+        logger.info("into judge file is jpg...");
         String fileName = fileToJudge.getName().toLowerCase();
         if (!(fileName.endsWith("jpg") || fileName.endsWith("jpeg"))) {
             return false;
@@ -125,6 +156,7 @@ public class FileUtils {
      * @return
      */
     public static boolean isDcmFile(File fileToJudge) {
+        logger.info("into judge file is dcm...");
         byte[] bytes = new byte[132];
         try (FileInputStream in = new FileInputStream(fileToJudge)) {
             int len = readAvailable(in, bytes, 0, 132);
@@ -169,21 +201,13 @@ public class FileUtils {
      * @param temp
      * @return
      */
-    public static boolean deleteDir(File temp) {
+    public static void deleteDir(File temp) {
         logger.info("into delete");
-        if (temp.exists()) {
-            File[] subFiles = temp.listFiles();
-            Arrays.stream(subFiles)
-                  .forEach(subFile -> {
-                      if (subFile.isDirectory()) {
-                          deleteDir(subFile);
-                      } else {
-                          subFile.delete();
-                      }
-                  });
-            return temp.delete();
+        try {
+            org.apache.tomcat.util.http.fileupload.FileUtils.deleteDirectory(temp);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return false;
     }
 
     /**

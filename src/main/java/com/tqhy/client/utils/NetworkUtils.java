@@ -109,7 +109,7 @@ public class NetworkUtils {
         if (serverIPFile.exists()) {
             List<String> datas = FileUtils.readLine(serverIPFile, line -> line);
             String serverIP = datas.size() > 0 ? datas.get(0).trim() : "";
-            if (StringUtils.isEmpty(serverIP) || isNotIP(serverIP)) {
+            if (StringUtils.isEmpty(serverIP)) {
                 return "";
             }
 
@@ -145,12 +145,7 @@ public class NetworkUtils {
         if (StringUtils.isEmpty(str)) {
             return false;
         }
-        // 匹配 1
-        // String regex = "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}";
-        // 匹配 2
-        String regex = "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}";
-
-        // 匹配1 和匹配2均可实现Ip判断的效果
+        String regex = "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}(\\:[0-9]+)?";
         Pattern pattern = Pattern.compile(regex);
 
         return pattern.matcher(str).matches();

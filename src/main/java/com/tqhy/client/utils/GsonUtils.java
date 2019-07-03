@@ -1,10 +1,12 @@
 package com.tqhy.client.utils;
 
 import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import okhttp3.ResponseBody;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -17,7 +19,9 @@ public class GsonUtils {
 
 
     public static <T> Optional<T> parseJsonToObj(String json, Class<T> type) {
-        T t = new Gson().fromJson(json, type);
+        JsonReader jsonReader = new JsonReader(new StringReader(json));
+        jsonReader.setLenient(true);
+        T t = new Gson().fromJson(jsonReader, type);
         return Optional.ofNullable(t);
     }
 

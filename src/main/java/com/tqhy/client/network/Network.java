@@ -26,7 +26,7 @@ public class Network {
     public static final String TEST_URL = "http://baidu.com/";
     public static String SERVER_IP;
     public static String TOKEN;
-    public static String SERVER_BASE_URL = "http://192.168.1.129:8080/";
+    public static String SERVER_BASE_URL = "http://192.168.1.129/";
     public static String LOCAL_BASE_URL = "http://localhost:8081/";
     private static Logger logger = LoggerFactory.getLogger(Network.class);
 
@@ -51,7 +51,7 @@ public class Network {
     }
 
     public static void setServerBaseUrl(String ip) {
-        SERVER_BASE_URL = "http://" + ip + ":8080/";
+        SERVER_BASE_URL = "http://" + ip + "/";
         aicApi = null;
     }
 

@@ -1,7 +1,6 @@
 package com.tqhy.client.task;
 
 
-import com.tqhy.client.config.Constants;
 import lombok.*;
 import org.dcm4che3.image.BufferedImageUtils;
 import org.dcm4che3.imageio.plugins.dcm.DicomImageReadParam;
@@ -44,6 +43,8 @@ public class Dcm2JpgTask implements Callable<File> {
     @NonNull
     private File dicomFile;
 
+    @NonNull
+    private File jpgDir;
     /**
      * 初始化ImageWriter
      */
@@ -71,9 +72,9 @@ public class Dcm2JpgTask implements Callable<File> {
         if (dcmFile.exists()) {
 
             try (ImageInputStream iis = ImageIO.createImageInputStream(dcmFile)) {
-                File jpgDir = new File(dcmFile.getParent(), Constants.PATH_TEMP_JPG);
+
                 if (!jpgDir.exists()) {
-                    jpgDir.mkdir();
+                    jpgDir.mkdirs();
                 }
                 imageReader = ImageIO.getImageReadersByFormatName("DICOM").next();
                 imageReader.setInput(iis);

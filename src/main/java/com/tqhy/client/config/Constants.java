@@ -17,6 +17,10 @@ public class Constants {
     //alert('upload_case;' + uploadId + ';' + uploadTargetName)
     public static final String CMD_MSG_UPLOAD = "upload";
 
+    public static final String CMD_MSG_DOWNLOAD = "download";
+
+    public static final String CMD_MSG_SAVE = "save";
+
     public static final String CMD_MSG_STOP_BEAT = "stop";
 
     public static final String CMD_MSG_CONTINUE_BEAT = "continue";
@@ -29,5 +33,11 @@ public class Constants {
 
     public static final String PATH_TEMP_JPG = "TQHY_TEMP";
 
+
+    public static final String CMD_NOT_UPLOAD = "NOT_UPLOAD";
+
+    public static final String MSG_SPLITTER = ";";
+
+    public static final String VALUE_SPLITTER = ",";
 
 }

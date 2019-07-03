@@ -1,15 +1,21 @@
 package com.tqhy.client.utils;
 
+import com.tqhy.client.ClientApplication;
 import com.tqhy.client.controllers.PreloaderController;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
+import java.io.File;
 import java.io.IOException;
 
 import static com.tqhy.client.ClientApplication.springContext;
@@ -71,7 +77,10 @@ public class FXMLUtils {
      * @param parentNode
      */
     private static void loadScene(Stage stage, Parent parentNode) {
-        Scene scene = new Scene(parentNode, Color.TRANSPARENT);
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        double width = visualBounds.getWidth();
+        double height = visualBounds.getHeight();
+        Scene scene = new Scene(parentNode, width, height, Color.TRANSPARENT);
         scene.getStylesheets().add(NetworkUtils.toExternalForm("/static/css/fx_root.css"));
         stage.setScene(scene);
         stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title_light.png")));
@@ -94,5 +103,16 @@ public class FXMLUtils {
                 parent.getChildren().remove(child);
             }
         }
+    }
+
+    /**
+     * 弹出选择文件夹窗口并返回选择路径
+     *
+     * @param window 若为null则使用主窗口{@link ClientApplication#stage}对象
+     * @return
+     */
+    public static File chooseDir(Window window) {
+        DirectoryChooser downloadDirChooser = new DirectoryChooser();
+        return downloadDirChooser.showDialog(null == window ? ClientApplication.stage : window);
     }
 }

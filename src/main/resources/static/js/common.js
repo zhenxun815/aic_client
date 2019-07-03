@@ -1,20 +1,19 @@
-var $ = null
-var layer = null
+let $ = null
+let layer = null
 
 baseUrlLocal = 'http://localhost:8081'
-var lay_setting = {
+layui.use(['layer', 'form', 'jquery'], function () {
+	layer = layui.layer
+	$ = layui.jquery
+});
+
+let lay_setting = {
 	type: 1,
 	area: '600px',
 	title: false,
 	closeBtn: 0,
 	shade: 0.8
 }
-
-layui.use(['layer', 'form'], function () {
-	layer = layui.layer;
-	$ = layui.$;
-
-});
 
 // 调用弹窗
 function layOpenFunc1() {
@@ -63,7 +62,7 @@ function layOpenFunc4() {
 
 // 关闭弹窗
 function layCloseFunc() {
-	layer.closeAll();
+	layer.closeAll()
 }
 
 // 表单验证
@@ -85,6 +84,7 @@ function checkValueFunc() {
 }
 
 function post_ajax(apiName, ajaxUrl, request, callback) {
+	$ = layui.jquery
 	$.ajax({
 		type: "POST",
 		url: ajaxUrl,
@@ -103,16 +103,38 @@ function post_ajax(apiName, ajaxUrl, request, callback) {
 			if (response) {
 				callback(response);
 			} else {
-				alert("问题接口：" + apiName + "\n失败----" + response.desc + response.flag);
+				//alert("问题接口：" + apiName + "\n失败----" + response.desc + response.flag);
 				return false;
 			}
 		},
 		error: function (response) {
-			alert("问题接口：" + apiName + "\n异常错误" + JSON.stringify(response));
+			//alert("问题接口：" + apiName + "\n异常错误" + JSON.stringify(response));
 			return false;
 		}
 	})
 }
+
+function get_ajax(apiName, ajaxUrl, callback) {
+	$ = layui.jquery
+	$.ajax({
+		type: "GET",
+		url: ajaxUrl,
+		async: true,
+		success: function (response) {
+			if (response) {
+				callback(response);
+			} else {
+				//alert("问题接口：" + apiName + "\n失败----" + response.desc + response.flag);
+				return false;
+			}
+		},
+		error: function (response) {
+			//alert("问题接口：" + apiName + "\n异常错误" + JSON.stringify(response));
+			return false;
+		}
+	})
+}
+
 
 
 

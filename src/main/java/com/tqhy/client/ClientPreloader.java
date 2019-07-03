@@ -129,12 +129,13 @@ public class ClientPreloader extends Preloader {
                           });
                 break;
             case BEFORE_START:
+                logger.info("before start...");
                 preloaderFlag = true;
                 preloaderController.setPreloadProgress(100D);
                 preloaderController.setPreloadMessage("资源加载完毕...");
                 preloaderStage.hide();
-                logger.info("before start...");
                 break;
+
         }
 
     }
@@ -149,23 +150,5 @@ public class ClientPreloader extends Preloader {
             Network.SERVER_IP = serverIP;
             logger.info("init server IP: " + serverIP);
         });
-    }
-
-
-    @Override
-    public void handleProgressNotification(ProgressNotification info) {
-        logger.info("handleProgressNotification: " + info.getProgress());
-        preloaderController.setPreloadProgress(info.getProgress());
-    }
-
-    @Override
-    public boolean handleErrorNotification(ErrorNotification info) {
-        preloaderController.setPreloadMessage(info.getDetails());
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return true;
     }
 }
