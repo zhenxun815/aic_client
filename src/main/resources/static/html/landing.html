@@ -122,9 +122,9 @@
 			console.log(`userName is: ${userName}, userPwd is: ${userPwd}`)
 			post_ajax('land', '/landing', landInfo, (response) => {
 				let flag = response.flag
+				let token = response.token
 				console.log(`flag is: ${flag}`)
 				if (1 == flag) {
-					let token = response.token
 					let localIP = response.localIP
 					localStorage.setItem("AIC_TOKEN", token)
 					//window.location.href = baseUrlLocal + '/html/test_upload.html'
@@ -136,7 +136,7 @@
 				} else if (203 == flag) {
 					layOpenFunc1()
 				} else {
-					$('#landing_tips').html('账号与密码不匹配, 请核实后登录!')
+					$('#landing_tips').html(token)
 					$('#landing_tips').show()
 				}
 			})

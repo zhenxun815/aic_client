@@ -89,6 +89,7 @@ public class LandingController extends BaseWebviewController {
                .landing(userName, userPwd)
                .map(body -> {
                    ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
+                   logger.info("land response msg is {}", clientMsg);
                    logger.info("flag is: " + clientMsg.getFlag());
                    response.setFlag(clientMsg.getFlag());
                    response.setDesc(clientMsg.getDesc());
