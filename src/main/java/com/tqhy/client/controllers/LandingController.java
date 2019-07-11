@@ -87,6 +87,8 @@ public class LandingController extends BaseWebviewController {
 
         Network.getAicApi()
                .landing(userName, userPwd)
+               .observeOn(Schedulers.io())
+               .subscribeOn(Schedulers.trampoline())
                .map(body -> {
                    ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
                    logger.info("land response msg is {}", clientMsg);
@@ -95,21 +97,21 @@ public class LandingController extends BaseWebviewController {
                    response.setDesc(clientMsg.getDesc());
                    List<String> msg = clientMsg.getMsg();
                    String token = msg.get(0);
-                   logger.info("token is: " + token);
+                   logger.info("map token is: " + token);
                    response.setToken(token);
                    response.setLocalIP(localIp);
                    response.setServerIP(Network.SERVER_IP);
+                   logger.info("response server ip is: {}", Network.SERVER_IP);
                    return response;
                })
-               .observeOn(Schedulers.io())
-               .subscribeOn(Schedulers.trampoline())
-               .subscribe(res -> {
+               .blockingSubscribe(res -> {
                    if (BaseMsg.SUCCESS == res.getFlag()) {
+                       logger.info("subscribe token is {}", response.getToken());
                        heartBeatService.startBeat(response.getToken());
                        Network.TOKEN = response.getToken();
                    }
                });
-
+        logger.info("response is {}", response);
         return response;
     }
 

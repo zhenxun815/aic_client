@@ -28,7 +28,7 @@ public class HeartBeatService {
     Logger logger = LoggerFactory.getLogger(HeartBeatService.class);
 
     private static String status;
-
+    private String token;
     /**
      * 判断页面是否需要跳转到登录页,与{@link com.tqhy.client.controllers.LandingController LandingController} 中
      * {@code jumpToLandingFlag} 进行双向绑定
@@ -39,27 +39,27 @@ public class HeartBeatService {
         status = CMD_MSG_STOP_BEAT;
     }
 
-    public void startBeat(String token) {
+    public void startBeat(String t) {
         status = CMD_MSG_CONTINUE_BEAT;
-
-        Observable.interval(5000, TimeUnit.MILLISECONDS)
+        this.token = t;
+        logger.info("into start beat...{}", token);
+        Observable.interval(5, TimeUnit.SECONDS)
                   .takeWhile(beatTimes -> CMD_MSG_CONTINUE_BEAT.equals(status))
                   .observeOn(Schedulers.trampoline())
                   .subscribeOn(Schedulers.io())
                   .subscribe(aLong -> {
-                      //logger.info("heartBeating... ");
-
+                      logger.info("start token is...{}", token);
                       Network.getAicApi()
                              .heartbeat(token)
                              .observeOn(Schedulers.io())
                              .subscribeOn(Schedulers.trampoline())
                              .subscribe(responseBody -> {
                                  String json = responseBody.string();
-                                 //logger.info("heart beat json is: [{}]",json);
+                                 logger.info("heart beat response json is: {}", json);
                                  ClientMsg clientMsg = new Gson().fromJson(json, ClientMsg.class);
                                  Integer flag = clientMsg.getFlag();
                                  if (1 == flag) {
-                                     logger.info("heart beat continue...");
+                                     logger.info("heart beat continue...{}", token);
                                      status = CMD_MSG_CONTINUE_BEAT;
                                      setJumpToLandingFlag(false);
                                  } else if (Constants.CMD_STATUS_LOGOUT == flag) {
