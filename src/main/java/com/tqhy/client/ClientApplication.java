@@ -43,6 +43,10 @@ public class ClientApplication extends Application {
     private void initPrimaryStageSize() {
         stage.setMaximized(true);
         stage.centerOnScreen();
+        double height = stage.getHeight();
+        double width = stage.getWidth();
+        stage.setMaxHeight(height);
+        stage.setMaxWidth(width);
         stage.setResizable(false);
     }
 
