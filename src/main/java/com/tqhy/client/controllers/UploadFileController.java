@@ -190,6 +190,9 @@ public class UploadFileController {
 
         stage.setWidth(visualBounds.getWidth());
         stage.setHeight(visualBounds.getHeight());
+
+        btn_upload_min.setLayoutX(visualBounds.getWidth() - 50);
+        btn_upload_min.setLayoutY(16);
         stage.centerOnScreen();
         panels = new VBox[]{panel_choose, panel_progress, panel_fail, panel_complete};
         showPanel(panel_choose.getId());

@@ -244,15 +244,16 @@
                 </VBox>
             </VBox>
 
-            <Button fx:id="btn_upload_min" onMouseClicked="#stage_minimum">
-                <HBox.margin>
-                    <Insets>
-                        <left>10</left>
-                    </Insets>
-                </HBox.margin>
-            </Button>
+
 
         </children>
 
     </HBox>
+    <Button fx:id="btn_upload_min" onMouseClicked="#stage_minimum">
+        <!--<HBox.margin>
+            <Insets>
+                <left>10</left>
+            </Insets>
+        </HBox.margin>-->
+    </Button>
 </AnchorPane>
