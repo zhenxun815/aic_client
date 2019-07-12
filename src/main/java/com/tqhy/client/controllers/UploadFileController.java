@@ -87,7 +87,8 @@ public class UploadFileController {
 
     @Value("${path.data:'/data/'}")
     private String localDataPath;
-
+    @FXML
+    HBox container_pane;
     @FXML
     VBox panels_parent;
     @FXML
@@ -160,6 +161,12 @@ public class UploadFileController {
     @FXML
     ProgressBar progress_bar_upload;
 
+    /**
+     * 窗口最小化
+     */
+    @FXML
+    public Button btn_upload_min;
+
     @FXML
     Button btn_failed_check;
 
@@ -198,11 +205,20 @@ public class UploadFileController {
 
         uploadReady = false;
 
-        mainStageIconified.bind(ClientApplication.stage.iconifiedProperty());
-        mainStageIconified.addListener((observable, oldVal, newVal) -> {
-            logger.info("main stage iconified state change..." + newVal);
-            stage.setIconified(newVal);
-        });
+        stage.iconifiedProperty()
+             .addListener((observable, oldVal, newVal) -> {
+                 logger.info("main stage iconified state change..." + newVal);
+                 ClientApplication.stage.setIconified(newVal);
+             });
+
+        //mainStageIconified.bind(ClientApplication.stage.iconifiedProperty());
+        ClientApplication.stage.iconifiedProperty()
+                               .addListener((observable, oldVal, newVal) -> {
+                                   logger.info("main stage iconified state change..." + newVal);
+                                   stage.setIconified(newVal);
+                                   //ClientApplication.stage.setIconified(newVal);
+                               });
+
         text_field_max.setFocusTraversable(false);
         text_field_remarks.setOnKeyPressed(event -> {
             int length = text_field_remarks.getLength();
@@ -359,8 +375,8 @@ public class UploadFileController {
      */
     private void showPanel(String panelId) {
 
-        panels_parent.setLayoutX((stage.getWidth() - 600) / 2);
-        panels_parent.setLayoutY((stage.getHeight() - 248) / 2);
+        container_pane.setLayoutX((stage.getWidth() - 600) / 2);
+        container_pane.setLayoutY((stage.getHeight() - 268) / 2);
 
         panels_parent.getChildren().removeAll(panels);
         VBox panelToShow = Arrays.stream(panels)
@@ -464,6 +480,15 @@ public class UploadFileController {
         }
     }
 
+    @FXML
+    public void stage_minimum(MouseEvent mouseEvent) {
+        MouseButton button = mouseEvent.getButton();
+        if (MouseButton.PRIMARY.equals(button)) {
+            stage.setIconified(true);
+            ClientApplication.stage.setIconified(true);
+        }
+    }
+
     /**
      * 开启上传窗口,初始化页面
      *
@@ -496,6 +521,4 @@ public class UploadFileController {
             }
         });
     }
-
-
 }
