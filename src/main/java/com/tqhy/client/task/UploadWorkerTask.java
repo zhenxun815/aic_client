@@ -123,10 +123,10 @@ public class UploadWorkerTask extends Task {
         failCount = new AtomicInteger(0);
         jpgDir = new File(dirToUpload, Constants.PATH_TEMP_JPG);
         //批次目录下图片
-        HashMap<File, String> directImgFileMap = FileUtils.getFilesMapInDir(dirToUpload, file -> isDcmFile(file) || FileUtils.isJpgFile(file), null);
+        //HashMap<File, String> directImgFileMap = FileUtils.getFilesMapInDir(dirToUpload, file -> isDcmFile(file) || FileUtils.isJpgFile(file), null);
         HashMap<File, String> subDirImgFileMap = FileUtils.getFilesMapInSubDir(dirToUpload, file -> isDcmFile(file) || FileUtils.isJpgFile(file));
         HashMap<File, String> tempTotalFile = new HashMap<>();
-        tempTotalFile.putAll(directImgFileMap);
+        //tempTotalFile.putAll(directImgFileMap);
         tempTotalFile.putAll(subDirImgFileMap);
 
         List<String> caseNames = tempTotalFile.values()
