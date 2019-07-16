@@ -3,7 +3,6 @@ import com.google.gson.stream.JsonReader;
 import com.tqhy.client.models.entity.DownloadInfo;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
-import com.tqhy.client.task.Dcm2JpgTask;
 import com.tqhy.client.utils.FileUtils;
 import com.tqhy.client.utils.GsonUtils;
 import okhttp3.ResponseBody;
@@ -17,14 +16,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -39,28 +33,27 @@ public class UnitTests {
     Logger logger = LoggerFactory.getLogger(UnitTests.class);
 
     @Test
+    public void testJudgeDcm() {
+        String dirPath = "C:\\Users\\qing\\Documents\\WeChat Files\\shamaohengheng\\FileStorage\\File\\2019-07\\a735aadbe0f9fa1605520f641ccbb978";
+        String dcmName = "c4ca4238a0b923820dcc509a6f75849b.3.6.1.4.1.25403.220295149980554.168.20190703101815.4.dcm";
+        boolean isDcm = FileUtils.isDcmFile(new File(dirPath, dcmName));
+        logger.info("is dcm {}", isDcm);
+    }
+
+    @Test
     public void testParseDcm() {
 
         String libPath = System.getProperty("java.library.path");
         logger.info("lib path: is: " + libPath);
 
-        File dcmDir = new File("F:\\dicom\\4321\\case1\\");
-        File[] dcmFiles = dcmDir.listFiles(File::isFile);
+        File dcmDir = new File("C:\\Users\\qing\\Documents\\WeChat Files\\shamaohengheng\\FileStorage\\File\\2019-07\\a735aadbe0f9fa1605520f641ccbb978");
+        File[] dcmFiles = dcmDir.listFiles(FileUtils::isDcmFile);
         logger.info("dcm count is: " + dcmFiles.length);
-        ExecutorService executor = Executors.newFixedThreadPool(4);
         Arrays.stream(dcmFiles)
-              .collect(ArrayList<File>::new, (list, dicomFile) -> {
-                  Future<File> fileFuture = executor.submit(Dcm2JpgTask.of(dicomFile, dcmDir));
-                  try {
-                      File jpgFile = fileFuture.get();
-                      System.out.println("trans jpg file finish..." + jpgFile.getAbsolutePath());
-                  } catch (InterruptedException e) {
-                      e.printStackTrace();
-                  } catch (ExecutionException e) {
-                      e.printStackTrace();
-                  }
-              }, ArrayList::addAll)
-              .forEach(jpgFile -> System.out.println("trans jpg file finish..." + jpgFile.getAbsolutePath()));
+              .forEach(dcmFile -> {
+                  File jpgFile = FileUtils.transToJpg(dcmFile, dcmDir).get();
+                  System.out.println("trans jpg file finish..." + jpgFile.getAbsolutePath());
+              });
 
     }
 
