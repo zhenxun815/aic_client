@@ -103,20 +103,20 @@ public class FileUtils {
     }
 
 
-    public static File transToJpg(File fileToTrans, File jpgDir) {
+    public static Optional<File> transToJpg(File fileToTrans, File jpgDir) {
         try {
             ExecutorService executor = Executors.newSingleThreadExecutor();
             Future<File> jpgFileFuture = executor.submit(Dcm2JpgTask.of(fileToTrans, jpgDir));
             File jpgFile = jpgFileFuture.get();
             logger.info("file to trans success {}", jpgFile.getAbsolutePath());
-            return jpgFile;
+            return Optional.of(jpgFile);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
 
-        return fileToTrans;
+        return Optional.empty();
     }
 
 
