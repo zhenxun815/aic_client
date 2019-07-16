@@ -85,8 +85,8 @@
 		console.log('into key up event listener..')
 		if (e.keyCode === 13) {
 			$ = layui.jquery;
-			let nameLength = $('#input_uname').val().length
-			let pwdLength = $('#input_upwd').val().length
+			var nameLength = $('#input_uname').val().length
+			var pwdLength = $('#input_upwd').val().length
 			console.log(`name length ${nameLength}, pwd length ${pwdLength}`)
 			if (nameLength > 0 && pwdLength > 0) {
 				land()
@@ -96,8 +96,8 @@
 
 	function checkInputLength() {
 		$ = layui.jquery;
-		let nameLength = $('#input_uname').val().length
-		let pwdLength = $('#input_upwd').val().length
+		var nameLength = $('#input_uname').val().length
+		var pwdLength = $('#input_upwd').val().length
 		if (nameLength > 50 || pwdLength > 50) {
 			$('#landing_tips').html('输入长度不合法,请重新输入!')
 			$('#landing_tips').show()
@@ -115,19 +115,19 @@
 	function land() {
 		//localStorage.clear()
 		if (checkValueFunc() && checkInputLength()) {
-			let userName = $('#input_uname').val()
-			let userPwd = $('#input_upwd').val()
+			var userName = $('#input_uname').val()
+			var userPwd = $('#input_upwd').val()
 
-			let landInfo = {userName: userName, userPwd: userPwd}
+			var landInfo = {userName: userName, userPwd: userPwd}
 			console.log(`userName is: ${userName}, userPwd is: ${userPwd}`)
 			post_ajax('land', '/landing', landInfo, (response) => {
-				let flag = response.flag
-				let token = response.token
+				var flag = response.flag
+				var token = response.token
 				console.log(`flag is: ${flag}`)
 				if (1 == flag) {
-					let localIP = response.localIP
+					var localIP = response.localIP
 					//window.location.href = baseUrlLocal + '/html/test_upload.html'
-					let serverIP = response.serverIP
+					var serverIP = response.serverIP
 					//alert('server ip: '+serverIP)
 					//window.location.href = 'http://' + serverIP + '/index.html?token=' + token + '&localIP=' + localIP
 					// jsp version

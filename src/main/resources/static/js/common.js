@@ -1,5 +1,5 @@
-let $ = null
-let layer = null
+var $ = null
+var layer = null
 
 baseUrlLocal = 'http://localhost:8081'
 layui.use(['layer', 'form', 'jquery'], function () {
@@ -7,7 +7,7 @@ layui.use(['layer', 'form', 'jquery'], function () {
 	$ = layui.jquery
 });
 
-let lay_setting = {
+var lay_setting = {
 	type: 1,
 	area: '600px',
 	title: false,
@@ -67,7 +67,7 @@ function layCloseFunc() {
 
 // 表单验证
 function checkValueFunc() {
-	let result = true
+	var result = true
 	try {
 		$.each($('.input'), function (index, item) {
 			// console.log(item,index)

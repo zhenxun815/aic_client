@@ -27,6 +27,7 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -64,10 +65,16 @@ public class UploadWorkerTask extends Task {
 
     @NonNull
     int maxUploadCaseCount;
+
+    /**
+     * 待转换总文件数
+     */
+    int total2Transform;
+
     /**
      * 待上传总文件数
      */
-    int total;
+    int total2Upload;
 
     /**
      * 上传成功文件数
@@ -92,14 +99,14 @@ public class UploadWorkerTask extends Task {
 
         prepareTask();
 
-        if (total == 0) {
-            logger.info("total file count is 0!");
+        if (total2Upload == 0) {
+            logger.info("total2Upload file count is 0!");
             updateProgress(100, 100);
             String completeMsg = PROGRESS_MSG_COMPLETE + ";" + successCount.get() + ";" + failCount.get();
             updateMessage(completeMsg);
         }
 
-        logger.info("total file count is: " + total);
+        logger.info("total2Upload file count is: " + total2Upload);
 
         String uploadType = uploadMsg.getUploadType();
 
@@ -123,10 +130,10 @@ public class UploadWorkerTask extends Task {
         failCount = new AtomicInteger(0);
         jpgDir = new File(dirToUpload, Constants.PATH_TEMP_JPG);
         //批次目录下图片
-        HashMap<File, String> directImgFileMap = FileUtils.getFilesMapInDir(dirToUpload, file -> isDcmFile(file) || FileUtils.isJpgFile(file), null);
+        //HashMap<File, String> directImgFileMap = FileUtils.getFilesMapInDir(dirToUpload, file -> isDcmFile(file) || FileUtils.isJpgFile(file), null);
         HashMap<File, String> subDirImgFileMap = FileUtils.getFilesMapInSubDir(dirToUpload, file -> isDcmFile(file) || FileUtils.isJpgFile(file));
         HashMap<File, String> tempTotalFile = new HashMap<>();
-        tempTotalFile.putAll(directImgFileMap);
+        //tempTotalFile.putAll(directImgFileMap);
         tempTotalFile.putAll(subDirImgFileMap);
 
         List<String> caseNames = tempTotalFile.values()
@@ -134,6 +141,7 @@ public class UploadWorkerTask extends Task {
                                               .distinct()
                                               .collect(Collectors.toList());
 
+        uploadInfoFile = FileUtils.getLocalFile(localDataPath, uploadMsg.getBatchNumber() + ".txt");
         if (maxUploadCaseCount > 0 && maxUploadCaseCount < caseNames.size()) {
             HashMap<File, String> tempUploadFile = new HashMap<>();
             List<String> uploadCaseNames = caseNames.stream()
@@ -150,15 +158,14 @@ public class UploadWorkerTask extends Task {
            /* tempUploadFile.forEach((file, caseName) -> {
                 logger.info("file {} case name {}", file.getAbsolutePath(), caseName);
             });*/
-            total = tempUploadFile.values().size();
+            total2Transform = tempUploadFile.values().size();
             uploadImgFileMap = transAllToJpg(tempUploadFile, jpgDir);
 
         } else {
-            total = tempTotalFile.values().size();
+            total2Transform = tempTotalFile.values().size();
             uploadImgFileMap = transAllToJpg(tempTotalFile, jpgDir);
         }
-
-        uploadInfoFile = FileUtils.getLocalFile(localDataPath, uploadMsg.getBatchNumber() + ".txt");
+        total2Upload = uploadImgFileMap.values().size();
         stopUploadFlag.setValue(false);
     }
 
@@ -275,11 +282,13 @@ public class UploadWorkerTask extends Task {
      */
     private void updateUploadStatus() {
         int completeCount = successCount.get() + failCount.get();
-        double progress = (completeCount + 0D) / total * 100;
+        double progress = (completeCount + 0D) / total2Upload * 100;
         logger.info("complete count is: " + completeCount + ", progress is: " + progress);
-        updateProgress(completeCount, total);
+        updateProgress(completeCount, total2Upload);
 
-        String completeMsg = PROGRESS_MSG_COMPLETE + ";" + successCount.get() + ";" + failCount.get();
+        int transformFailCount = total2Transform - total2Upload;
+        int totalFailCount = failCount.get() + transformFailCount;
+        String completeMsg = PROGRESS_MSG_COMPLETE + ";" + successCount.get() + ";" + totalFailCount;
         String uploadMsg = PROGRESS_MSG_UPLOAD + ";" + progress;
         updateMessage(progress == 100.0D ? completeMsg : uploadMsg);
         deleteTempFiles(completeCount);
@@ -290,7 +299,7 @@ public class UploadWorkerTask extends Task {
      */
     private void deleteTempFiles(int completeCount) {
 
-        if (completeCount == total) {
+        if (completeCount == total2Upload) {
             File temp = new File(dirToUpload, Constants.PATH_TEMP_JPG);
             FileUtils.deleteDir(temp);
         }
@@ -364,17 +373,19 @@ public class UploadWorkerTask extends Task {
                                                                    String caseName = entry.getValue();
                                                                    if (isDcmFile(file)) {
                                                                        File jpgCaseDir = new File(jpgDir, caseName);
-
-                                                                       File jpgFile = transToJpg(file, jpgCaseDir);
-                                                                       map.put(jpgFile, caseName);
+                                                                       Optional<File> jpgFileOpt = transToJpg(file, jpgCaseDir);
+                                                                       if (jpgFileOpt.isPresent()) {
+                                                                           map.put(jpgFileOpt.get(), caseName);
+                                                                       } else {
+                                                                           FileUtils.appendFile(uploadInfoFile, file.getAbsolutePath(), builder -> builder.append(Constants.NEW_LINE), true);
+                                                                       }
                                                                    } else {
                                                                        map.put(file, caseName);
                                                                    }
-                                                                   double progress = (completeCount.incrementAndGet() + 0D) / total * 100;
-                                                                   updateProgress(completeCount.get(), total);
+                                                                   double progress = (completeCount.incrementAndGet() + 0D) / total2Transform * 100;
+                                                                   updateProgress(completeCount.get(), total2Transform);
                                                                    String uploadMsg = PROGRESS_MSG_COLLECT + ";" + progress;
                                                                    updateMessage(uploadMsg);
-
                                                                },
                                                                HashMap::putAll);
 
