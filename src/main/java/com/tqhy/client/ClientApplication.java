@@ -3,6 +3,8 @@ package com.tqhy.client;
 import com.tqhy.client.utils.FXMLUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Rectangle2D;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,22 +34,27 @@ public class ClientApplication extends Application {
     public void start(Stage primaryStage) throws Exception {
         stage = primaryStage;
         stage.setOnCloseRequest(event -> System.exit(0));
-        FXMLUtils.loadWindow(ClientApplication.stage, "/static/fxml/main.fxml");
         initPrimaryStageSize();
-
     }
 
     /**
      * 初始最大化窗口,固定窗体大小
      */
     private void initPrimaryStageSize() {
+
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        stage.setX(visualBounds.getMinX());
+        stage.setY(visualBounds.getMinY());
+        logger.info("stage: x {}, y {}", stage.getX(), stage.getY());
         stage.setMaximized(true);
-        stage.centerOnScreen();
-        double height = stage.getHeight();
-        double width = stage.getWidth();
-        stage.setMaxHeight(height);
-        stage.setMaxWidth(width);
-        stage.setResizable(false);
+        FXMLUtils.loadWindow(stage, "/static/fxml/main.fxml");
+        double st_width = stage.getWidth();
+        double st_height = stage.getHeight();
+        logger.info("st width {}, height {}", st_width, st_height);
+        stage.setMinWidth(st_width);
+        stage.setMinHeight(st_height);
+        stage.setMaxWidth(st_width);
+        stage.setMaxHeight(st_height);
     }
 
     /**
