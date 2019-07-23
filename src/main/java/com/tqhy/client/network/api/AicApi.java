@@ -94,8 +94,8 @@ public interface AicApi {
      *
      * @return
      */
-    @GET("uploadTestEnd")
-    Call<ResponseBody> uploadTestEnd(@Query("batchNumber") String batchNumber);
+    @POST("delBatch")
+    Observable<ResponseBody> delBatch(@Query("batchNumber") String batchNumber, @Query("typeName") String typeName);
 
     /*@Multipart
     @POST("login/")

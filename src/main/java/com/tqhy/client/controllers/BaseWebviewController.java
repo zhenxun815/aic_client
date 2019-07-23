@@ -40,6 +40,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -279,12 +280,19 @@ public class BaseWebviewController {
     /**
      * 向js传值
      *
-     * @param msg
+     * @param msgs
      */
-    void sendMsgToJs(WebView webView, String funcName, String msg) {
+    void sendMsgToJs(WebView webView, String funcName, String... msgs) {
+        logger.info("send msg to js func {} with msg {}", funcName, msgs);
+        String paramsStr = Arrays.stream(msgs)
+                                 .collect(StringBuilder::new,
+                                          (builder, msg) -> builder.append(msg).append(","),
+                                          StringBuilder::append)
+                                 .toString();
+        paramsStr = paramsStr.substring(0, paramsStr.length() - 1);
         Object response = webView.getEngine()
-                                 .executeScript(funcName + "('" + msg + "')");
+                                 .executeScript(funcName + "('" + paramsStr + "')");
         String s = (String) response;
-        logger.info("get response: " + s);
+        logger.info("send msg to js get response: {}", s);
     }
 }

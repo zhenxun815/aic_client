@@ -159,7 +159,7 @@ public class LandingController extends BaseWebviewController {
         return response;
     }
 
-    void sendMsgToJs(String funcName, String msg) {
-        super.sendMsgToJs(webView, funcName, msg);
+    void sendMsgToJs(String funcName, String... msgs) {
+        super.sendMsgToJs(webView, funcName, msgs);
     }
 }

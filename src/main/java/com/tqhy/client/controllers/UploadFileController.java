@@ -7,6 +7,7 @@ import com.tqhy.client.network.Network;
 import com.tqhy.client.task.UploadWorkerTask;
 import com.tqhy.client.utils.FXMLUtils;
 import com.tqhy.client.utils.FileUtils;
+import io.reactivex.schedulers.Schedulers;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -419,7 +420,8 @@ public class UploadFileController {
             //通知页面刷新
             String batchNumber = uploadMsg.getBatchNumber();
             if (StringUtils.isNotEmpty(batchNumber)) {
-                landingController.sendMsgToJs("callJsFunction", batchNumber);
+                String successCount = workerTask.getSuccessCount().toString();
+                landingController.sendMsgToJs("callJsFunction", batchNumber, successCount);
             }
         }
     }
@@ -452,6 +454,17 @@ public class UploadFileController {
             logger.info("into stop upload....");
             workerTask.getStopUploadFlag().set(true);
             showPanel(panel_choose.getId());
+            @NonNull String uploadType = uploadMsg.getUploadType();
+            String batchNumber = uploadMsg.getBatchNumber();
+            logger.info("delBatch request batch number{}, uploadType{}", batchNumber, uploadType);
+            Network.getAicApi()
+                   .delBatch(batchNumber, uploadType)
+                   .observeOn(Schedulers.io())
+                   .subscribeOn(Schedulers.trampoline())
+                   .subscribe(responseBody -> {
+                       String jsonStr = responseBody.string();
+                       logger.info("delBatch response batch number {},response str {}", batchNumber, jsonStr);
+                   });
         }
     }
 
