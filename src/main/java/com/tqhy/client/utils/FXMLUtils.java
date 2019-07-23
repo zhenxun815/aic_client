@@ -78,9 +78,9 @@ public class FXMLUtils {
      */
     private static void loadScene(Stage stage, Parent parentNode) {
         Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
-        double width = visualBounds.getWidth();
-        double height = visualBounds.getHeight();
-        Scene scene = new Scene(parentNode, width, height, Color.TRANSPARENT);
+        double visualWidth = visualBounds.getWidth();
+        double visualHeight = visualBounds.getHeight();
+        Scene scene = new Scene(parentNode, visualWidth, visualHeight, Color.TRANSPARENT);
         scene.getStylesheets().add(NetworkUtils.toExternalForm("/static/css/fx_root.css"));
         stage.setScene(scene);
         stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title_light.png")));
