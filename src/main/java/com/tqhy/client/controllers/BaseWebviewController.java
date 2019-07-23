@@ -290,8 +290,12 @@ public class BaseWebviewController {
                                           StringBuilder::append)
                                  .toString();
         paramsStr = paramsStr.substring(0, paramsStr.length() - 1);
+        logger.info("paramstr is {}", paramsStr);
+        String jsFunStr = funcName + "(" + paramsStr + ")";
+        logger.info("jsFunStr is {}", jsFunStr);
+
         Object response = webView.getEngine()
-                                 .executeScript(funcName + "('" + paramsStr + "')");
+                                 .executeScript(jsFunStr);
         String s = (String) response;
         logger.info("send msg to js get response: {}", s);
     }
