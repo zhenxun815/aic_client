@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -459,6 +460,7 @@ public class UploadFileController {
             logger.info("delBatch request batch number{}, uploadType{}", batchNumber, uploadType);
             Network.getAicApi()
                    .delBatch(batchNumber, uploadType)
+                   .delay(2, TimeUnit.SECONDS)
                    .observeOn(Schedulers.io())
                    .subscribeOn(Schedulers.trampoline())
                    .subscribe(responseBody -> {

@@ -243,6 +243,9 @@ public class UploadWorkerTask extends Task {
                                   @Override
                                   public void onSubscribe(Disposable d) {
                                       logger.info("Disposable: " + d);
+                                      if (shouldStop()) {
+                                          d.dispose();
+                                      }
                                   }
 
                                   @Override
