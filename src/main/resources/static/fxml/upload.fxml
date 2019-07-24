@@ -16,7 +16,7 @@
              style="-fx-background-color: transparent;-fx-padding: 10px"
               -->
     <!--选择上传文件夹显示页面-->
-    <HBox fx:id="container_pane" styleClass="container_pane">
+    <HBox fx:id="container_pane" styleClass="container_pane" minWidth="600" minHeight="268">
         <children>
             <VBox fx:id="panels_parent">
                 <VBox fx:id="panel_choose" styleClass="pane">

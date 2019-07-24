@@ -116,6 +116,22 @@ public class FXMLUtils {
     }
 
     /**
+     * 使页面相对屏幕居中
+     *
+     * @param pane
+     */
+    public static void center2Display(Pane pane) {
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        double visualWidth = visualBounds.getWidth();
+        double visualHeight = visualBounds.getHeight();
+
+        pane.setLayoutX((visualWidth - pane.getMinWidth()) / 2);
+        pane.setLayoutY((visualHeight - pane.getMinHeight()) / 2);
+        //logger.info("pane width {}, pane height {}", pane.getMinWidth(), pane.getMinHeight());
+        //logger.info("x {}, y {}", pane.getLayoutX(), pane.getLayoutY());
+    }
+
+    /**
      * 弹出选择文件夹窗口并返回选择路径
      *
      * @param window 若为null则使用主窗口{@link ClientApplication#stage}对象

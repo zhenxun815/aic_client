@@ -378,9 +378,7 @@ public class UploadFileController {
      */
     private void showPanel(String panelId) {
 
-        container_pane.setLayoutX((stage.getWidth() - 600) / 2);
-        container_pane.setLayoutY((stage.getHeight() - 268) / 2);
-
+        FXMLUtils.center2Display(container_pane);
         panels_parent.getChildren().removeAll(panels);
         VBox panelToShow = Arrays.stream(panels)
                                  .filter(panel -> panel.getId().equals(panelId))
