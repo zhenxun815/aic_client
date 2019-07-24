@@ -286,7 +286,10 @@ public class BaseWebviewController {
         logger.info("send msg to js func {} with msg {}", funcName, msgs);
         String paramsStr = Arrays.stream(msgs)
                                  .collect(StringBuilder::new,
-                                          (builder, msg) -> builder.append(msg).append(","),
+                                          (builder, msg) -> builder.append("'")
+                                                                   .append(msg)
+                                                                   .append("'")
+                                                                   .append(","),
                                           StringBuilder::append)
                                  .toString();
         paramsStr = paramsStr.substring(0, paramsStr.length() - 1);

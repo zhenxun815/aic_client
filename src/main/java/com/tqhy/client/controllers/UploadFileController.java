@@ -7,7 +7,6 @@ import com.tqhy.client.network.Network;
 import com.tqhy.client.task.UploadWorkerTask;
 import com.tqhy.client.utils.FXMLUtils;
 import com.tqhy.client.utils.FileUtils;
-import io.reactivex.schedulers.Schedulers;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -41,7 +40,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -243,7 +241,7 @@ public class UploadFileController {
     private void resetValues() {
         dirToUpload = null;
         text_choose_info.setText("未选择任何文件!");
-        text_field_max.setText(null);
+        text_field_max.setText("");
         uploadReady = false;
     }
 
@@ -318,7 +316,7 @@ public class UploadFileController {
                 return;
             }
             String batchNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
-            uploadMsg.setBatchNumber(batchNumber);
+            uploadMsg.setBatchNumber(batchNumber + "a");
             text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
             logger.info("upload batch number is {}", batchNumber);
 
@@ -455,18 +453,7 @@ public class UploadFileController {
             logger.info("into stop upload....");
             workerTask.getStopUploadFlag().set(true);
             showPanel(panel_choose.getId());
-            @NonNull String uploadType = uploadMsg.getUploadType();
-            String batchNumber = uploadMsg.getBatchNumber();
-            logger.info("delBatch request batch number{}, uploadType{}", batchNumber, uploadType);
-            Network.getAicApi()
-                   .delBatch(batchNumber, uploadType)
-                   .delay(2, TimeUnit.SECONDS)
-                   .observeOn(Schedulers.io())
-                   .subscribeOn(Schedulers.trampoline())
-                   .subscribe(responseBody -> {
-                       String jsonStr = responseBody.string();
-                       logger.info("delBatch response batch number {},response str {}", batchNumber, jsonStr);
-                   });
+
         }
     }
 

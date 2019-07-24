@@ -130,12 +130,8 @@ public class UploadWorkerTask extends Task {
         failCount = new AtomicInteger(0);
         jpgDir = new File(dirToUpload, Constants.PATH_TEMP_JPG);
         //批次目录下图片
-        HashMap<File, String> directImgFileMap = FileUtils.getFilesMapInDir(dirToUpload, file -> isDcmFile(file) || FileUtils.isJpgFile(file), null);
-        HashMap<File, String> subDirImgFileMap = FileUtils.getFilesMapInSubDir(dirToUpload, file -> isDcmFile(file) || FileUtils.isJpgFile(file));
-        HashMap<File, String> tempTotalFile = new HashMap<>();
-        tempTotalFile.putAll(directImgFileMap);
-        tempTotalFile.putAll(subDirImgFileMap);
 
+        HashMap<File, String> tempTotalFile = collectAll(dirToUpload);
         List<String> caseNames = tempTotalFile.values()
                                               .stream()
                                               .distinct()
@@ -168,6 +164,7 @@ public class UploadWorkerTask extends Task {
         total2Upload = uploadImgFileMap.values().size();
         stopUploadFlag.setValue(false);
     }
+
 
     /**
      * 上传测试数据
@@ -213,21 +210,30 @@ public class UploadWorkerTask extends Task {
     }
 
     private void upLoadDir(HashMap<String, String> requestParamMap) {
-        uploadImgFileMap.forEach((file, caseName) -> {
+
+
+        for (Map.Entry<File, String> uploadFileEntry : uploadImgFileMap.entrySet()) {
+            File file = uploadFileEntry.getKey();
+            String caseName = uploadFileEntry.getValue();
             if (shouldStop()) {
+                logger.info("upload dir should stop...");
                 return;
             }
             requestParamMap.put("caseName", caseName);
             logger.info("case name is: {}", caseName);
             Map<String, RequestBody> requestMap = NetworkUtils.createRequestParamMap(requestParamMap);
             doUpLoad(file, requestMap);
-        });
+        }
+
     }
 
     private void doUpLoad(File fileToUpload, Map<String, RequestBody> requestParamMap) {
 
         logger.info("start upload file: " + fileToUpload.getAbsolutePath());
-        if (shouldStop()) return;
+        if (shouldStop()) {
+            logger.info("do upload should stop...");
+            return;
+        }
         MultipartBody.Part filePart = NetworkUtils.createFilePart("file", fileToUpload.getAbsolutePath());
         Observable<ResponseBody> responseBodyObservable = null;
 
@@ -240,18 +246,40 @@ public class UploadWorkerTask extends Task {
         responseBodyObservable.observeOn(Schedulers.io())
                               .subscribeOn(Schedulers.trampoline())
                               .blockingSubscribe(new Observer<ResponseBody>() {
+                                  Disposable d;
+
                                   @Override
                                   public void onSubscribe(Disposable d) {
-                                      logger.info("Disposable: " + d);
+                                      logger.info("on subscribe Disposable: " + d);
                                       if (shouldStop()) {
+                                          logger.info("on subscribe should stop {}", d);
                                           d.dispose();
                                       }
+                                      this.d = d;
                                   }
 
                                   @Override
                                   public void onNext(ResponseBody responseBody) {
                                       ClientMsg clientMsg = GsonUtils.parseResponseToObj(responseBody);
                                       Integer flag = clientMsg.getFlag();
+                                      if (shouldStop()) {
+                                          logger.info("on next should stop..");
+                                          d.dispose();
+                                          logger.info("start delete...");
+                                          File temp = new File(dirToUpload, Constants.PATH_TEMP_JPG);
+                                          FileUtils.deleteDir(temp);
+                                          @NonNull String uploadType = uploadMsg.getUploadType();
+                                          String batchNumber = uploadMsg.getBatchNumber();
+                                          logger.info("delBatch request batch number{}, uploadType{}", batchNumber, uploadType);
+                                          Network.getAicApi()
+                                                 .delBatch(batchNumber, uploadType)
+                                                 .observeOn(Schedulers.io())
+                                                 .subscribeOn(Schedulers.trampoline())
+                                                 .subscribe(resBody -> {
+                                                     String jsonStr = resBody.string();
+                                                     logger.info("delBatch response batch number {},response str {}", batchNumber, jsonStr);
+                                                 });
+                                      }
                                       if (203 == flag) {
                                           jumpToLandFlag.set(true);
                                       }
@@ -360,6 +388,38 @@ public class UploadWorkerTask extends Task {
         return completeCount;
     }
 
+    private HashMap<File, String> collectAll(File dirToUpload) {
+        AtomicInteger completeCount = new AtomicInteger(0);
+        AtomicInteger maxCount = new AtomicInteger(200);
+        HashMap<File, String> directImgFileMap = FileUtils.getFilesMapInDir(dirToUpload, file -> {
+            boolean fileValid = isDcmFile(file) || FileUtils.isJpgFile(file);
+            if (completeCount.get() > maxCount.get() / 4 * 3) {
+                maxCount.addAndGet(maxCount.get() / 4);
+            }
+            double progress = (completeCount.incrementAndGet() + 0D) / maxCount.get() * 100;
+            updateProgress(completeCount.get(), maxCount.get());
+            String uploadMsg = PROGRESS_MSG_COLLECT + ";" + progress;
+            updateMessage(uploadMsg);
+            return fileValid;
+        }, null);
+
+        HashMap<File, String> subDirImgFileMap = FileUtils.getFilesMapInSubDir(dirToUpload, file -> {
+            boolean fileValid = isDcmFile(file) || FileUtils.isJpgFile(file);
+            if (completeCount.get() > maxCount.get() / 4 * 3) {
+                maxCount.addAndGet(maxCount.get() / 4);
+            }
+            double progress = (completeCount.incrementAndGet() + 0D) / maxCount.get() * 100;
+            updateProgress(completeCount.get(), maxCount.get());
+            String uploadMsg = PROGRESS_MSG_COLLECT + ";" + progress;
+            updateMessage(uploadMsg);
+            return fileValid;
+        });
+        HashMap<File, String> tempTotalFile = new HashMap<>();
+        tempTotalFile.putAll(directImgFileMap);
+        tempTotalFile.putAll(subDirImgFileMap);
+        return tempTotalFile;
+    }
+
     /**
      * @param originFiles
      * @return
@@ -397,10 +457,21 @@ public class UploadWorkerTask extends Task {
 
     private boolean shouldStop() {
         if (stopUploadFlag.get() || jumpToLandFlag.get()) {
-            File temp = new File(dirToUpload, Constants.PATH_TEMP_JPG);
-            FileUtils.deleteDir(temp);
+            logger.info("should stop..");
+            initValues();
             return true;
         }
         return false;
+    }
+
+    /**
+     * 初始化数据
+     */
+    private void initValues() {
+
+        total2Upload = 0;
+        total2Transform = 0;
+        successCount.set(0);
+        failCount.set(0);
     }
 }
