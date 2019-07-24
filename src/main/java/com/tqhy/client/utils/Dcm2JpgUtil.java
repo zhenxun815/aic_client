@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 /**
- * 将Dicom文件转换为Jpg文件任务
+ * 将Dicom文件转换为Jpg文件
  *
  * @author Yiheng
  * @create 2018/5/18

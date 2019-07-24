@@ -33,8 +33,8 @@ public class WarningOnCloseController extends BasePopWindowController {
 
         base_pane.setLayoutX((visualWidth - base_pane.getMinWidth()) / 2);
         base_pane.setLayoutY((visualHeight - base_pane.getMinHeight()) / 2);
-        logger.info("pane width {}, pane height {}", base_pane.getMinWidth(), base_pane.getMinHeight());
-        logger.info("x {}, y {}", base_pane.getLayoutX(), base_pane.getLayoutY());
+        //logger.info("pane width {}, pane height {}", base_pane.getMinWidth(), base_pane.getMinHeight());
+        //logger.info("x {}, y {}", base_pane.getLayoutX(), base_pane.getLayoutY());
     }
 
     @FXML

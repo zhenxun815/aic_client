@@ -15,6 +15,12 @@ import lombok.Setter;
 @Setter
 public class BasePopWindowController {
 
+    /**
+     * 通过页面事件{@link Event}对象获取页面所属的{@link Stage}对象
+     *
+     * @param event
+     * @return
+     */
     Stage getOwnerStageFromEvent(Event event) {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         return stage;

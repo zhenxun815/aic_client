@@ -90,7 +90,7 @@ public interface AicApi {
     Call<ResponseBody> pingServer();
 
     /**
-     * 通知后台上传完成
+     * 通知后台删除无效批次
      *
      * @return
      */

@@ -453,7 +453,6 @@ public class UploadFileController {
             logger.info("into stop upload....");
             workerTask.getStopUploadFlag().set(true);
             showPanel(panel_choose.getId());
-
         }
     }
 

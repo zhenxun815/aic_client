@@ -265,7 +265,7 @@ public class UploadWorkerTask extends Task {
                                       if (shouldStop()) {
                                           logger.info("on next should stop..");
                                           d.dispose();
-                                          logger.info("start delete...");
+                                          logger.info("start delete tmp file...");
                                           File temp = new File(dirToUpload, Constants.PATH_TEMP_JPG);
                                           FileUtils.deleteDir(temp);
                                           @NonNull String uploadType = uploadMsg.getUploadType();
@@ -388,30 +388,24 @@ public class UploadWorkerTask extends Task {
         return completeCount;
     }
 
+    /**
+     * 收集全部文件信息并更新进度条状态
+     *
+     * @param dirToUpload
+     * @return
+     */
     private HashMap<File, String> collectAll(File dirToUpload) {
         AtomicInteger completeCount = new AtomicInteger(0);
         AtomicInteger maxCount = new AtomicInteger(200);
         HashMap<File, String> directImgFileMap = FileUtils.getFilesMapInDir(dirToUpload, file -> {
             boolean fileValid = isDcmFile(file) || FileUtils.isJpgFile(file);
-            if (completeCount.get() > maxCount.get() / 4 * 3) {
-                maxCount.addAndGet(maxCount.get() / 4);
-            }
-            double progress = (completeCount.incrementAndGet() + 0D) / maxCount.get() * 100;
-            updateProgress(completeCount.get(), maxCount.get());
-            String uploadMsg = PROGRESS_MSG_COLLECT + ";" + progress;
-            updateMessage(uploadMsg);
+            updateCollectAllStatus(completeCount, maxCount);
             return fileValid;
         }, null);
 
         HashMap<File, String> subDirImgFileMap = FileUtils.getFilesMapInSubDir(dirToUpload, file -> {
             boolean fileValid = isDcmFile(file) || FileUtils.isJpgFile(file);
-            if (completeCount.get() > maxCount.get() / 4 * 3) {
-                maxCount.addAndGet(maxCount.get() / 4);
-            }
-            double progress = (completeCount.incrementAndGet() + 0D) / maxCount.get() * 100;
-            updateProgress(completeCount.get(), maxCount.get());
-            String uploadMsg = PROGRESS_MSG_COLLECT + ";" + progress;
-            updateMessage(uploadMsg);
+            updateCollectAllStatus(completeCount, maxCount);
             return fileValid;
         });
         HashMap<File, String> tempTotalFile = new HashMap<>();
@@ -421,6 +415,24 @@ public class UploadWorkerTask extends Task {
     }
 
     /**
+     * 更新文件信息收集状态
+     *
+     * @param completeCount
+     * @param maxCount
+     */
+    private void updateCollectAllStatus(AtomicInteger completeCount, AtomicInteger maxCount) {
+        if (completeCount.get() > maxCount.get() / 4 * 3) {
+            maxCount.addAndGet(maxCount.get() / 4);
+        }
+        double progress = (completeCount.incrementAndGet() + 0D) / maxCount.get() * 100;
+        updateProgress(completeCount.get(), maxCount.get());
+        String uploadMsg = PROGRESS_MSG_COLLECT + ";" + progress;
+        updateMessage(uploadMsg);
+    }
+
+    /**
+     * 统一所有待上传图片数据为JPG格式
+     *
      * @param originFiles
      * @return
      */
@@ -468,7 +480,6 @@ public class UploadWorkerTask extends Task {
      * 初始化数据
      */
     private void initValues() {
-
         total2Upload = 0;
         total2Transform = 0;
         successCount.set(0);
