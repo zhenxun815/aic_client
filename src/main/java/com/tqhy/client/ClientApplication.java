@@ -33,7 +33,10 @@ public class ClientApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         stage = primaryStage;
-        stage.setOnCloseRequest(event -> System.exit(0));
+        stage.setOnCloseRequest(event -> {
+            event.consume();
+            FXMLUtils.loadPopWindow("/static/fxml/warning_onclose.fxml");
+        });
         initPrimaryStageSize();
     }
 

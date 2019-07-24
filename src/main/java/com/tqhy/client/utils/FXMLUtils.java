@@ -10,10 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
-import javafx.stage.Window;
+import javafx.stage.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +24,19 @@ import static com.tqhy.client.ClientApplication.springContext;
  */
 public class FXMLUtils {
 
+    /**
+     * 打开新窗口
+     *
+     * @param url
+     * @return
+     */
+    public static Stage loadPopWindow(String url) {
+        Stage stage = new Stage();
+        stage.setResizable(false);
+        stage.initStyle(StageStyle.TRANSPARENT);
+        stage.setAlwaysOnTop(true);
+        return loadWindow(stage, url);
+    }
 
     /**
      * 打开新窗口
