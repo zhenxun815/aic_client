@@ -1,6 +1,5 @@
 package com.tqhy.client.utils;
 
-import com.tqhy.client.task.Dcm2JpgTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
@@ -13,10 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -41,22 +36,7 @@ public class FileUtils {
         File[] files = dir.listFiles();
         String dirName = dir.getName();
         //logger.info("dir name is: {}", dirName);
-        /*HashMap<File, String> fileMap = new HashMap<>();
-        for (File file : files) {
-            if (file.isFile() && filter.test(file)) {
-                String fileName = null;
-                String fileFullName = file.getName().toLowerCase();
-                if (fileFullName.endsWith(".dcm") || fileFullName.endsWith(".jpg") || fileFullName.endsWith(".jpeg")) {
-                    int lastIndex = fileFullName.lastIndexOf(".");
-                    fileName = file.getName().substring(0, lastIndex);
-                } else {
-                    fileName = fileFullName;
-                }
-                String name = null == caseName ? fileName : caseName;
-                fileMap.put(file, name);
-                logger.info("add file map key: {}, value: {}", file.getAbsolutePath(), name);
-            }
-        }*/
+
         HashMap<File, String> fileMap = Arrays.stream(files)
                                               .filter(File::isFile)
                                               .collect(HashMap::new,
@@ -104,19 +84,9 @@ public class FileUtils {
 
 
     public static Optional<File> transToJpg(File fileToTrans, File jpgDir) {
-        try {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            Future<File> jpgFileFuture = executor.submit(Dcm2JpgTask.of(fileToTrans, jpgDir));
-            File jpgFile = jpgFileFuture.get();
-            logger.info("file to trans success {}", jpgFile.getAbsolutePath());
-            return Optional.of(jpgFile);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-
-        return Optional.empty();
+        File jpgFile = Dcm2JpgUtil.convert(fileToTrans, jpgDir);
+        logger.info("file to trans success {}", jpgFile.getAbsolutePath());
+        return Optional.ofNullable(jpgFile);
     }
 
 
