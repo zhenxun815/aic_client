@@ -39,7 +39,7 @@
                         </Insets>
                     </HBox.margin>
                 </Button>
-                <Button fx:id="btn_stage_minimum" onMouseClicked="#stageMinimum" styleClass="btn_confirm">最小化
+                <Button fx:id="btn_stage_minimum" onMouseClicked="#stageMinimum" styleClass="btn_cancel">最小化
                     <HBox.margin>
                         <Insets>
                             <left>15</left>
