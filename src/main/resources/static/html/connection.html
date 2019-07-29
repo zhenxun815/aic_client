@@ -121,7 +121,9 @@
 				$('.connect-test .spin').css({
 					'display': 'inline-block'
 				})
-
+				if (serverIP.indexOf(':') == -1) {
+					serverIP = serverIP + ":8080"
+				}
 				var requestData = {serverIP: serverIP}
 				post_ajax('connTest', '/verify/connection', requestData, (response) => {
 					//console.log(`response data is: ${JSON.stringify(response)}`)
