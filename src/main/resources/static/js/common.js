@@ -1,7 +1,7 @@
 var $ = null
 var layer = null
 
-baseUrlLocal = 'http://localhost:59527'
+baseUrlLocal = 'http://localhost:59527/html'
 layui.use(['layer', 'form', 'jquery'], function () {
 	layer = layui.layer
 	$ = layui.jquery
