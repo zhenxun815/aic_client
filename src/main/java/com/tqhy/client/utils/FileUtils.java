@@ -1,5 +1,6 @@
 package com.tqhy.client.utils;
 
+import com.tqhy.client.config.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
@@ -26,40 +27,55 @@ public class FileUtils {
     static Logger logger = LoggerFactory.getLogger(FileUtils.class);
 
     /**
+     * 生成病例名,若为根目录下文件则以文件名为病例名,否则以文件夹名作为病例名
+     *
+     * @param file
+     * @param rootDir 是否是根目录下图片文件
+     * @return
+     */
+    public static String generateCaseName(File file, File rootDir) {
+        File parentFile = file.getParentFile();
+        //logger.info("parent file is {}", parentFile.getName());
+        String caseName;
+        if (parentFile.equals(rootDir)) {
+            String fileFullName = file.getName().toLowerCase();
+            if (fileFullName.endsWith(".dcm") || fileFullName.endsWith(
+                    ".jpg") || fileFullName.endsWith(".jpeg")) {
+                int lastIndex = fileFullName.lastIndexOf(".");
+                caseName = fileFullName.substring(0, lastIndex);
+            } else {
+                caseName = fileFullName;
+            }
+        } else {
+            String absolutePath = parentFile.getAbsolutePath();
+            String rootDirName = rootDir.getName();
+            int beginIndex = absolutePath.indexOf(rootDirName);
+            caseName = absolutePath.substring(beginIndex).replace("\\", "_");
+        }
+        byte[] bytes = caseName.getBytes();
+
+        return bytes.length > 256 ? Constants.CASE_NAME_INVALID : caseName;
+    }
+
+    /**
      * 获取文件夹下所有文件
      *
      * @param dir
      * @return
      */
-    public static HashMap<File, String> getFilesMapInDir(File dir, Predicate<File> filter, String caseName) {
+    public static HashMap<File, String> getFilesMapInRootDir(File dir, Predicate<File> filter) {
         //logger.info("into get file map in dir...");
         File[] files = dir.listFiles();
-        String dirName = dir.getName();
-        //logger.info("dir name is: {}", dirName);
 
-        HashMap<File, String> fileMap = Arrays.stream(files)
-                                              .filter(File::isFile)
-                                              .collect(HashMap::new,
-                                                       (map, file) -> {
-                                                           boolean test = filter.test(file);
-                                                           //logger.info("test valid img: {}", test);
-                                                           if (test) {
-                                                               String fileFullName = file.getName().toLowerCase();
-                                                               String fileName = null;
-                                                               if (fileFullName.endsWith(".dcm") || fileFullName.endsWith(".jpg") || fileFullName.endsWith(".jpeg")) {
-                                                                   int lastIndex = fileFullName.lastIndexOf(".");
-                                                                   fileName = file.getName().substring(0, lastIndex);
-                                                               } else {
-                                                                   fileName = fileFullName;
-                                                               }
-                                                               String name = null == caseName ? fileName : caseName;
-                                                               map.put(file, name);
-                                                               //logger.info("add file map key: {}, value: {}", file.getAbsolutePath(), name);
-                                                           }
-                                                       },
-                                                       HashMap::putAll);
-        logger.info("return fileMap {}", fileMap);
-        return fileMap;
+        return Arrays.stream(files)
+                     .filter(File::isFile)
+                     .filter(file -> filter.test(file))
+                     .collect(HashMap::new,
+                              (map, file) -> {
+                                  map.put(file, generateCaseName(file, dir));
+                                  //logger.info("add file map key: {}, value: {}", file.getAbsolutePath(), name);
+                              },
+                              HashMap::putAll);
     }
 
     /**
@@ -68,24 +84,28 @@ public class FileUtils {
      * @param dir
      * @return
      */
-    public static HashMap<File, String> getFilesMapInSubDir(File dir, Predicate<File> filter) {
-        // logger.info("into get file map in sub dir...");
-        File[] dirs = dir.listFiles(File::isDirectory);
-        if (null != dirs) {
-            HashMap<File, String> fileMap = Arrays.stream(dirs)
-                                                  .collect(HashMap::new,
-                                                           (map, file) -> map.putAll(getFilesMapInDir(file, filter, file.getName())),
-                                                           HashMap::putAll);
-            return fileMap;
-        } else {
+    public static HashMap<File, String> getFilesMapInSubDir(File dir, Predicate<File> filter, File rootDir) {
+        //logger.info("into get file map in sub dir...");
+        File[] files = dir.listFiles();
+        if (null == files || files.length == 0) {
             return new HashMap<>();
         }
+        return Arrays.stream(files)
+                     .collect(HashMap::new,
+                              (map, file) -> {
+                                  if (file.isFile() && !file.getParentFile().equals(rootDir)) {
+                                      map.put(file, generateCaseName(file, rootDir));
+                                  } else {
+                                      map.putAll(getFilesMapInSubDir(file, filter, rootDir));
+                                  }
+                              },
+                              HashMap::putAll);
     }
 
 
     public static Optional<File> transToJpg(File fileToTrans, File jpgDir) {
         File jpgFile = Dcm2JpgUtil.convert(fileToTrans, jpgDir);
-        logger.info("file to trans success {}", jpgFile.getAbsolutePath());
+        logger.info("file to trans complete {}", fileToTrans.getAbsolutePath());
         return Optional.ofNullable(jpgFile);
     }
 
@@ -216,7 +236,8 @@ public class FileUtils {
      * @param create   当文件不存在时是否创建新文件
      * @param append   是否追加写入
      */
-    public static void writeFile(File file, String info, @Nullable Function<StringBuilder, StringBuilder> function, boolean create, boolean append) {
+    public static void writeFile(File file, String info, @Nullable Function<StringBuilder, StringBuilder> function,
+                                 boolean create, boolean append) {
 
         if (create && !file.exists()) {
             createNewFile(file);
@@ -244,7 +265,8 @@ public class FileUtils {
      * @param function 处理写入内容,为null则不做任何处理
      * @param create   当文件不存在时是否创建新文件
      */
-    public static void writeFile(File file, String info, @Nullable Function<StringBuilder, StringBuilder> function, boolean create) {
+    public static void writeFile(File file, String info, @Nullable Function<StringBuilder, StringBuilder> function,
+                                 boolean create) {
         writeFile(file, info, function, create, false);
     }
 
@@ -256,7 +278,8 @@ public class FileUtils {
      * @param consumer 处理写入内容,为null则不做任何处理
      * @param create   当文件不存在时是否创建新文件
      */
-    public static void appendFile(File file, String info, @Nullable Function<StringBuilder, StringBuilder> consumer, boolean create) {
+    public static void appendFile(File file, String info, @Nullable Function<StringBuilder, StringBuilder> consumer,
+                                  boolean create) {
         writeFile(file, info, consumer, create, true);
     }
 

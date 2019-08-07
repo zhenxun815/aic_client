@@ -40,4 +40,5 @@ public class Constants {
 
     public static final String VALUE_SPLITTER = ",";
 
+    public static final String CASE_NAME_INVALID = "TQHY_INVALID";
 }

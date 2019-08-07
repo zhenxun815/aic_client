@@ -93,7 +93,10 @@ public class Dcm2JpgUtil {
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("trans dcm error:", e);
+            } catch (IllegalStateException e) {
+                logger.error("trans dcm error: {}", e.getMessage());
+                //e.printStackTrace();
             }
         }
         return null;
