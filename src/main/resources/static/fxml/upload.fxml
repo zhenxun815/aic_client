@@ -6,100 +6,123 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.tqhy.client.controllers.UploadFileController"
-            stylesheets="@../css/fx_upload_pane.css"
-            styleClass="window_root">
+<AnchorPane styleClass="window_root" stylesheets="@../css/fx_upload_pane.css"
+            xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.tqhy.client.controllers.UploadFileController">
     <!--  prefHeight="268.0"
              prefWidth="620.0"
              style="-fx-background-color: transparent;-fx-padding: 10px"
               -->
     <!--选择上传文件夹显示页面-->
-    <HBox fx:id="container_pane" styleClass="container_pane" minWidth="600" minHeight="268">
+    <HBox fx:id="container_pane" minHeight="340" minWidth="600" styleClass="container_pane">
         <children>
             <VBox fx:id="panels_parent">
                 <VBox fx:id="panel_choose" styleClass="pane">
                     <children>
-                        <Text styleClass="text_title">导入数据
+                        <Text styleClass="text_title">添加数据
                             <VBox.margin>
                                 <Insets>
-                                    <top>25</top>
+                                    <top>30</top>
                                 </Insets>
                             </VBox.margin>
                         </Text>
-                        <HBox styleClass="small_btn_container">
+
+                        <HBox>
                             <VBox.margin>
                                 <Insets>
-                                    <top>15</top>
-                                    <bottom>10</bottom>
+                                    <top>30</top>
                                 </Insets>
                             </VBox.margin>
-                            <Text fx:id="text_choose_desc" styleClass="text_tips">将数据导入至:
-                            </Text>
-                            <TextField fx:id="text_field_max" styleClass="text_max" promptText="输入最大上传样本数">
-                                <HBox.margin>
-                                    <Insets>
-                                        <left>20</left>
-                                    </Insets>
-                                </HBox.margin>
-                            </TextField>
-                        </HBox>
-
-                        <HBox styleClass="small_btn_container">
-                            <Button fx:id="btn_choose" onMouseClicked="#chooseDirectory" styleClass="btn_small">选择文件
-                            </Button>
-
-                            <Text fx:id="text_choose_info">未选择任何文件
+                            <VBox minWidth="197" style="-fx-alignment: top-right;" styleClass="choose_left">
+                                <Text>选择数据
+                                    <VBox.margin>
+                                        <Insets>
+                                            <top>5</top>
+                                        </Insets>
+                                    </VBox.margin>
+                                </Text>
+                                <Text>最大上传数量
+                                    <VBox.margin>
+                                        <Insets>
+                                            <top>52</top>
+                                        </Insets>
+                                    </VBox.margin>
+                                </Text>
+                                <Text fx:id="text_choose_remark">备注信息
+                                    <VBox.margin>
+                                        <Insets>
+                                            <top>20</top>
+                                        </Insets>
+                                    </VBox.margin>
+                                </Text>
+                            </VBox>
+                            <VBox fx:id="choose_right" minWidth="393" style="-fx-alignment: top-left;"
+                                  styleClass="choose_right">
                                 <HBox.margin>
                                     <Insets>
                                         <left>10</left>
                                     </Insets>
                                 </HBox.margin>
-                            </Text>
+                                <HBox styleClass="small_btn_container">
+                                    <Button fx:id="btn_choose" onMouseClicked="#chooseDirectory" styleClass="btn_small">
+                                        选择文件
+                                    </Button>
 
-                            <Text fx:id="text_choose_tip" styleClass="text_tips">仅支持DICOM/JPG格式文件
-                                <HBox.margin>
-                                    <Insets>
-                                        <left>10</left>
-                                    </Insets>
-                                </HBox.margin>
-                            </Text>
+                                    <Text fx:id="text_choose_info">未选择任何文件
+                                        <HBox.margin>
+                                            <Insets>
+                                                <left>10</left>
+                                            </Insets>
+                                        </HBox.margin>
+                                    </Text>
+
+                                </HBox>
+                                <Text fx:id="text_choose_tip" styleClass="text_tips">仅支持DICOM/JPG格式文件
+                                    <VBox.margin>
+                                        <Insets>
+                                            <top>5</top>
+                                        </Insets>
+                                    </VBox.margin>
+                                </Text>
+                                <TextField fx:id="text_field_max" promptText="请输入希望上传的数据数量，不填代表全部上传"
+                                           styleClass="text_max">
+                                    <VBox.margin>
+                                        <Insets>
+                                            <top>15</top>
+                                            <bottom>10</bottom>
+                                        </Insets>
+                                    </VBox.margin>
+                                </TextField>
+
+                                <TextArea fx:id="text_field_remarks" promptText="请为这批数据添加至少一个关键词，以便在使用过程中对其进行检索"
+                                          styleClass="text_remark">
+
+                                </TextArea>
+                            </VBox>
                         </HBox>
-
-                        <TextField fx:id="text_field_remarks" styleClass="text_remark" promptText="请输入备注信息,最大长度50字">
-                            <VBox.margin>
-                                <Insets>
-                                    <top>11</top>
-                                </Insets>
-                            </VBox.margin>
-                        </TextField>
-
                         <HBox styleClass="confirm_btn_container">
                             <VBox.margin>
                                 <Insets>
                                     <top>25</top>
                                 </Insets>
                             </VBox.margin>
-                            <children>
-                                <Button fx:id="btn_cancel_upload" onMouseClicked="#cancelUpload"
-                                        styleClass="btn_cancel">取消
-                                </Button>
-                                <Button fx:id="btn_start_upload" onMouseClicked="#startUpload" styleClass="btn_confirm">
-                                    开始导入
-                                    <HBox.margin>
-                                        <Insets>
-                                            <left>75</left>
-                                        </Insets>
-                                    </HBox.margin>
-                                </Button>
-                            </children>
+                            <Button fx:id="btn_cancel_upload" onMouseClicked="#cancelUpload" styleClass="btn_cancel">取消
+                            </Button>
+                            <Button fx:id="btn_start_upload" onMouseClicked="#startUpload" styleClass="btn_confirm">
+                                开始导入
+                                <HBox.margin>
+                                    <Insets>
+                                        <left>75</left>
+                                    </Insets>
+                                </HBox.margin>
+                            </Button>
                         </HBox>
+
                     </children>
                 </VBox>
 
                 <!--上传中显示页面-->
-                <VBox fx:id="panel_progress" stylesheets="@../css/fx_upload_progress.css" styleClass="pane">
+                <VBox fx:id="panel_progress" styleClass="pane" stylesheets="@../css/fx_upload_progress.css">
                     <children>
                         <Text fx:id="text_progress_title" styleClass="text_title">导入数据
                             <VBox.margin>
@@ -111,7 +134,7 @@
                         <HBox styleClass="progress_box">
                             <VBox.margin>
                                 <Insets>
-                                    <top>30</top>
+                                    <top>40</top>
                                 </Insets>
                             </VBox.margin>
                             <children>
@@ -122,19 +145,19 @@
                                         </Insets>
                                     </HBox.margin>
                                 </ProgressBar>
-                                <Text fx:id="text_progress_info">准备中..
-                                    <HBox.margin>
-                                        <Insets>
-                                            <left>6</left>
-                                        </Insets>
-                                    </HBox.margin>
-                                </Text>
                             </children>
                         </HBox>
-                        <Text fx:id="text_progress_desc" styleClass="text_tips">
+                        <Text fx:id="text_progress_info">准备中..
                             <VBox.margin>
                                 <Insets>
                                     <top>10</top>
+                                </Insets>
+                            </VBox.margin>
+                        </Text>
+                        <Text fx:id="text_progress_desc" styleClass="text_tips">
+                            <VBox.margin>
+                                <Insets>
+                                    <top>20</top>
                                 </Insets>
                             </VBox.margin>
                         </Text>
@@ -153,19 +176,19 @@
                     <children>
                         <ImageView fitHeight="40" fitWidth="40">
                             <image>
-                                <Image url="@../img/success-circle.png"></Image>
+                                <Image url="@../img/success-circle.png"/>
                             </image>
 
                             <VBox.margin>
                                 <Insets>
-                                    <top>33</top>
+                                    <top>40</top>
                                 </Insets>
                             </VBox.margin>
                         </ImageView>
-                        <HBox style="-fx-alignment: center" fx:id="box_complete">
+                        <HBox fx:id="box_complete" style="-fx-alignment: center">
                             <VBox.margin>
                                 <Insets>
-                                    <top>14</top>
+                                    <top>30</top>
                                 </Insets>
                             </VBox.margin>
                             <Text fx:id="text_success_desc">数据导入完毕
@@ -183,14 +206,14 @@
                         <Text fx:id="text_success_info">导入批次:
                             <VBox.margin>
                                 <Insets>
-                                    <top>14</top>
+                                    <top>30</top>
                                 </Insets>
                             </VBox.margin>
                         </Text>
                         <Button fx:id="btn_success_confirm" onMouseClicked="#cancelUpload" styleClass="btn_confirm">确认
                             <VBox.margin>
                                 <Insets>
-                                    <top>31</top>
+                                    <top>35</top>
                                 </Insets>
                             </VBox.margin>
                         </Button>
@@ -200,23 +223,22 @@
                 <!--上传失败显示界面-->
                 <VBox fx:id="panel_fail" styleClass="pane">
                     <children>
-                        <Text styleClass="text_title" fx:id="text_fail_title">
+                        <Text fx:id="text_fail_title" styleClass="text_title">
                             <VBox.margin>
                                 <Insets>
-                                    <top>20</top>
+                                    <top>40</top>
                                 </Insets>
                             </VBox.margin>
                         </Text>
-                        <ScrollPane fx:id="scrollPane"
-                                    stylesheets="@../css/fx_scroll_pane.css"
-                                    maxHeight="120.0" minViewportHeight="110.0" maxWidth="500.0">
+                        <ScrollPane fx:id="scrollPane" maxHeight="150.0" maxWidth="500.0" minViewportHeight="110.0"
+                                    stylesheets="@../css/fx_scroll_pane.css">
                             <VBox.margin>
                                 <Insets>
-                                    <top>14</top>
+                                    <top>30</top>
                                 </Insets>
                             </VBox.margin>
                             <VBox alignment="CENTER">
-                                <Label fx:id="label_fail_desc" styleClass="label_tips" maxWidth="500">
+                                <Label fx:id="label_fail_desc" maxWidth="500" styleClass="label_tips">
                                 </Label>
                             </VBox>
                         </ScrollPane>
@@ -243,7 +265,6 @@
                     </children>
                 </VBox>
             </VBox>
-
 
 
         </children>
