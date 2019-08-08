@@ -31,13 +31,13 @@
 				<form class="login-zone" onsubmit="return false">
 					<div class="input-box user">
 						<h6 class="label">用户名</h6>
-						<input class="input" id="input_uname" onblur="checkValueFunc()()"
+						<input class="input" id="input_uname" onblur="checkUserName()"
 						       placeholder="填写用户名" type="text"/>
 						<p class="callback-message">用户名不能为空</p>
 					</div>
 					<div class="input-box user">
 						<h6 class="label">密码</h6>
-						<input class="input" id="input_upwd" onblur="checkValueFunc()()"
+						<input class="input" id="input_upwd" onblur="checkUserPwd()"
 						       placeholder="填写密码" type="password"/>
 						<p class="callback-message" id="landing_tips">密码不能为空</p>
 					</div>
@@ -93,6 +93,26 @@
 			}
 		}
 	})
+
+	function checkUserName() {
+		$ = layui.jquery
+		var nameLength = $('#input_uname').val().length
+		if (nameLength == 0) {
+			$('#input_uname').next().addClass("show")
+		} else {
+			$('#input_uname').next().removeClass("show")
+		}
+	}
+
+	function checkUserPwd() {
+		$ = layui.jquery
+		var nameLength = $('#input_upwd').val().length
+		if (nameLength == 0) {
+			$('#input_upwd').next().addClass("show")
+		} else {
+			$('#input_upwd').next().removeClass("show")
+		}
+	}
 
 	function checkInputLength() {
 		$ = layui.jquery
