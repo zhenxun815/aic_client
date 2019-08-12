@@ -93,7 +93,7 @@ public class FileUtils {
         return Arrays.stream(files)
                      .collect(HashMap::new,
                               (map, file) -> {
-                                  if (file.isFile() && !file.getParentFile().equals(rootDir)) {
+                                  if (filter.test(file) && !file.getParentFile().equals(rootDir)) {
                                       map.put(file, generateCaseName(file, rootDir));
                                   } else {
                                       map.putAll(getFilesMapInSubDir(file, filter, rootDir));
