@@ -486,9 +486,12 @@ public class UploadFileController {
         uploadMsg.setToken(Network.TOKEN);
         logger.info("uploadTargetName to upload is: {}", uploadMsg.getUploadTargetName());
         Platform.runLater(() -> {
-            stage = new Stage();
-
-            FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml");
+            if (null == stage) {
+                stage = new Stage();
+                FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml");
+            } else {
+                stage.show();
+            }
             // text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
 
             @NonNull String uploadType = uploadMsg.getUploadType();
