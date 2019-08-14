@@ -490,6 +490,7 @@ public class UploadFileController {
                 stage = new Stage();
                 FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml");
             } else {
+                showPanel(panel_choose.getId());
                 stage.show();
             }
             // text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
