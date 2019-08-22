@@ -51,6 +51,7 @@ public class FXMLUtils {
             fxmlLoader.setControllerFactory(springContext::getBean);
             Parent parentNode = fxmlLoader.load();
             loadScene(stage, parentNode);
+            stage.setAlwaysOnTop(true);
             stage.show();
             return stage;
         } catch (IOException e) {
@@ -86,7 +87,7 @@ public class FXMLUtils {
      * @param stage
      * @param parentNode
      */
-    private static void loadScene(Stage stage, Parent parentNode) {
+    public static void loadScene(Stage stage, Parent parentNode) {
         Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
         double visualWidth = visualBounds.getWidth();
         double visualHeight = visualBounds.getHeight();

@@ -79,7 +79,10 @@ public class ClientApplication extends Application {
             java.awt.Image image = ImageIO.read(imageLoc);
             //final TrayIcon trayIcon = new TrayIcon(image, "打开悬浮窗",popupMenu);
             final TrayIcon trayIcon = new TrayIcon(image);
-
+            trayIcon.addActionListener(e -> Platform.runLater(() -> {
+                logger.info("click icon");
+                FXMLUtils.loadPopWindow("/static/fxml/choose_model.fxml");
+            }));
             systemTray.add(trayIcon);
         } catch (IOException e) {
             e.printStackTrace();
