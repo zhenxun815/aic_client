@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            styleClass="window_root"
+            stylesheets="@../css/fx_choose_model.css"
+            fx:controller="com.tqhy.client.controllers.ChooseModelController"
+            prefHeight="500.0" prefWidth="400.0">
+
+    <VBox fx:id="base_pane" styleClass="base_pane" minWidth="400" minHeight="500">
+        <ListView fx:id="model_list"></ListView>
+        <TextField fx:id="text_field_case_id" promptText="请输入病历号"></TextField>
+        <Label fx:id="label_tips">tips</Label>
+        <HBox>
+            <Button fx:id="confirm" onMouseClicked="#confirm">确认</Button>
+            <Button fx:id="cancel" onMouseClicked="#cancel">取消</Button>
+        </HBox>
+    </VBox>
+
+</AnchorPane>
