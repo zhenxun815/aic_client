@@ -103,32 +103,29 @@ public class NetworkUtils {
      *
      * @return
      */
-    public static String initServerIP(String localDataPath) {
+    public static String initServerIP() {
         logger.info("into init webEngine..");
-        File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
-        if (serverIPFile.exists()) {
-            List<String> datas = FileUtils.readLine(serverIPFile, line -> line);
-            String serverIP = datas.size() > 0 ? datas.get(0).trim() : "";
-            if (StringUtils.isEmpty(serverIP)) {
-                return "";
-            }
 
-            Network.setServerBaseUrl(serverIP);
-            try {
-                ResponseBody body = Network.getAicApi()
-                                           .pingServer()
-                                           .execute()
-                                           .body();
+        String serverIP = PropertyUtils.getProperty(Constants.SERVER_IP);
+        if (StringUtils.isEmpty(serverIP)) {
+            return "";
+        }
 
-                ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
-                Integer flag = clientMsg.getFlag();
-                logger.info("ping server ip: " + serverIP + ", get flag: " + flag);
-                if (BaseMsg.SUCCESS == flag) {
-                    return serverIP;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+        Network.setServerBaseUrl(serverIP);
+        try {
+            ResponseBody body = Network.getAicApi()
+                                       .pingServer()
+                                       .execute()
+                                       .body();
+
+            ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
+            Integer flag = clientMsg.getFlag();
+            logger.info("ping server ip: " + serverIP + ", get flag: " + flag);
+            if (BaseMsg.SUCCESS == flag) {
+                return serverIP;
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return "";
     }

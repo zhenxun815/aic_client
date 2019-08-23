@@ -6,7 +6,6 @@ import com.tqhy.client.models.msg.local.LandingMsg;
 import com.tqhy.client.models.msg.local.VerifyMsg;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
-import com.tqhy.client.utils.FileUtils;
 import com.tqhy.client.utils.GsonUtils;
 import com.tqhy.client.utils.NetworkUtils;
 import com.tqhy.client.utils.PropertyUtils;
@@ -22,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -144,9 +142,7 @@ public class LandingController extends BaseWebviewController {
 
             if (BaseMsg.SUCCESS == clientMsg.getFlag()) {
                 logger.info("ping server: " + serverIP + " successCount");
-
-                File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
-                FileUtils.writeFile(serverIPFile, serverIP, null, true);
+                PropertyUtils.setProperty(Constants.SERVER_IP, serverIP);
                 response.setFlag(1);
                 response.setServerIP(Network.SERVER_IP);
                 return response;
