@@ -42,7 +42,7 @@ public class ReadModelController extends BaseWebviewController {
         logger.info("read model show...case id is {}, model size {}", caseId, models.size());
         this.caseId = caseId;
         this.models = models;
-        FXMLUtils.loadWindow(ClientApplication.stage, "/static/fxml/read_model.fxml");
+        FXMLUtils.loadWindow(ClientApplication.stage, "/static/fxml/read_model.fxml", true);
         ClientApplication.stage.setIconified(false);
     }
 }

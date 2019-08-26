@@ -488,7 +488,7 @@ public class UploadFileController {
         Platform.runLater(() -> {
             if (null == stage) {
                 stage = new Stage();
-                FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml");
+                FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml", false);
             } else {
                 showPanel(panel_choose.getId());
                 stage.show();

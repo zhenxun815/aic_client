@@ -14,6 +14,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URL;
 
@@ -28,7 +30,7 @@ public class ClientApplication extends Application {
     static Logger logger = LoggerFactory.getLogger(ClientApplication.class);
     public static ConfigurableApplicationContext springContext;
     public static Stage stage;
-
+    public static Stage menuStage;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -50,7 +52,7 @@ public class ClientApplication extends Application {
         stage.setY(visualBounds.getMinY());
         logger.info("stage: x {}, y {}", stage.getX(), stage.getY());
         stage.setMaximized(true);
-        FXMLUtils.loadWindow(stage, "/static/fxml/main.fxml");
+        FXMLUtils.loadWindow(stage, "/static/fxml/main.fxml", true);
         double st_width = stage.getWidth();
         double st_height = stage.getHeight();
         logger.info("st width {}, height {}", st_width, st_height);
@@ -58,6 +60,7 @@ public class ClientApplication extends Application {
         stage.setMinHeight(st_height);
         stage.setMaxWidth(st_width);
         stage.setMaxHeight(st_height);
+
     }
 
     /**
@@ -79,10 +82,41 @@ public class ClientApplication extends Application {
             java.awt.Image image = ImageIO.read(imageLoc);
             //final TrayIcon trayIcon = new TrayIcon(image, "打开悬浮窗",popupMenu);
             final TrayIcon trayIcon = new TrayIcon(image);
-            trayIcon.addActionListener(e -> Platform.runLater(() -> {
-                logger.info("click icon");
-                FXMLUtils.loadPopWindow("/static/fxml/choose_model.fxml");
-            }));
+
+            trayIcon.addMouseListener(new MouseListener() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getButton() > 1) {
+                        logger.info("button 2 clicked...");
+                        Platform.runLater(
+                                () -> FXMLUtils.loadMenu("/static/fxml/menu.fxml",
+                                                         e.getX() + 0D,
+                                                         e.getY() + 0D,
+                                                         60,
+                                                         100));
+                    }
+                }
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    Platform.runLater(() -> menuStage.hide());
+                }
+            });
             systemTray.add(trayIcon);
         } catch (IOException e) {
             e.printStackTrace();
