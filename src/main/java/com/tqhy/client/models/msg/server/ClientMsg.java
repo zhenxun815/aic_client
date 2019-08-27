@@ -15,7 +15,7 @@ import java.util.List;
 @Setter
 public class ClientMsg<T> extends BaseMsg {
 
-    public T data;
+    public List<T> data;
 
     public List<String> msg;
 }
