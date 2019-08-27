@@ -1,6 +1,14 @@
 package com.tqhy.client.controllers;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.tqhy.client.models.entity.Model;
+import com.tqhy.client.models.msg.BaseMsg;
+import com.tqhy.client.models.msg.server.ClientMsg;
+import com.tqhy.client.network.Network;
 import com.tqhy.client.utils.FXMLUtils;
+import io.reactivex.schedulers.Schedulers;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -20,7 +28,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -44,29 +54,53 @@ public class ChooseModelController extends BasePopWindowController {
     public Label label_tips;
     @Autowired
     ReadModelController readModelController;
-    private List<String> allModels = new ArrayList<>();
+    private Map<String, String> allModelMap = new HashMap<>();
     private List<String> chosenModels = new ArrayList();
 
     @FXML
     public void initialize() {
         logger.info("choose model initialize...");
-        allModels.clear();
+        allModelMap.clear();
         chosenModels.clear();
-        for (int i = 0; i < 100; i++) {
-            allModels.add("model name ".concat(Integer.toString(i)));
-        }
+
+        Network.getAicApi()
+               .getAllModels()
+               .observeOn(Schedulers.io())
+               .subscribeOn(Schedulers.trampoline())
+               .subscribe(responseBody -> {
+                   String json = responseBody.string();
+                   logger.info("get all models res is {}", json);
+                   ClientMsg<Model> clientMsg = new Gson().fromJson(json, new TypeToken<ClientMsg<Model>>() {
+                   }.getType());
+                   logger.info("client msg flag is {}", clientMsg.getFlag());
+                   if (BaseMsg.SUCCESS == clientMsg.getFlag()) {
+                       List<Model> modelList = clientMsg.getData();
+                       allModelMap = modelList.stream()
+                                              .collect(HashMap::new,
+                                                       (map, modle) -> {
+                                                           logger.info("name is: {}, id is {}", modle.getName(),
+                                                                       modle.getId());
+                                                           map.put(modle.getName(), modle.getId());
+                                                       },
+                                                       HashMap::putAll);
+
+                       Platform.runLater(() -> model_list.getItems().addAll(allModelMap.keySet()));
+                   }
+               });
+
+
         FXMLUtils.center2Display(base_pane);
-        model_list.getItems().addAll(allModels);
+
         model_list.setCellFactory(CheckBoxListCell.forListView((Callback<String, ObservableValue<Boolean>>) item -> {
             BooleanProperty observable = new SimpleBooleanProperty();
             observable.addListener((obs, wasSelected, isNowSelected) -> {
                 logger.info("check status old: {}, new: {}", wasSelected, isNowSelected);
                 if (isNowSelected) {
                     logger.info("add choose model {}", item);
-                    chosenModels.add(item);
+                    chosenModels.add(allModelMap.get(item));
                 } else {
                     logger.info("remove choose model {}", item);
-                    chosenModels.remove(item);
+                    chosenModels.remove(allModelMap.get(item));
                 }
             });
             return observable;

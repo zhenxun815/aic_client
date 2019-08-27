@@ -90,6 +90,14 @@ public interface AicApi {
     Call<ResponseBody> pingServer();
 
     /**
+     * 获取所有模型名称与id
+     *
+     * @return
+     */
+    @GET("modellist")
+    Observable<ResponseBody> getAllModels();
+
+    /**
      * 通知后台删除无效批次
      *
      * @return
