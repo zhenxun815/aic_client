@@ -79,7 +79,8 @@ public interface AicApi {
      */
     @Multipart
     @POST("uploadTest/")
-    Observable<ResponseBody> uploadTestFiles(@PartMap Map<String, RequestBody> params, @Part MultipartBody.Part fileParts);
+    Observable<ResponseBody> uploadTestFiles(@PartMap Map<String, RequestBody> params,
+                                             @Part MultipartBody.Part fileParts);
 
     /**
      * 测试后台是否联通
@@ -96,6 +97,15 @@ public interface AicApi {
      */
     @GET("modellist")
     Observable<ResponseBody> getAllModels();
+
+    /**
+     * 获取病例信息
+     *
+     * @param caseId
+     * @return
+     */
+    @POST("searchCase")
+    Observable<ResponseBody> searchCase(@Query("caseNo") String caseId);
 
     /**
      * 通知后台删除无效批次
