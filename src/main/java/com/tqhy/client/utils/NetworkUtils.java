@@ -174,6 +174,26 @@ public class NetworkUtils {
     }
 
     /**
+     * 拼接url请求
+     *
+     * @param host
+     * @param port
+     * @param path
+     * @param params
+     * @return
+     */
+    public static String createUrl(String host, int port, String path, Map<String, String> params) {
+        String basePath = host.concat(":").concat(Integer.toString(port));
+        return createUrl(basePath, path, params);
+    }
+
+    public static String createUrl(String basePath, String path, Map<String, String> params) {
+        StringBuilder builder = new StringBuilder(basePath).append(path).append("?");
+        params.forEach((k, v) -> builder.append(k).append("=").append(v).append("&"));
+        return builder.deleteCharAt(builder.lastIndexOf("&")).toString();
+    }
+
+    /**
      * 创建多参数请求
      *
      * @param params

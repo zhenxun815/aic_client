@@ -58,7 +58,7 @@ public class ChooseModelController extends BasePopWindowController {
     public Label label_tips;
     @Autowired
     ReadModelController readModelController;
-    private List<String> chosenModels = new ArrayList();
+    private List<Model> chosenModels = new ArrayList();
     private Case chosenCase = null;
 
     @FXML
@@ -90,7 +90,7 @@ public class ChooseModelController extends BasePopWindowController {
                 logger.info("check status old: {}, new: {}", wasSelected, isNowSelected);
                 if (isNowSelected) {
                     logger.info("add choose model {}", model.getName());
-                    chosenModels.add(model.getId());
+                    chosenModels.add(model);
                 } else {
                     logger.info("remove choose model {}", model.getName());
                     chosenModels.remove(model.getId());
@@ -116,18 +116,17 @@ public class ChooseModelController extends BasePopWindowController {
     @FXML
     public void submit(MouseEvent mouseEvent) {
         logger.info("into submit");
-        for (String choosedModel : chosenModels) {
-            logger.info("choosed model is {}", choosedModel);
-        }
-        //
-        String caseId = text_field_case_id.getText();
-        if (StringUtils.isEmpty(caseId)) {
+        /*for (Model choosedModel : chosenModels) {
+            logger.info("choosed model is {}", choosedModel.getName());
+        }*/
+        String patientId = text_field_case_id.getText();
+        if (StringUtils.isEmpty(patientId)) {
             logger.info("case Id must not be empty!");
             label_tips.setText("请输入患者id!");
         } else {
             label_tips.setText("");
             if (chosenModels.size() > 0) {
-                readModelController.show(caseId, chosenModels);
+                readModelController.show(chosenCase, chosenModels);
                 cancel(mouseEvent);
             } else {
                 logger.info("must check at least one model!");
@@ -144,14 +143,14 @@ public class ChooseModelController extends BasePopWindowController {
 
     @FXML
     public void confirm(MouseEvent mouseEvent) {
-        String text = text_field_case_id.getText();
-        if (StringUtils.isEmpty(text)) {
+        String patientId = text_field_case_id.getText();
+        if (StringUtils.isEmpty(patientId)) {
             label_tips.setText("请输入患者id!");
             return;
         }
 
         Network.getAicApi()
-               .searchCase(text)
+               .searchCase(patientId)
                .observeOn(Schedulers.io())
                .subscribeOn(Schedulers.trampoline())
                .subscribe(responseBody -> {
