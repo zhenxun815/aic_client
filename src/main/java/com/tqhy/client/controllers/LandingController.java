@@ -56,12 +56,22 @@ public class LandingController extends BaseWebviewController {
 
     private WebEngine webEngine;
 
+    private boolean landingIgnore;
+
     @FXML
     void initialize() {
         super.initialize(webView);
-        String initUrl = StringUtils.isEmpty(Network.SERVER_IP) ? connectionUrl : landingUrl;
-        logger.info("init load url is: " + initUrl);
-        loadPage(webView, Network.LOCAL_BASE_URL + initUrl);
+        String landingIgnoreConfig = PropertyUtils.getProperty(Constants.LANDING_IGNORE);
+        landingIgnore = StringUtils.isEmpty(landingIgnoreConfig) ? false : Boolean.parseBoolean(landingIgnoreConfig);
+        if (StringUtils.isEmpty(Network.SERVER_IP)) {
+            logger.info("init load url is connection");
+            loadPage(webView, Network.LOCAL_BASE_URL + connectionUrl);
+        } else if (landingIgnore) {
+            loadPage(webView, Network.SERVER_BASE_URL + "/ai/case/release");
+        } else {
+            loadPage(webView, Network.LOCAL_BASE_URL + landingUrl);
+        }
+
         //webEngine.load("https://www.baidu.com");
     }
 
@@ -143,6 +153,7 @@ public class LandingController extends BaseWebviewController {
             if (BaseMsg.SUCCESS == clientMsg.getFlag()) {
                 logger.info("ping server: " + serverIP + " successCount");
                 PropertyUtils.setProperty(Constants.SERVER_IP, serverIP);
+                response.setLandingIgnore(landingIgnore);
                 response.setFlag(1);
                 response.setServerIP(Network.SERVER_IP);
                 return response;

@@ -46,4 +46,6 @@ public class Constants {
     public static final String SERVER_IP = "serverIP";
 
     public static final String USERNAME = "username";
+
+    public static final String LANDING_IGNORE = "landingIgnore";
 }

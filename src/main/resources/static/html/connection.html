@@ -133,8 +133,11 @@
 						$('.spin').hide()
 						$('.callback-message').html('连接成功!')
 						$('.callback-message').addClass("show")
-
-						window.location.href = baseUrlLocal + '/landing.html'
+						if (response.landingIgnore) {
+							window.location.href = 'http://' + serverIP + '/ai/case/release'
+						} else {
+							window.location.href = baseUrlLocal + '/landing.html'
+						}
 					} else {
 						flag = 0
 						//layOpenFunc1()

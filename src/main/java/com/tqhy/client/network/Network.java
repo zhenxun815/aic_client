@@ -26,7 +26,7 @@ public class Network {
     public static final String TEST_URL = "http://baidu.com/";
     public static String SERVER_IP;
     public static String TOKEN;
-    public static String SERVER_BASE_URL = "http://192.168.1.129/";
+    public static String SERVER_BASE_URL = "";
     public static String LOCAL_BASE_URL = "http://localhost:59527/";
     private static Logger logger = LoggerFactory.getLogger(Network.class);
 

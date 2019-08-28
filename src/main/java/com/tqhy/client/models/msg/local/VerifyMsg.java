@@ -31,7 +31,7 @@ public class VerifyMsg extends BaseMsg {
     private String token;
 
     /**
-     * 激活码
+     * 是否跳过登录
      */
-    //private String activationCode;
+    private Boolean landingIgnore;
 }
