@@ -3,19 +3,21 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            styleClass="window_root"
-            stylesheets="@../css/fx_choose_model.css"
-            fx:controller="com.tqhy.client.controllers.ChooseModelController"
-            prefHeight="500.0" prefWidth="400.0">
+<AnchorPane prefHeight="500.0" prefWidth="400.0" styleClass="window_root" stylesheets="@../css/fx_choose_model.css"
+            xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.tqhy.client.controllers.ChooseModelController">
 
-    <VBox fx:id="base_pane" styleClass="base_pane" minWidth="400" minHeight="500">
-        <ListView fx:id="model_list"></ListView>
-        <TextField fx:id="text_field_case_id" promptText="请输入病历号"></TextField>
-        <Label fx:id="label_tips">tips</Label>
+    <VBox fx:id="base_pane" minHeight="500" minWidth="400" styleClass="base_pane">
+
         <HBox>
-            <Button fx:id="confirm" onMouseClicked="#confirm">确认
+            <TextField fx:id="text_field_case_id" promptText="请输入病历号"/>
+            <Button fx:id="confirm" onMouseClicked="#confirm">确认</Button>
+        </HBox>
+        <Label fx:id="label_tips">tips</Label>
+        <ListView fx:id="case_list" editable="true" styleClass="case_list"/>
+        <ListView fx:id="model_list" editable="true" styleClass="model_list"/>
+        <HBox>
+            <Button fx:id="submit" onMouseClicked="#submit">提交
                 <HBox.margin>
                     <Insets>
                         <left>150</left>

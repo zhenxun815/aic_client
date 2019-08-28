@@ -15,3 +15,13 @@
     -fx-font-size: 12px;
     -fx-effect: dropshadow(gaussian, rgba(208, 212, 227, 0.8), 20, 0.0, 0, 0);
 }
+
+.case_list {
+    -fx-max-height: 150px;
+    -fx-min-height: 150px;
+}
+
+.model_list {
+    -fx-max-height: 250px;
+    -fx-min-height: 250px;
+}
