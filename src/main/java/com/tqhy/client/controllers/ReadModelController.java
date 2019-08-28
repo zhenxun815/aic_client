@@ -34,6 +34,9 @@ public class ReadModelController extends BaseWebviewController {
         super.initialize(webView);
         String readModelUrl = "";
         logger.info("init case id is {}, model size {}", caseId, models.size());
+        for (String modelId : models) {
+            logger.info("model id {}", modelId);
+        }
         //loadPage(webView, Network.LOCAL_BASE_URL + readModelUrl);
         webView.getEngine().load("https://www.baidu.com");
     }
