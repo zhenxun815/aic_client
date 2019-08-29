@@ -71,6 +71,15 @@ public class FXMLUtils {
         return loadWindow(stage, url, true);
     }
 
+    public static Stage loadChooseModel(String url) {
+        if (null == ClientApplication.chooseModelStage) {
+            ClientApplication.chooseModelStage = new Stage();
+            ClientApplication.chooseModelStage.setResizable(false);
+            ClientApplication.chooseModelStage.initStyle(StageStyle.TRANSPARENT);
+        }
+        return loadWindow(ClientApplication.chooseModelStage, url, true);
+    }
+
     /**
      * 打开新窗口
      *
@@ -133,7 +142,7 @@ public class FXMLUtils {
         scene.getStylesheets().add(NetworkUtils.toExternalForm("/static/css/fx_root.css"));
         KeyCombination kc = new KeyCodeCombination(KeyCode.Q, KeyCombination.CONTROL_DOWN);
         scene.getAccelerators().put(kc, () -> {
-            Platform.runLater(() -> FXMLUtils.loadPopWindow("/static/fxml/choose_model.fxml"));
+            Platform.runLater(() -> FXMLUtils.loadChooseModel("/static/fxml/choose_model.fxml"));
         });
         stage.setScene(scene);
         stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title_light.png")));

@@ -42,28 +42,28 @@ public class HeartBeatService {
     public void startBeat(String t) {
         status = CMD_MSG_CONTINUE_BEAT;
         this.token = t;
-        logger.info("into start beat...{}", token);
+        //logger.info("into start beat...{}", token);
         Observable.interval(5, TimeUnit.SECONDS)
                   .takeWhile(beatTimes -> CMD_MSG_CONTINUE_BEAT.equals(status))
                   .observeOn(Schedulers.trampoline())
                   .subscribeOn(Schedulers.io())
                   .subscribe(aLong -> {
-                      logger.info("start token is...{}", token);
+                      //logger.info("start token is...{}", token);
                       Network.getAicApi()
                              .heartbeat(token)
                              .observeOn(Schedulers.io())
                              .subscribeOn(Schedulers.trampoline())
                              .subscribe(responseBody -> {
                                  String json = responseBody.string();
-                                 logger.info("heart beat response json is: {}", json);
+                                 //logger.info("heart beat response json is: {}", json);
                                  ClientMsg clientMsg = new Gson().fromJson(json, ClientMsg.class);
                                  Integer flag = clientMsg.getFlag();
                                  if (1 == flag) {
-                                     logger.info("heart beat continue...{}", token);
+                                     //logger.info("heart beat continue...{}", token);
                                      status = CMD_MSG_CONTINUE_BEAT;
                                      setJumpToLandingFlag(false);
                                  } else if (Constants.CMD_STATUS_LOGOUT == flag) {
-                                     logger.info("heart beat stop...");
+                                     //logger.info("heart beat stop...");
                                      stopBeat();
                                      setJumpToLandingFlag(true);
                                  }

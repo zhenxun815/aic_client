@@ -31,6 +31,7 @@ public class ClientApplication extends Application {
     public static ConfigurableApplicationContext springContext;
     public static Stage stage;
     public static Stage menuStage;
+    public static Stage chooseModelStage;
 
     @Override
     public void start(Stage primaryStage) throws Exception {

@@ -67,7 +67,7 @@ public class LandingController extends BaseWebviewController {
             logger.info("init load url is connection");
             loadPage(webView, Network.LOCAL_BASE_URL + connectionUrl);
         } else if (landingIgnore) {
-            loadPage(webView, Network.SERVER_BASE_URL + "/ai/case/release");
+            loadPage(webView, Network.SERVER_BASE_URL + "/case/release");
         } else {
             loadPage(webView, Network.LOCAL_BASE_URL + landingUrl);
         }

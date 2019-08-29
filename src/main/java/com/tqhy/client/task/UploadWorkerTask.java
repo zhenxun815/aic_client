@@ -500,6 +500,7 @@ public class UploadWorkerTask extends Task {
         public void onNext(ResponseBody responseBody) {
             ClientMsg clientMsg = GsonUtils.parseResponseToObj(responseBody);
             Integer flag = clientMsg.getFlag();
+            logger.info("upload onnext flag is {}", flag);
             if (shouldStop()) {
                 logger.info("on next should stop..");
                 d.dispose();

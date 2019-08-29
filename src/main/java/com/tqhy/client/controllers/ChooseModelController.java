@@ -5,7 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import com.tqhy.client.models.entity.Case;
 import com.tqhy.client.models.entity.Model;
 import com.tqhy.client.models.msg.BaseMsg;
-import com.tqhy.client.models.msg.server.ClientMsg;
+import com.tqhy.client.models.msg.server.ModelMsg;
 import com.tqhy.client.network.Network;
 import com.tqhy.client.utils.DateUtils;
 import com.tqhy.client.utils.FXMLUtils;
@@ -73,11 +73,11 @@ public class ChooseModelController extends BasePopWindowController {
                .subscribe(responseBody -> {
                    String json = responseBody.string();
                    logger.info("get all models res is {}", json);
-                   ClientMsg<Model> clientMsg = new Gson().fromJson(json, new TypeToken<ClientMsg<Model>>() {
+                   ModelMsg<Model> modelMsg = new Gson().fromJson(json, new TypeToken<ModelMsg<Model>>() {
                    }.getType());
-                   logger.info("client msg flag is {}", clientMsg.getFlag());
-                   if (BaseMsg.SUCCESS == clientMsg.getFlag()) {
-                       Platform.runLater(() -> model_list.getItems().addAll(clientMsg.getData()));
+                   logger.info("client msg flag is {}", modelMsg.getFlag());
+                   if (BaseMsg.SUCCESS == modelMsg.getFlag()) {
+                       Platform.runLater(() -> model_list.getItems().addAll(modelMsg.getData()));
                    }
                });
 
@@ -156,12 +156,12 @@ public class ChooseModelController extends BasePopWindowController {
                .subscribe(responseBody -> {
                    String json = responseBody.string();
                    logger.info("get all cases res is {}", json);
-                   ClientMsg<Case> clientMsg = new Gson().fromJson(json, new TypeToken<ClientMsg<Case>>() {
+                   ModelMsg<Case> modelMsg = new Gson().fromJson(json, new TypeToken<ModelMsg<Case>>() {
                    }.getType());
-                   logger.info("client msg flag is {}", clientMsg.getFlag());
-                   if (BaseMsg.SUCCESS == clientMsg.getFlag()) {
+                   logger.info("client msg flag is {}", modelMsg.getFlag());
+                   if (BaseMsg.SUCCESS == modelMsg.getFlag()) {
                        ObservableList<Case> caseLists = FXCollections.observableArrayList();
-                       caseLists.addAll(clientMsg.getData());
+                       caseLists.addAll(modelMsg.getData());
                        Platform.runLater(() -> case_list.setItems(caseLists));
                    }
                });

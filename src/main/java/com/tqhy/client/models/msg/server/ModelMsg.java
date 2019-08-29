@@ -8,14 +8,14 @@ import java.util.List;
 
 /**
  * @author Yiheng
- * @create 3/18/2019
+ * @create 8/29/2019
  * @since 1.0.0
  */
 @Getter
 @Setter
-public class ClientMsg<T> extends BaseMsg {
+public class ModelMsg<T> extends BaseMsg {
 
-    public T data;
+    public List<T> data;
 
     public List<String> msg;
 }
