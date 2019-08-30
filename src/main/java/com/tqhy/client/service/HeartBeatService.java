@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.tqhy.client.config.Constants;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
+import com.tqhy.client.utils.PropertyUtils;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import javafx.beans.property.BooleanProperty;
@@ -11,6 +12,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -49,25 +51,32 @@ public class HeartBeatService {
                   .subscribeOn(Schedulers.io())
                   .subscribe(aLong -> {
                       //logger.info("start token is...{}", token);
-                      Network.getAicApi()
-                             .heartbeat(token)
-                             .observeOn(Schedulers.io())
-                             .subscribeOn(Schedulers.trampoline())
-                             .subscribe(responseBody -> {
-                                 String json = responseBody.string();
-                                 //logger.info("heart beat response json is: {}", json);
-                                 ClientMsg clientMsg = new Gson().fromJson(json, ClientMsg.class);
-                                 Integer flag = clientMsg.getFlag();
-                                 if (1 == flag) {
-                                     //logger.info("heart beat continue...{}", token);
-                                     status = CMD_MSG_CONTINUE_BEAT;
-                                     setJumpToLandingFlag(false);
-                                 } else if (Constants.CMD_STATUS_LOGOUT == flag) {
-                                     //logger.info("heart beat stop...");
-                                     stopBeat();
-                                     setJumpToLandingFlag(true);
-                                 }
-                             });
+                      String serverIP = PropertyUtils.getProperty(Constants.SERVER_IP);
+                      if (StringUtils.isEmpty(serverIP)) {
+                          stopBeat();
+                          setJumpToLandingFlag(true);
+                      } else {
+                          Network.getAicApi()
+                                 .heartbeat(token)
+                                 .observeOn(Schedulers.io())
+                                 .subscribeOn(Schedulers.trampoline())
+                                 .subscribe(responseBody -> {
+                                     String json = responseBody.string();
+                                     //logger.info("heart beat response json is: {}", json);
+                                     ClientMsg clientMsg = new Gson().fromJson(json, ClientMsg.class);
+                                     Integer flag = clientMsg.getFlag();
+                                     if (1 == flag) {
+                                         logger.info("heart beat continue...{}", token);
+                                         status = CMD_MSG_CONTINUE_BEAT;
+                                         setJumpToLandingFlag(false);
+                                     } else if (Constants.CMD_STATUS_LOGOUT == flag) {
+                                         logger.info("heart beat stop...");
+                                         stopBeat();
+                                         setJumpToLandingFlag(true);
+                                     }
+                                 });
+                      }
+
                   });
     }
 

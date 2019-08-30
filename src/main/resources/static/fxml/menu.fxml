@@ -31,7 +31,7 @@
                     <top>5</top>
                 </Insets>
             </VBox.margin>
-            <Label fx:id="item_setting" onMouseClicked="#openSetting" styleClass="menu_label">设置
+            <Label fx:id="item_setting" onMouseClicked="#openSetting" styleClass="menu_label">重置
                 <HBox.margin>
                     <Insets>
                         <left>10</left>

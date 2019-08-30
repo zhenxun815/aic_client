@@ -137,6 +137,7 @@ public class LandingController extends BaseWebviewController {
 
     @PostMapping("/verify/connection")
     public VerifyMsg activateClient(@RequestBody VerifyMsg msg) {
+        heartBeatService.stopBeat();
         logger.info("get request.." + msg);
         String serverIP = msg.getServerIP();
         VerifyMsg response = new VerifyMsg();

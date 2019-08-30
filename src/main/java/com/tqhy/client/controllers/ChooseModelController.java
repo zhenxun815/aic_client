@@ -65,6 +65,8 @@ public class ChooseModelController extends BasePopWindowController {
     public void initialize() {
         logger.info("choose model initialize...");
         chosenModels.clear();
+        chosenCase = null;
+        FXMLUtils.center2Display(base_pane);
 
         Network.getAicApi()
                .getAllModels()
@@ -81,8 +83,6 @@ public class ChooseModelController extends BasePopWindowController {
                    }
                });
 
-
-        FXMLUtils.center2Display(base_pane);
 
         model_list.setCellFactory(CheckBoxListCell.forListView(model -> {
             BooleanProperty observable = new SimpleBooleanProperty();
@@ -111,6 +111,14 @@ public class ChooseModelController extends BasePopWindowController {
                 return model;
             }
         }));
+
+        text_field_case_id.setOnKeyReleased(event -> {
+            int length = text_field_case_id.getText().length();
+            if (length >= 8) {
+                initCase(text_field_case_id.getText());
+                event.consume();
+            }
+        });
     }
 
     @FXML
@@ -148,7 +156,18 @@ public class ChooseModelController extends BasePopWindowController {
             label_tips.setText("请输入患者id!");
             return;
         }
+        logger.info("into confirm...");
+        initCase(patientId);
+    }
 
+    private void initCase(String patientId) {
+        logger.info("initcase patient id {}", patientId);
+
+        case_list.setCellFactory(listView -> {
+            Case aCase = listView.getItems().get(0);
+            RadioListCell radioListCell = new RadioListCell();
+            return radioListCell;
+        });
         Network.getAicApi()
                .searchCase(patientId)
                .observeOn(Schedulers.io())
@@ -161,11 +180,15 @@ public class ChooseModelController extends BasePopWindowController {
                    logger.info("client msg flag is {}", modelMsg.getFlag());
                    if (BaseMsg.SUCCESS == modelMsg.getFlag()) {
                        ObservableList<Case> caseLists = FXCollections.observableArrayList();
-                       caseLists.addAll(modelMsg.getData());
-                       Platform.runLater(() -> case_list.setItems(caseLists));
+                       if (modelMsg.getData().size() > 0) {
+                           caseLists.addAll(modelMsg.getData());
+                           Platform.runLater(() -> {
+                               case_list.setItems(caseLists);
+                           });
+                       }
                    }
                });
-        case_list.setCellFactory(param -> new RadioListCell());
+
 
     }
 
@@ -203,7 +226,9 @@ public class ChooseModelController extends BasePopWindowController {
             } else {
                 radioButton.setText(itemShowText(caseEntity));
                 radioButton.setToggleGroup(group);
+                logger.info("radio index {}, group.getSelectedToggle(){}", getIndex(), group.getSelectedToggle());
                 radioButton.setSelected(Objects.equals(caseEntity, chosenCase));
+
                 if (isSelected()) {
                     logger.info("selected case is: {}", caseEntity.getId());
                 }
