@@ -79,6 +79,12 @@ dependencies {
     compile('org.dcm4che.tool:dcm4che-tool-dcm2jpg:5.16.1') {
         exclude group: 'org.slf4j'
     }
+    compile('org.dcm4che.tool:dcm4che-tool-common:5.16.1') {
+        exclude group: 'org.slf4j'
+    }
+    compile('org.dcm4che.tool:dcm4che-tool-dcmdump:5.16.1') {
+        exclude group: 'org.slf4j'
+    }
     compile('org.weasis.thirdparty.org.opencv:opencv_java:4.0.0-dcmR3') {
         artifact {
             name = 'opencv_java'
