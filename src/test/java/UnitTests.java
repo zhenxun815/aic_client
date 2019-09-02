@@ -1,9 +1,13 @@
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.tqhy.client.jna.JnaCaller;
 import com.tqhy.client.models.entity.DownloadInfo;
+import com.tqhy.client.models.entity.Model;
 import com.tqhy.client.models.msg.server.ClientMsg;
+import com.tqhy.client.models.msg.server.ModelMsg;
 import com.tqhy.client.network.Network;
+import com.tqhy.client.utils.DateUtils;
 import com.tqhy.client.utils.FileUtils;
 import com.tqhy.client.utils.GsonUtils;
 import okhttp3.ResponseBody;
@@ -19,6 +23,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -55,8 +60,7 @@ public class UnitTests {
         String libPath = System.getProperty("java.library.path");
         logger.info("lib path: is: " + libPath);
 
-        File dcmDir = new File(
-                "C:\\Users\\qing\\Documents\\WeChat Files\\shamaohengheng\\FileStorage\\File\\2019-07\\a735aadbe0f9fa1605520f641ccbb978");
+        File dcmDir = new File("C:\\Users\\qing\\Desktop\\小结节\\ttt\\2");
         File[] dcmFiles = dcmDir.listFiles(FileUtils::isDcmFile);
         logger.info("dcm count is: " + dcmFiles.length);
         Arrays.stream(dcmFiles)
@@ -162,11 +166,23 @@ public class UnitTests {
         jsonReader.setLenient(true);
         DownloadInfo downloadInfo = new Gson().fromJson(jsonReader, DownloadInfo.class);
         logger.info("download info is: {}", downloadInfo);
+
+        String json = "{\"flag\":1,\"data\":[{\"id\":\"60921c68d5ef4ec1a9ed833fe2e0834b\",\"delFlag\":0,\"createTime\":1566888675000,\"updateTime\":1566888726000,\"createUser\":\"阴景洲\",\"updateUser\":null,\"name\":\"肺结节\",\"remark\":\"肺结节2万\",\"taskId\":\"7c8f5f93b54846a7896856ca9b92dd41\",\"stepNum\":20000,\"state\":2,\"modelPath\":\"/mnt/data/model/7c8f5f93b54846a7896856ca9b92dd41/60921c68d5ef4ec1a9ed833fe2e0834b\",\"projectId\":\"3f59a5ebdc32487998bfcad7fd263953\",\"projectName\":\"人工智能识别肺结节\"}],\"msg\":[\"操作成功\"]}";
+        ModelMsg<Model> msg = new Gson().fromJson(json, new TypeToken<ModelMsg<Model>>() {
+        }.getType());
+        List<Model> models = msg.getData();
+        for (Model model : models) {
+            logger.info("model name {}, model id {}", model.getName(), model.getId());
+        }
     }
 
     @Test
     public void testFetchData() {
+        long dateMills = 1546444800000L;
+        long timeMills = 6588000L;
 
+
+        logger.info("datetime is {}", DateUtils.getDatetimeFromMills(dateMills + timeMills));
     }
 
     public static void main(String[] args) {
