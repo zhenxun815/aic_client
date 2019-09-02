@@ -1,6 +1,9 @@
 package com.tqhy.client.utils;
 
 
+import com.tqhy.client.config.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
@@ -18,47 +21,48 @@ import java.util.Properties;
  */
 public class PropertyUtils {
 
-    public static void setUserName(String name) {
-        File file = new File("config.properties");
-        String path = file.getAbsolutePath();
-        //这里自动获取的绝对路径不对，要用下面一行做一下修改
-        path = path.replace("config.properties", "src\\main\\resources\\config.properties");
-        Properties properties = new Properties();
+    static Logger logger = LoggerFactory.getLogger(PropertyUtils.class);
 
-        try {
-            File propertyFile = new File(path);
-            if (!propertyFile.exists()) {
-                FileUtils.createNewFile(propertyFile);
-            }
-            properties.load(new FileInputStream(path));
-            FileOutputStream fos = new FileOutputStream(path);
-            properties.setProperty("username", name);
-            properties.store(fos, "update the username");//配置文件中可以生成修改日志，可以没有
-            fos.close();
-        } catch (IOException e) {
-            System.out.println("can't load properties file");
-            e.printStackTrace();
-        }
-    }
-
-    public static String getUserName() {
-        File file = new File("config.properties");
-        String path = file.getAbsolutePath();
-        //这里自动获取的绝对路径不对，要用下面一行做一下修改
-        path = path.replace("config.properties", "src\\main\\resources\\config.properties");
-        File propertyFile = new File(path);
-        if (!propertyFile.exists()) {
-            FileUtils.createNewFile(propertyFile);
+    public static String getProperty(String key) {
+        File configFile = FileUtils.getLocalFile("/data/", "config.properties");
+        if (!configFile.exists()) {
+            logger.info("config file not exist...");
+            FileUtils.createNewFile(configFile);
             return "";
         }
         Properties properties = new Properties();
         try {
-            properties.load(new FileInputStream(path));
+            properties.load(new FileInputStream(configFile));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("can't load config file", e);
         }
+        String value = properties.getProperty(key);
+        return StringUtils.isEmpty(value) ? "" : value;
+    }
 
-        String username = properties.getProperty("username");
-        return StringUtils.isEmpty(username) ? "" : username;
+    public static void setProperty(String key, String value) {
+        File configFile = FileUtils.getLocalFile("/data/", "config.properties");
+        Properties properties = new Properties();
+
+        try {
+            if (!configFile.exists()) {
+                FileUtils.createNewFile(configFile);
+            }
+            properties.load(new FileInputStream(configFile));
+            FileOutputStream fos = new FileOutputStream(configFile);
+            properties.setProperty(key, value);
+            properties.store(fos, "update");
+            fos.close();
+        } catch (IOException e) {
+            logger.error("can't load config file", e);
+        }
+    }
+
+    public static void setUserName(String name) {
+        setProperty(Constants.USERNAME, name);
+    }
+
+    public static String getUserName() {
+        return getProperty(Constants.USERNAME);
     }
 }

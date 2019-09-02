@@ -37,10 +37,8 @@ import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 /**
  * @author Yiheng
@@ -51,6 +49,8 @@ import java.util.stream.Collectors;
 public class UploadFileController {
 
 
+    public VBox choose_right;
+    public Text text_choose_remark;
     Logger logger = LoggerFactory.getLogger(UploadFileController.class);
     Stage stage;
 
@@ -80,14 +80,10 @@ public class UploadFileController {
     @FXML
     public TextField text_field_max;
 
-    /**
-     * 是否可以上传
-     */
-    private boolean uploadReady;
-
     @Value("${path.data:'/data/'}")
     private String localDataPath;
-
+    @FXML
+    HBox container_pane;
     @FXML
     VBox panels_parent;
     @FXML
@@ -98,12 +94,6 @@ public class UploadFileController {
     VBox panel_complete;
     @FXML
     VBox panel_fail;
-
-    /**
-     * 显示将文件上传至哪个集合
-     */
-    @FXML
-    Text text_choose_desc;
 
     /**
      * 选择上传文件提示
@@ -132,7 +122,7 @@ public class UploadFileController {
      * 上传备注信息
      */
     @FXML
-    TextField text_field_remarks;
+    TextArea text_field_remarks;
     /**
      * 上传进度百分比
      */
@@ -160,6 +150,12 @@ public class UploadFileController {
     @FXML
     ProgressBar progress_bar_upload;
 
+    /**
+     * 窗口最小化
+     */
+    @FXML
+    public Button btn_upload_min;
+
     @FXML
     Button btn_failed_check;
 
@@ -183,6 +179,9 @@ public class UploadFileController {
 
         stage.setWidth(visualBounds.getWidth());
         stage.setHeight(visualBounds.getHeight());
+
+        btn_upload_min.setLayoutX(visualBounds.getWidth() - 50);
+        btn_upload_min.setLayoutY(16);
         stage.centerOnScreen();
         panels = new VBox[]{panel_choose, panel_progress, panel_fail, panel_complete};
         showPanel(panel_choose.getId());
@@ -196,13 +195,20 @@ public class UploadFileController {
             }
         });
 
-        uploadReady = false;
+        stage.iconifiedProperty()
+             .addListener((observable, oldVal, newVal) -> {
+                 logger.info("main stage iconified state change..." + newVal);
+                 ClientApplication.stage.setIconified(newVal);
+             });
 
-        mainStageIconified.bind(ClientApplication.stage.iconifiedProperty());
-        mainStageIconified.addListener((observable, oldVal, newVal) -> {
-            logger.info("main stage iconified state change..." + newVal);
-            stage.setIconified(newVal);
-        });
+        //mainStageIconified.bind(ClientApplication.stage.iconifiedProperty());
+        ClientApplication.stage.iconifiedProperty()
+                               .addListener((observable, oldVal, newVal) -> {
+                                   logger.info("main stage iconified state change..." + newVal);
+                                   stage.setIconified(newVal);
+                                   //ClientApplication.stage.setIconified(newVal);
+                               });
+
         text_field_max.setFocusTraversable(false);
         text_field_remarks.setOnKeyPressed(event -> {
             int length = text_field_remarks.getLength();
@@ -222,8 +228,7 @@ public class UploadFileController {
     private void resetValues() {
         dirToUpload = null;
         text_choose_info.setText("未选择任何文件!");
-        text_field_max.setText(null);
-        uploadReady = false;
+        text_field_max.setText("");
     }
 
 
@@ -243,38 +248,12 @@ public class UploadFileController {
             if (null != dirToUpload) {
                 File[] files = dirToUpload.listFiles();
 
-                if (null != files && files.length > 0) {
-                    logger.info("choose dirToUpload is: [{}]", dirToUpload.getAbsolutePath());
-                    File[] caseDirs = dirToUpload.listFiles(File::isDirectory);
-                    uploadReady = true;
-                    if (null != caseDirs && caseDirs.length > 0) {
-                        List<File> invalidDirs = Arrays.stream(caseDirs)
-                                                       .filter(caseDir -> {
-                                                           File[] caseSubDirs = caseDir.listFiles(File::isDirectory);
-                                                           return null != caseSubDirs && caseSubDirs.length > 0;
-                                                       }).collect(Collectors.toList());
-                        if (invalidDirs.size() > 0) {
-                            String paths = invalidDirs.stream()
-                                                      .collect(StringBuilder::new,
-                                                               (builder, dir) ->
-                                                                       builder.append(dir.getAbsolutePath())
-                                                                              .append(Constants.NEW_LINE),
-                                                               StringBuilder::append)
-                                                      .toString();
-                            text_fail_title.setText("以下文件夹路径结构不符合规则");
-                            label_fail_desc.setText(paths);
-                            text_success_desc.setText("路径不合法,未上传任何文件!");
-                            uploadReady = false;
-                            label_fail_desc.setText(paths);
-                            showPanel(panel_fail.getId());
-                        }
-                    }
-                    text_choose_info.setText(dirToUpload.getAbsolutePath());
-
-                } else {
+                if (null == files || files.length == 0) {
                     logger.info("choose dirToUpload error");
                     text_choose_info.setText("文件夹路径不合法!");
-                    uploadReady = false;
+                } else {
+                    logger.info("choose dirToUpload is: [{}]", dirToUpload.getAbsolutePath());
+                    text_choose_info.setText(dirToUpload.getAbsolutePath());
                 }
             }
         }
@@ -287,9 +266,6 @@ public class UploadFileController {
      */
     @FXML
     public void startUpload(MouseEvent mouseEvent) {
-        if (!uploadReady) {
-            return;
-        }
         MouseButton button = mouseEvent.getButton();
         if (MouseButton.PRIMARY.equals(button)) {
             logger.info(button.name() + "....");
@@ -297,7 +273,7 @@ public class UploadFileController {
                 return;
             }
             String batchNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
-            uploadMsg.setBatchNumber(batchNumber);
+            uploadMsg.setBatchNumber(batchNumber + "a");
             text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
             logger.info("upload batch number is {}", batchNumber);
 
@@ -328,17 +304,37 @@ public class UploadFileController {
                                   String completeCount = msgSplit[1];
                                   String errorCount = msgSplit[2];
                                   String completeMsg = "上传完毕,成功: " + completeCount + " 条, 失败: " + errorCount + " 条!";
-                                  FXMLUtils.displayChildNode(box_complete, btn_failed_check, Integer.parseInt(errorCount) > 0);
+                                  FXMLUtils.displayChildNode(box_complete, btn_failed_check,
+                                                             Integer.parseInt(errorCount) > 0);
                                   text_success_desc.setText(completeMsg);
                                   break;
                               case UploadWorkerTask.PROGRESS_MSG_COLLECT:
                                   text_progress_desc.setText("文件信息采集中,请耐心等待..");
-                                  text_progress_info.setText(decimalFormat.format(Double.parseDouble(msgSplit[1])) + "%");
+                                  String infoType = msgSplit[1];
+                                  if (infoType.equals("progress")) {
+                                      text_progress_info.setText(
+                                              decimalFormat.format(Double.parseDouble(msgSplit[2])) + "%");
+                                  } else {
+                                      text_fail_title.setText("以下文件夹路径结构不符合规则");
+                                      File uploadInfoFile = FileUtils.getLocalFile(localDataPath, batchNumber + ".txt");
+                                      if (uploadInfoFile.exists()) {
+                                          String failedInfos = FileUtils.readLine(uploadInfoFile, line -> line.concat(
+                                                  Constants.NEW_LINE))
+                                                                        .stream()
+                                                                        .collect(StringBuilder::new,
+                                                                                 StringBuilder::append,
+                                                                                 StringBuilder::append)
+                                                                        .toString();
+                                          label_fail_desc.setText(failedInfos);
+                                      }
+                                      showPanel(panel_fail.getId());
+                                  }
                                   break;
                               case UploadWorkerTask.PROGRESS_MSG_UPLOAD:
                                   text_progress_desc.setText("文件上传中,请耐心等待..");
                                   logger.info("upload progress msg..." + newVal);
-                                  text_progress_info.setText(decimalFormat.format(Double.parseDouble(msgSplit[1])) + "%");
+                                  text_progress_info.setText(
+                                          decimalFormat.format(Double.parseDouble(msgSplit[1])) + "%");
                                   break;
                           }
                       });
@@ -359,9 +355,7 @@ public class UploadFileController {
      */
     private void showPanel(String panelId) {
 
-        panels_parent.setLayoutX((stage.getWidth() - 600) / 2);
-        panels_parent.setLayoutY((stage.getHeight() - 248) / 2);
-
+        FXMLUtils.center2Display(container_pane);
         panels_parent.getChildren().removeAll(panels);
         VBox panelToShow = Arrays.stream(panels)
                                  .filter(panel -> panel.getId().equals(panelId))
@@ -369,15 +363,19 @@ public class UploadFileController {
                                  .get();
         if (panelToShow.getId().equals(panel_choose.getId())) {
             if (UploadMsg.UPLOAD_TYPE_CASE.equals(uploadMsg.getUploadType())) {
-                FXMLUtils.displayChildNode(panel_choose, text_field_remarks, true);
+                FXMLUtils.displayChildNode(choose_right, text_field_remarks, true);
+                text_choose_remark.setText("");
                 //text_choose_desc.setText("将数据导入至: " + uploadMsg.getUploadTargetName());
                 //text_choose_desc.setVisible(true);
                 //logger.info("upload case...target name is: [{}]",uploadMsg.getUploadTargetName());
             } else if (UploadMsg.UPLOAD_TYPE_TEST.equals(uploadMsg.getUploadType())) {
-                FXMLUtils.displayChildNode(panel_choose, text_field_remarks, false);
+                FXMLUtils.displayChildNode(choose_right, text_field_remarks, false);
+                text_choose_remark.setText("备注信息");
                 //text_choose_desc.setVisible(false);
                 logger.info("upload test...");
             }
+        } else {
+            container_pane.setMinHeight(300);
         }
 
         panels_parent.getChildren()
@@ -400,7 +398,8 @@ public class UploadFileController {
             //通知页面刷新
             String batchNumber = uploadMsg.getBatchNumber();
             if (StringUtils.isNotEmpty(batchNumber)) {
-                landingController.sendMsgToJs("callJsFunction", batchNumber);
+                String successCount = workerTask.getSuccessCount().toString();
+                landingController.sendMsgToJs("callJsFunction", batchNumber, successCount);
             }
         }
     }
@@ -464,6 +463,15 @@ public class UploadFileController {
         }
     }
 
+    @FXML
+    public void stage_minimum(MouseEvent mouseEvent) {
+        MouseButton button = mouseEvent.getButton();
+        if (MouseButton.PRIMARY.equals(button)) {
+            stage.setIconified(true);
+            ClientApplication.stage.setIconified(true);
+        }
+    }
+
     /**
      * 开启上传窗口,初始化页面
      *
@@ -478,24 +486,25 @@ public class UploadFileController {
         uploadMsg.setToken(Network.TOKEN);
         logger.info("uploadTargetName to upload is: {}", uploadMsg.getUploadTargetName());
         Platform.runLater(() -> {
-            stage = new Stage();
-
-            FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml");
+            if (null == stage) {
+                stage = new Stage();
+                FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml", false);
+            } else {
+                showPanel(panel_choose.getId());
+                stage.show();
+            }
             // text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
 
             @NonNull String uploadType = uploadMsg.getUploadType();
-            text_choose_desc.setText("将数据上传至: " + uploadMsg.getUploadTargetName());
             if (UploadMsg.UPLOAD_TYPE_CASE.equals(uploadType)) {
-                FXMLUtils.displayChildNode(panel_choose, text_field_remarks, true);
+                FXMLUtils.displayChildNode(choose_right, text_field_remarks, true);
                 //text_choose_desc.setVisible(true);
                 //logger.info("upload case...target name is: [{}]",uploadMsg.getUploadTargetName());
             } else if (UploadMsg.UPLOAD_TYPE_TEST.equals(uploadType)) {
-                FXMLUtils.displayChildNode(panel_choose, text_field_remarks, false);
+                FXMLUtils.displayChildNode(choose_right, text_field_remarks, false);
                 //text_choose_desc.setVisible(false);
                 logger.info("upload test...");
             }
         });
     }
-
-
 }

@@ -3,6 +3,8 @@ package com.tqhy.client;
 import com.tqhy.client.utils.FXMLUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Rectangle2D;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URL;
 
@@ -26,24 +30,38 @@ public class ClientApplication extends Application {
     static Logger logger = LoggerFactory.getLogger(ClientApplication.class);
     public static ConfigurableApplicationContext springContext;
     public static Stage stage;
-
+    public static Stage menuStage;
+    public static Stage chooseModelStage;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         stage = primaryStage;
-        stage.setOnCloseRequest(event -> System.exit(0));
-        FXMLUtils.loadWindow(ClientApplication.stage, "/static/fxml/main.fxml");
+        stage.setOnCloseRequest(event -> {
+            event.consume();
+            FXMLUtils.loadPopWindow("/static/fxml/warning_onclose.fxml");
+        });
         initPrimaryStageSize();
-
     }
 
     /**
      * 初始最大化窗口,固定窗体大小
      */
     private void initPrimaryStageSize() {
+
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        stage.setX(visualBounds.getMinX());
+        stage.setY(visualBounds.getMinY());
+        logger.info("stage: x {}, y {}", stage.getX(), stage.getY());
         stage.setMaximized(true);
-        stage.centerOnScreen();
-        stage.setResizable(false);
+        FXMLUtils.loadWindow(stage, "/static/fxml/main.fxml", true);
+        double st_width = stage.getWidth();
+        double st_height = stage.getHeight();
+        logger.info("st width {}, height {}", st_width, st_height);
+        stage.setMinWidth(st_width);
+        stage.setMinHeight(st_height);
+        stage.setMaxWidth(st_width);
+        stage.setMaxHeight(st_height);
+
     }
 
     /**
@@ -66,6 +84,40 @@ public class ClientApplication extends Application {
             //final TrayIcon trayIcon = new TrayIcon(image, "打开悬浮窗",popupMenu);
             final TrayIcon trayIcon = new TrayIcon(image);
 
+            trayIcon.addMouseListener(new MouseListener() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getButton() > 1) {
+                        logger.info("button 2 clicked...");
+                        Platform.runLater(
+                                () -> FXMLUtils.loadMenu("/static/fxml/menu.fxml",
+                                                         e.getX() + 0D,
+                                                         e.getY() + 0D,
+                                                         60,
+                                                         100));
+                    }
+                }
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    Platform.runLater(() -> menuStage.hide());
+                }
+            });
             systemTray.add(trayIcon);
         } catch (IOException e) {
             e.printStackTrace();

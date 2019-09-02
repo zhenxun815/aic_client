@@ -88,7 +88,7 @@
 </div>
 </body>
 <script type="text/javascript">
-	let flag = 0
+	var flag = 0
 	document.oncontextmenu = function () {
 		return false;
 	}
@@ -96,7 +96,7 @@
 	document.body.addEventListener('keyup', ev => {
 		if (ev.keyCode === 13) {
 			$ = layui.jquery;
-			let serverIPLength = $('#server_ip').val().length
+			var serverIPLength = $('#server_ip').val().length
 			if (serverIPLength > 0) {
 				nextStep()
 			}
@@ -110,10 +110,10 @@
 	function nextStep() {
 		flag = 0
 		if (checkValueFunc()) {
-			let serverIP = $('#server_ip').val()
-			let ip_pattern = /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\:[0-9]+)?/g
-			let reg = new RegExp(ip_pattern)
-			let ipValid = reg.test(serverIP)
+			var serverIP = $('#server_ip').val()
+			var ip_pattern = /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\:[0-9]+)?/g
+			var reg = new RegExp(ip_pattern)
+			var ipValid = reg.test(serverIP)
 			console.log(`server ip to connect is: ${serverIP},valid is: ${ipValid}`)
 
 			if (ipValid) {
@@ -121,8 +121,10 @@
 				$('.connect-test .spin').css({
 					'display': 'inline-block'
 				})
-
-				let requestData = {serverIP: serverIP}
+				if (serverIP.indexOf(':') == -1) {
+					serverIP = serverIP + ":8080"
+				}
+				var requestData = {serverIP: serverIP}
 				post_ajax('connTest', '/verify/connection', requestData, (response) => {
 					//console.log(`response data is: ${JSON.stringify(response)}`)
 					flag = response.flag
@@ -131,8 +133,11 @@
 						$('.spin').hide()
 						$('.callback-message').html('连接成功!')
 						$('.callback-message').addClass("show")
-
-						window.location.href = baseUrlLocal + '/html/landing.html'
+						if (response.landingIgnore) {
+							window.location.href = 'http://' + serverIP + '/case/release'
+						} else {
+							window.location.href = baseUrlLocal + '/landing.html'
+						}
 					} else {
 						flag = 0
 						//layOpenFunc1()

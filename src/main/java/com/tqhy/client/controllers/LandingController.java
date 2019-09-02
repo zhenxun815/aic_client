@@ -6,7 +6,6 @@ import com.tqhy.client.models.msg.local.LandingMsg;
 import com.tqhy.client.models.msg.local.VerifyMsg;
 import com.tqhy.client.models.msg.server.ClientMsg;
 import com.tqhy.client.network.Network;
-import com.tqhy.client.utils.FileUtils;
 import com.tqhy.client.utils.GsonUtils;
 import com.tqhy.client.utils.NetworkUtils;
 import com.tqhy.client.utils.PropertyUtils;
@@ -22,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -58,12 +56,22 @@ public class LandingController extends BaseWebviewController {
 
     private WebEngine webEngine;
 
+    private boolean landingIgnore;
+
     @FXML
     void initialize() {
         super.initialize(webView);
-        String initUrl = StringUtils.isEmpty(Network.SERVER_IP) ? connectionUrl : landingUrl;
-        logger.info("init load url is: " + initUrl);
-        loadPage(webView, Network.LOCAL_BASE_URL + initUrl);
+        String landingIgnoreConfig = PropertyUtils.getProperty(Constants.LANDING_IGNORE);
+        landingIgnore = StringUtils.isEmpty(landingIgnoreConfig) ? false : Boolean.parseBoolean(landingIgnoreConfig);
+        if (StringUtils.isEmpty(Network.SERVER_IP)) {
+            logger.info("init load url is connection");
+            loadPage(webView, Network.LOCAL_BASE_URL + connectionUrl);
+        } else if (landingIgnore) {
+            loadPage(webView, Network.SERVER_BASE_URL + "/case/release");
+        } else {
+            loadPage(webView, Network.LOCAL_BASE_URL + landingUrl);
+        }
+
         //webEngine.load("https://www.baidu.com");
     }
 
@@ -87,28 +95,31 @@ public class LandingController extends BaseWebviewController {
 
         Network.getAicApi()
                .landing(userName, userPwd)
+               .observeOn(Schedulers.io())
+               .subscribeOn(Schedulers.trampoline())
                .map(body -> {
                    ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
+                   logger.info("land response msg is {}", clientMsg);
                    logger.info("flag is: " + clientMsg.getFlag());
                    response.setFlag(clientMsg.getFlag());
                    response.setDesc(clientMsg.getDesc());
                    List<String> msg = clientMsg.getMsg();
                    String token = msg.get(0);
-                   logger.info("token is: " + token);
+                   logger.info("map token is: " + token);
                    response.setToken(token);
                    response.setLocalIP(localIp);
                    response.setServerIP(Network.SERVER_IP);
+                   logger.info("response server ip is: {}", Network.SERVER_IP);
                    return response;
                })
-               .observeOn(Schedulers.io())
-               .subscribeOn(Schedulers.trampoline())
-               .subscribe(res -> {
+               .blockingSubscribe(res -> {
                    if (BaseMsg.SUCCESS == res.getFlag()) {
+                       logger.info("subscribe token is {}", response.getToken());
                        heartBeatService.startBeat(response.getToken());
                        Network.TOKEN = response.getToken();
                    }
                });
-
+        logger.info("response is {}", response);
         return response;
     }
 
@@ -126,6 +137,7 @@ public class LandingController extends BaseWebviewController {
 
     @PostMapping("/verify/connection")
     public VerifyMsg activateClient(@RequestBody VerifyMsg msg) {
+        heartBeatService.stopBeat();
         logger.info("get request.." + msg);
         String serverIP = msg.getServerIP();
         VerifyMsg response = new VerifyMsg();
@@ -141,9 +153,8 @@ public class LandingController extends BaseWebviewController {
 
             if (BaseMsg.SUCCESS == clientMsg.getFlag()) {
                 logger.info("ping server: " + serverIP + " successCount");
-
-                File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
-                FileUtils.writeFile(serverIPFile, serverIP, null, true);
+                PropertyUtils.setProperty(Constants.SERVER_IP, serverIP);
+                response.setLandingIgnore(landingIgnore);
                 response.setFlag(1);
                 response.setServerIP(Network.SERVER_IP);
                 return response;
@@ -156,7 +167,7 @@ public class LandingController extends BaseWebviewController {
         return response;
     }
 
-    void sendMsgToJs(String funcName, String msg) {
-        super.sendMsgToJs(webView, funcName, msg);
+    void sendMsgToJs(String funcName, String... msgs) {
+        super.sendMsgToJs(webView, funcName, msgs);
     }
 }

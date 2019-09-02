@@ -31,14 +31,14 @@
 				<form class="login-zone" onsubmit="return false">
 					<div class="input-box user">
 						<h6 class="label">用户名</h6>
-						<input class="input" id="input_uname" placeholder="填写用户名"
-						       type="text"/>
+						<input class="input" id="input_uname" onblur="checkUserName()"
+						       placeholder="填写用户名" type="text"/>
 						<p class="callback-message">用户名不能为空</p>
 					</div>
 					<div class="input-box user">
 						<h6 class="label">密码</h6>
-						<input class="input" id="input_upwd" placeholder="填写密码"
-						       type="password"/>
+						<input class="input" id="input_upwd" onblur="checkUserPwd()"
+						       placeholder="填写密码" type="password"/>
 						<p class="callback-message" id="landing_tips">密码不能为空</p>
 					</div>
 				</form>
@@ -85,8 +85,8 @@
 		console.log('into key up event listener..')
 		if (e.keyCode === 13) {
 			$ = layui.jquery;
-			let nameLength = $('#input_uname').val().length
-			let pwdLength = $('#input_upwd').val().length
+			var nameLength = $('#input_uname').val().length
+			var pwdLength = $('#input_upwd').val().length
 			console.log(`name length ${nameLength}, pwd length ${pwdLength}`)
 			if (nameLength > 0 && pwdLength > 0) {
 				land()
@@ -94,10 +94,30 @@
 		}
 	})
 
+	function checkUserName() {
+		$ = layui.jquery
+		var nameLength = $('#input_uname').val().length
+		if (nameLength == 0) {
+			$('#input_uname').next().addClass("show")
+		} else {
+			$('#input_uname').next().removeClass("show")
+		}
+	}
+
+	function checkUserPwd() {
+		$ = layui.jquery
+		var nameLength = $('#input_upwd').val().length
+		if (nameLength == 0) {
+			$('#input_upwd').next().addClass("show")
+		} else {
+			$('#input_upwd').next().removeClass("show")
+		}
+	}
+
 	function checkInputLength() {
-		$ = layui.jquery;
-		let nameLength = $('#input_uname').val().length
-		let pwdLength = $('#input_upwd').val().length
+		$ = layui.jquery
+		var nameLength = $('#input_uname').val().length
+		var pwdLength = $('#input_upwd').val().length
 		if (nameLength > 50 || pwdLength > 50) {
 			$('#landing_tips').html('输入长度不合法,请重新输入!')
 			$('#landing_tips').show()
@@ -115,20 +135,19 @@
 	function land() {
 		//localStorage.clear()
 		if (checkValueFunc() && checkInputLength()) {
-			let userName = $('#input_uname').val()
-			let userPwd = $('#input_upwd').val()
+			var userName = $('#input_uname').val()
+			var userPwd = $('#input_upwd').val()
 
-			let landInfo = {userName: userName, userPwd: userPwd}
+			var landInfo = {userName: userName, userPwd: userPwd}
 			console.log(`userName is: ${userName}, userPwd is: ${userPwd}`)
 			post_ajax('land', '/landing', landInfo, (response) => {
-				let flag = response.flag
+				var flag = response.flag
+				var token = response.token
 				console.log(`flag is: ${flag}`)
 				if (1 == flag) {
-					let token = response.token
-					let localIP = response.localIP
-					localStorage.setItem("AIC_TOKEN", token)
+					var localIP = response.localIP
 					//window.location.href = baseUrlLocal + '/html/test_upload.html'
-					let serverIP = response.serverIP
+					var serverIP = response.serverIP
 					//alert('server ip: '+serverIP)
 					//window.location.href = 'http://' + serverIP + '/index.html?token=' + token + '&localIP=' + localIP
 					// jsp version
@@ -136,7 +155,7 @@
 				} else if (203 == flag) {
 					layOpenFunc1()
 				} else {
-					$('#landing_tips').html('账号与密码不匹配, 请核实后登录!')
+					$('#landing_tips').html(token)
 					$('#landing_tips').show()
 				}
 			})

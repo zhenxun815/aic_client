@@ -103,32 +103,29 @@ public class NetworkUtils {
      *
      * @return
      */
-    public static String initServerIP(String localDataPath) {
+    public static String initServerIP() {
         logger.info("into init webEngine..");
-        File serverIPFile = FileUtils.getLocalFile(localDataPath, Constants.PATH_SERVER_IP);
-        if (serverIPFile.exists()) {
-            List<String> datas = FileUtils.readLine(serverIPFile, line -> line);
-            String serverIP = datas.size() > 0 ? datas.get(0).trim() : "";
-            if (StringUtils.isEmpty(serverIP)) {
-                return "";
-            }
 
-            Network.setServerBaseUrl(serverIP);
-            try {
-                ResponseBody body = Network.getAicApi()
-                                           .pingServer()
-                                           .execute()
-                                           .body();
+        String serverIP = PropertyUtils.getProperty(Constants.SERVER_IP);
+        if (StringUtils.isEmpty(serverIP)) {
+            return "";
+        }
 
-                ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
-                Integer flag = clientMsg.getFlag();
-                logger.info("ping server ip: " + serverIP + ", get flag: " + flag);
-                if (BaseMsg.SUCCESS == flag) {
-                    return serverIP;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+        Network.setServerBaseUrl(serverIP);
+        try {
+            ResponseBody body = Network.getAicApi()
+                                       .pingServer()
+                                       .execute()
+                                       .body();
+
+            ClientMsg clientMsg = GsonUtils.parseResponseToObj(body);
+            Integer flag = clientMsg.getFlag();
+            logger.info("ping server ip: " + serverIP + ", get flag: " + flag);
+            if (BaseMsg.SUCCESS == flag) {
+                return serverIP;
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return "";
     }
@@ -174,6 +171,26 @@ public class NetworkUtils {
         }
         RequestBody body = RequestBody.create(MediaType.parse("multipart/form-data"), content);
         return body;
+    }
+
+    /**
+     * 拼接url请求
+     *
+     * @param host
+     * @param port
+     * @param path
+     * @param params
+     * @return
+     */
+    public static String createUrl(String host, int port, String path, Map<String, String> params) {
+        String basePath = host.concat(":").concat(Integer.toString(port));
+        return createUrl(basePath, path, params);
+    }
+
+    public static String createUrl(String basePath, String path, Map<String, String> params) {
+        StringBuilder builder = new StringBuilder(basePath).append(path).append("?");
+        params.forEach((k, v) -> builder.append(k).append("=").append(v).append("&"));
+        return builder.deleteCharAt(builder.lastIndexOf("&")).toString();
     }
 
     /**

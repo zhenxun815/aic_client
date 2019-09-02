@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ClientPreloader extends Preloader {
 
 
-    Logger logger = LoggerFactory.getLogger(ClientPreloader.class);
+    static Logger logger = LoggerFactory.getLogger(ClientPreloader.class);
 
     private Stage preloaderStage;
     private PreloaderController preloaderController;
@@ -74,12 +74,15 @@ public class ClientPreloader extends Preloader {
      */
     private void initLibPath() {
         ExecutorService executor = Executors.newSingleThreadExecutor();
+        File destDll = FileUtils.getLocalFile("/", "opencv_java.dll");
+        if (destDll.exists()) {
+            return;
+        }
         executor.submit(() -> {
             String arc = SystemUtils.getArc();
             logger.info("system arc is: " + arc);
-
-            String dllToCopy = SystemUtils.SYS_ARC_64.equals(arc) ? "/bin/opencv_java_64bit.dll" : "/bin/opencv_java_32bit.dll";
-            File destDll = FileUtils.getLocalFile("/", "opencv_java.dll");
+            String dllToCopy =
+                    SystemUtils.SYS_ARC_64.equals(arc) ? "/bin/opencv_java_64bit.dll" : "/bin/opencv_java_32bit.dll";
 
             boolean copyResource = FileUtils.copyResource(dllToCopy, destDll.getAbsolutePath());
             if (!copyResource) {
@@ -146,7 +149,7 @@ public class ClientPreloader extends Preloader {
             //String dataPath = springContext.getEnvironment().getProperty("path.data");
             String dataPath = "/data/";
             logger.info("dataPath is: " + dataPath);
-            String serverIP = NetworkUtils.initServerIP(dataPath);
+            String serverIP = NetworkUtils.initServerIP();
             Network.SERVER_IP = serverIP;
             logger.info("init server IP: " + serverIP);
         });

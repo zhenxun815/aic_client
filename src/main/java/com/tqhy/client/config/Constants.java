@@ -29,7 +29,6 @@ public class Constants {
 
     /************************ PATH *************************/
 
-    public static final String PATH_SERVER_IP = "serverIP";
 
     public static final String PATH_TEMP_JPG = "TQHY_TEMP";
 
@@ -40,4 +39,13 @@ public class Constants {
 
     public static final String VALUE_SPLITTER = ",";
 
+    public static final String CASE_NAME_INVALID = "TQHY_INVALID";
+
+    /************************ CONFIG *************************/
+
+    public static final String SERVER_IP = "serverIP";
+
+    public static final String USERNAME = "username";
+
+    public static final String LANDING_IGNORE = "landingIgnore";
 }

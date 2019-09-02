@@ -1,9 +1,13 @@
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+import com.tqhy.client.jna.JnaCaller;
 import com.tqhy.client.models.entity.DownloadInfo;
+import com.tqhy.client.models.entity.Model;
 import com.tqhy.client.models.msg.server.ClientMsg;
+import com.tqhy.client.models.msg.server.ModelMsg;
 import com.tqhy.client.network.Network;
-import com.tqhy.client.task.Dcm2JpgTask;
+import com.tqhy.client.utils.DateUtils;
 import com.tqhy.client.utils.FileUtils;
 import com.tqhy.client.utils.GsonUtils;
 import okhttp3.ResponseBody;
@@ -17,16 +21,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 /**
  * @author Yiheng
@@ -39,28 +37,37 @@ public class UnitTests {
     Logger logger = LoggerFactory.getLogger(UnitTests.class);
 
     @Test
+    public void testOther() {
+        String str = "中文";
+        byte[] bytes = str.getBytes();
+        logger.info("length is {}", bytes.length);
+    }
+
+    @Test
+    public void testJudgeDcm() {
+        String dirPath = "H:\\肺结节整理\\35";
+        String dcmName = "1.3.6.1.4.1.25403.127846690305080.3884.20190725093946.3.dcm";
+        boolean isDcm = FileUtils.isDcmFile(new File(dirPath, dcmName));
+        logger.info("is dcm {}", isDcm);
+
+        Optional<File> jpgFileOpt = FileUtils.transToJpg(new File(dirPath, dcmName), new File(dirPath));
+        logger.info(jpgFileOpt.isPresent() ? jpgFileOpt.get().getAbsolutePath() : "fail");
+    }
+
+    @Test
     public void testParseDcm() {
 
         String libPath = System.getProperty("java.library.path");
         logger.info("lib path: is: " + libPath);
 
-        File dcmDir = new File("F:\\dicom\\4321\\case1\\");
-        File[] dcmFiles = dcmDir.listFiles(File::isFile);
+        File dcmDir = new File("C:\\Users\\qing\\Desktop\\小结节\\ttt\\2");
+        File[] dcmFiles = dcmDir.listFiles(FileUtils::isDcmFile);
         logger.info("dcm count is: " + dcmFiles.length);
-        ExecutorService executor = Executors.newFixedThreadPool(4);
         Arrays.stream(dcmFiles)
-              .collect(ArrayList<File>::new, (list, dicomFile) -> {
-                  Future<File> fileFuture = executor.submit(Dcm2JpgTask.of(dicomFile, dcmDir));
-                  try {
-                      File jpgFile = fileFuture.get();
-                      System.out.println("trans jpg file finish..." + jpgFile.getAbsolutePath());
-                  } catch (InterruptedException e) {
-                      e.printStackTrace();
-                  } catch (ExecutionException e) {
-                      e.printStackTrace();
-                  }
-              }, ArrayList::addAll)
-              .forEach(jpgFile -> System.out.println("trans jpg file finish..." + jpgFile.getAbsolutePath()));
+              .forEach(dcmFile -> {
+                  File jpgFile = FileUtils.transToJpg(dcmFile, dcmDir).get();
+                  System.out.println("trans jpg file finish..." + jpgFile.getAbsolutePath());
+              });
 
     }
 
@@ -71,46 +78,40 @@ public class UnitTests {
         boolean isJpgFile = FileUtils.isJpgFile(imgFile);
         logger.info("is jpg file {}", isJpgFile);*/
 
-        String dirPath = "C:\\Users\\qing\\Pictures\\shadow\\error";
+        String dirPath = "C:\\Users\\qing\\Desktop\\追加数据";
         File dir = new File(dirPath);
-        File[] files = dir.listFiles(File::isFile);
-        List<File> invalidDirs = Arrays.stream(files)
-                                       .filter(caseDir -> {
-                                           File[] caseSubDirs = caseDir.listFiles(File::isDirectory);
-                                           return null != caseSubDirs && caseSubDirs.length > 0;
-                                       }).collect(Collectors.toList());
-        logger.info("files {}", invalidDirs.size());
+        HashMap<File, String> filesMapInRootDir = FileUtils.getFilesMapInRootDir(dir, file -> FileUtils.isDcmFile(
+                file) || FileUtils.isJpgFile(file));
+        HashMap<File, String> tempTotalFile = new HashMap<>();
+        tempTotalFile.putAll(filesMapInRootDir);
+        logger.info("files {}", tempTotalFile.size());
     }
 
     @Test
-    public void testIp() {
-        File dir = new File("C:\\Users\\qing\\Pictures\\shadow\\jpg\\test2");
-        HashMap<File, String> filesMapInDir = getFilesMapInDir(dir, file -> FileUtils.isDcmFile(file) || FileUtils.isJpgFile(file));
-        filesMapInDir.forEach((k, v) -> logger.info("k is {},v is {}", k, v));
+    public void testGetFileMap() {
+        File dir = new File("F:\\dicom\\1234");
+        HashMap<File, String> filesMapInRootDir =
+                FileUtils.getFilesMapInRootDir(dir,
+                                               file -> FileUtils.isDcmFile(file) || FileUtils.isJpgFile(file));
+        HashMap<File, String> filesMapInSubDir =
+                FileUtils.getFilesMapInSubDir(dir,
+                                              file -> FileUtils.isDcmFile(file) || FileUtils.isJpgFile(file),
+                                              dir);
+        logger.info("root dir file is:");
+        filesMapInRootDir.forEach((k, v) -> logger.info("k is {},v is {}", k, v));
+        logger.info("sub dir file is:");
+        filesMapInSubDir.forEach((k, v) -> logger.info("k is {},v is {}", k, v));
     }
 
     @Test
     public void testSys() {
-        File source = new File("D:\\tq_workspace\\client3\\out\\artifacts\\client3\\bundles\\client3\\app", "opencv_java_64bit.dll");
-        File dest = new File("D:\\tq_workspace\\client3\\out\\artifacts\\client3\\bundles\\client3\\app\\dll", "opencv_java.dll");
+        File source = new File("D:\\tq_workspace\\client3\\out\\artifacts\\client3\\bundles\\client3\\app",
+                               "opencv_java_64bit.dll");
+        File dest = new File("D:\\tq_workspace\\client3\\out\\artifacts\\client3\\bundles\\client3\\app\\dll",
+                             "opencv_java.dll");
         boolean copyFile = FileUtils.copyFile(source, dest);
         logger.info("copy: " + copyFile);
         //System.out.println("arch: " + SystemUtils.getArc());
-    }
-
-    public HashMap<File, String> getFilesMapInDir(File dir, Predicate<File> filter) {
-
-        File[] files = dir.listFiles();
-        String dirName = dir.getName();
-        logger.info("dir name is: {}", dirName);
-        HashMap<File, String> fileMap = Arrays.stream(files)
-                                              .filter(File::isFile)
-                                              .collect(HashMap::new, (map, file) -> {
-                                                  if (filter.test(file)) {
-                                                      map.put(file, dirName);
-                                                  }
-                                              }, HashMap::putAll);
-        return fileMap;
     }
 
     @Test
@@ -165,5 +166,28 @@ public class UnitTests {
         jsonReader.setLenient(true);
         DownloadInfo downloadInfo = new Gson().fromJson(jsonReader, DownloadInfo.class);
         logger.info("download info is: {}", downloadInfo);
+
+        String json = "{\"flag\":1,\"data\":[{\"id\":\"60921c68d5ef4ec1a9ed833fe2e0834b\",\"delFlag\":0,\"createTime\":1566888675000,\"updateTime\":1566888726000,\"createUser\":\"阴景洲\",\"updateUser\":null,\"name\":\"肺结节\",\"remark\":\"肺结节2万\",\"taskId\":\"7c8f5f93b54846a7896856ca9b92dd41\",\"stepNum\":20000,\"state\":2,\"modelPath\":\"/mnt/data/model/7c8f5f93b54846a7896856ca9b92dd41/60921c68d5ef4ec1a9ed833fe2e0834b\",\"projectId\":\"3f59a5ebdc32487998bfcad7fd263953\",\"projectName\":\"人工智能识别肺结节\"}],\"msg\":[\"操作成功\"]}";
+        ModelMsg<Model> msg = new Gson().fromJson(json, new TypeToken<ModelMsg<Model>>() {
+        }.getType());
+        List<Model> models = msg.getData();
+        for (Model model : models) {
+            logger.info("model name {}, model id {}", model.getName(), model.getId());
+        }
+    }
+
+    @Test
+    public void testFetchData() {
+        long dateMills = 1546444800000L;
+        long timeMills = 6588000L;
+
+
+        logger.info("datetime is {}", DateUtils.getDatetimeFromMills(dateMills + timeMills));
+    }
+
+    public static void main(String[] args) {
+        String imgPath = "C:\\Users\\qing\\Pictures\\北医三院\\eccbc87e4b5ce2fe28308fd9f2a7baf3\\eccbc87e4b5ce2fe28308fd9f2a7baf3.jpg";
+        String data = JnaCaller.fetchData(imgPath, 2177, 158, 86, 20);
+        System.out.println("fetch data: " + data);
     }
 }
