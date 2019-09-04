@@ -49,6 +49,7 @@
 	$('#btn_confirm').click(() => {
 		console.log('confirm click...')
 		let patientId = $('#patient_id').val()
+		$('#case_list').html('')
 		get_ajax('get_case', `/cases/${patientId}`, (caseMsg) => {
 			console.log(`case msg is ${JSON.stringify(caseMsg)} `)
 			let cases = caseMsg.data
