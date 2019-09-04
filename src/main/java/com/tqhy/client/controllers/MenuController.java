@@ -39,7 +39,7 @@ public class MenuController extends BasePopWindowController {
     public void openKit(MouseEvent mouseEvent) {
         logger.info("click icon {}", mouseEvent.getButton());
         Platform.runLater(() -> {
-            FXMLUtils.loadPopWindow("/static/fxml/choose_model.fxml");
+            FXMLUtils.loadChooseModel("/static/fxml/choose_model.fxml");
         });
         getOwnerStageFromEvent(mouseEvent).hide();
     }

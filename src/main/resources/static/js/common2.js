@@ -29,7 +29,7 @@ function post_ajax(apiName, ajaxUrl, request, callback) {
 	})
 }
 
-function get_ajax(apiName, ajaxUrl, request, callback) {
+function get_ajax(apiName, ajaxUrl, callback) {
 	$.ajax({
 		type: "GET",
 		url: ajaxUrl,

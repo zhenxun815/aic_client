@@ -1,7 +1,6 @@
 package com.tqhy.client.utils;
 
 
-import lombok.NonNull;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.image.BufferedImageUtils;
@@ -37,12 +36,6 @@ public class Dcm2JpgUtil {
     private static ImageWriter imageWriter;
     private static ImageReader imageReader;
 
-    @NonNull
-    private File dicomFile;
-
-    @NonNull
-    private File jpgDir;
-
     /**
      * 初始化ImageWriter
      */
@@ -69,6 +62,7 @@ public class Dcm2JpgUtil {
         if (!dcmFile.exists()) {
             return null;
         }
+        File dest = genJpgFile(dcmFile, jpgDir);
         initImageWriter();
         try (ImageInputStream iis = ImageIO.createImageInputStream(dcmFile)) {
             imageReader = ImageIO.getImageReadersByFormatName("DICOM").next();
@@ -79,7 +73,6 @@ public class Dcm2JpgUtil {
                 bi = BufferedImageUtils.convertToIntRGB(bi);
             }
 
-            File dest = genJpgFile(dcmFile, jpgDir);
             ImageOutputStream ios = ImageIO.createImageOutputStream(dest);
             try {
                 imageWriter.setOutput(ios);

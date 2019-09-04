@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>model choose</title>
+	<link href="../css/model_choose.css" rel="stylesheet">
+	<script src="../js/jquery-3.3.1.min.js"></script>
+	<script src="../js/common2.js" type="text/javascript"></script>
+</head>
+<body>
+<div class="dv_top">
+	<input id="patient_id" placeholder="请输入患者id" type="text">
+	<button id="btn_confirm">确认</button>
+</div>
+<div class="tips">请选择一个病例:</div>
+<div class="dv_cases">
+	<form id="case_form">
+		<ol id="case_list">
+		</ol>
+	</form>
+</div>
+<div class="tips">请选择模型:</div>
+<div class="dv_models">
+	<form id="model_form">
+		<ol id="model_list"></ol>
+	</form>
+
+</div>
+<div class="tips" id="warning_tips" style="color:white">.</div>
+<div class="dv_bottom">
+	<button id="btn_submit">提交</button>
+	<button id="btn_cancel">取消</button>
+</div>
+</body>
+<script type="text/javascript">
+	$(document).ready(function () {
+		get_ajax('get_model', '/models', modelMsg => {
+			console.log(`model msg is ${JSON.stringify(modelMsg)} `)
+			let models = modelMsg.data
+			models.forEach(amodel => {
+				console.log(`model is ${amodel}`)
+				let li = `<li><input id="${amodel.id}" name="models" class="btn_check" type="checkbox" value="${amodel.id}"><label for="${amodel.id}">${amodel.name}</label></li>`
+				$('#model_list').append(li)
+			})
+		})
+	})
+
+
+	$('#btn_confirm').click(() => {
+		console.log('confirm click...')
+		let patientId = $('#patient_id').val()
+		get_ajax('get_case', `/cases/${patientId}`, (caseMsg) => {
+			console.log(`case msg is ${JSON.stringify(caseMsg)} `)
+			let cases = caseMsg.data
+			cases.forEach(acase => {
+				console.log(`acase is ${acase}`)
+				let dateTimeStr = formatDate(new Date(acase.seriesDate + acase.seriesTime))
+				let showText = acase.part ? `拍摄日期: ${dateTimeStr}, 拍摄部位: ${acase.part}` : `拍摄日期: ${dateTimeStr}`
+				let li = `<li><input id="${acase.id}" name="cases" class="btn_radio"  type="radio" value="${acase.id}"><label for="${acase.id}">${showText}</label></li>`
+				$('#case_list').append(li)
+			})
+			$('#case_list').find('input').first().attr('checked', true)
+		})
+	})
+
+	$('#btn_submit').click(() => {
+		console.log('submit click...')
+		//00213641
+		let caseForm = new FormData(document.querySelector('#case_form'))
+		let choosedCaseId = caseForm.get('cases')
+		if (!choosedCaseId) {
+			$('#warning_tips').css('color', 'red')
+			$('#warning_tips').html('请输入患者id!')
+			return
+		}
+
+		let modelForm = new FormData(document.querySelector('#model_form'))
+		let modelChoosed = new Array()
+		for (const entry of modelForm) {
+			console.log(`entry is key: ${entry[0]}, value: ${entry[1]}`)
+			modelChoosed.push(entry[1])
+		}
+		if (modelChoosed.length == 0) {
+			$('#warning_tips').css('color', 'red')
+			$('#warning_tips').html('请至少选择一个模型!')
+			return
+		}
+		let choosedModelIds = modelChoosed.join(",")
+
+		console.log(`model ids: ${choosedModelIds}, case id: ${choosedCaseId}`)
+		get_ajax('show', `/show/${choosedCaseId}/${choosedModelIds}`)
+
+	})
+
+	$('#btn_cancel').click(() => {
+		console.log('cancel click...')
+		get_ajax('cancel', `/cancel`)
+	})
+
+	function formatDate(dateTime) {
+		let y = dateTime.getFullYear()
+		let m = dateTime.getMonth() + 1
+		m = m < 10 ? ('0' + m) : m
+		let d = dateTime.getDate()
+		d = d < 10 ? ('0' + d) : d
+		let h = dateTime.getHours()
+		let minute = dateTime.getMinutes()
+		minute = minute < 10 ? ('0' + minute) : minute
+		let second = dateTime.getSeconds()
+		second = minute < 10 ? ('0' + second) : second
+		return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second
+	}
+</script>
+</html>
