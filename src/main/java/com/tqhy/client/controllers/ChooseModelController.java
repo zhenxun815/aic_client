@@ -8,7 +8,6 @@ import com.tqhy.client.models.entity.Model;
 import com.tqhy.client.models.msg.BaseMsg;
 import com.tqhy.client.models.msg.server.ModelMsg;
 import com.tqhy.client.network.Network;
-import com.tqhy.client.utils.FXMLUtils;
 import com.tqhy.client.utils.NetworkUtils;
 import io.reactivex.schedulers.Schedulers;
 import javafx.application.Platform;
@@ -49,7 +48,7 @@ public class ChooseModelController {
     void initialize() {
         base_pane.setMinWidth(400D);
         base_pane.setMinHeight(500D);
-        FXMLUtils.center2Display(base_pane);
+        //FXMLUtils.center2Display(base_pane);
         loadPage("html/model_choose.html");
     }
 

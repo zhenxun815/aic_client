@@ -65,7 +65,7 @@ public class LandingController extends BaseWebviewController {
         landingIgnore = StringUtils.isEmpty(landingIgnoreConfig) ? false : Boolean.parseBoolean(landingIgnoreConfig);
         if (StringUtils.isEmpty(Network.SERVER_IP)) {
             logger.info("init load url is connection");
-            loadPage(webView, Network.LOCAL_BASE_URL + connectionUrl);
+            loadConnectionPage();
         } else if (landingIgnore) {
             loadPage(webView, Network.SERVER_BASE_URL + "/case/release");
         } else {
@@ -75,6 +75,9 @@ public class LandingController extends BaseWebviewController {
         //webEngine.load("https://www.baidu.com");
     }
 
+    public void loadConnectionPage() {
+        loadPage(webView, Network.LOCAL_BASE_URL + connectionUrl);
+    }
 
     @PostMapping("/landing")
     @ResponseBody
