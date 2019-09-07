@@ -1,9 +1,11 @@
 package com.tqhy.client.utils;
 
 
-import lombok.NonNull;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.dcm4che3.image.BufferedImageUtils;
 import org.dcm4che3.imageio.plugins.dcm.DicomImageReadParam;
+import org.dcm4che3.io.DicomInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,12 +36,6 @@ public class Dcm2JpgUtil {
     private static ImageWriter imageWriter;
     private static ImageReader imageReader;
 
-    @NonNull
-    private File dicomFile;
-
-    @NonNull
-    private File jpgDir;
-
     /**
      * 初始化ImageWriter
      */
@@ -60,44 +56,39 @@ public class Dcm2JpgUtil {
     public static File convert(File dcmFile, File jpgDir) {
         logger.info("start convert dicom to jpg: " + dcmFile.getAbsolutePath());
 
-        initImageWriter();
         if (null == dcmFile) {
             return null;
         }
-        if (dcmFile.exists()) {
-
-            try (ImageInputStream iis = ImageIO.createImageInputStream(dcmFile)) {
-
-                if (!jpgDir.exists()) {
-                    jpgDir.mkdirs();
-                }
-                imageReader = ImageIO.getImageReadersByFormatName("DICOM").next();
-                imageReader.setInput(iis);
-                BufferedImage bi = imageReader.read(0, readParam());
-                ColorModel cm = bi.getColorModel();
-                if (cm.getNumComponents() == 3) {
-                    bi = BufferedImageUtils.convertToIntRGB(bi);
-                }
-
-                File dest = genJpgFile(dcmFile, jpgDir);
-
-                ImageOutputStream ios = ImageIO.createImageOutputStream(dest);
-                try {
-                    imageWriter.setOutput(ios);
-                    imageWriter.write(null, new IIOImage(bi, null, null), imageWriteParam);
-                    return dest;
-                } finally {
-                    try {
-                        ios.close();
-                    } catch (IOException ignore) {
-                    }
-                }
-            } catch (IOException e) {
-                logger.error("trans dcm error:", e);
-            } catch (IllegalStateException e) {
-                logger.error("trans dcm error: {}", e.getMessage());
-                //e.printStackTrace();
+        if (!dcmFile.exists()) {
+            return null;
+        }
+        File dest = genJpgFile(dcmFile, jpgDir);
+        initImageWriter();
+        try (ImageInputStream iis = ImageIO.createImageInputStream(dcmFile)) {
+            imageReader = ImageIO.getImageReadersByFormatName("DICOM").next();
+            imageReader.setInput(iis);
+            BufferedImage bi = imageReader.read(0, readParam());
+            ColorModel cm = bi.getColorModel();
+            if (cm.getNumComponents() == 3) {
+                bi = BufferedImageUtils.convertToIntRGB(bi);
             }
+
+            ImageOutputStream ios = ImageIO.createImageOutputStream(dest);
+            try {
+                imageWriter.setOutput(ios);
+                imageWriter.write(null, new IIOImage(bi, null, null), imageWriteParam);
+                return dest;
+            } finally {
+                try {
+                    ios.close();
+                } catch (IOException ignore) {
+                }
+            }
+        } catch (IOException e) {
+            logger.error("trans dcm error:", e);
+        } catch (IllegalStateException e) {
+            logger.error("trans dcm error: {}", e.getMessage());
+            //e.printStackTrace();
         }
         return null;
     }
@@ -110,15 +101,29 @@ public class Dcm2JpgUtil {
      * @return destJpgFile
      */
     private static File genJpgFile(File dcmFile, File jpgDir) {
-        String dcmFileName = dcmFile.getName();
+        try (DicomInputStream iis = new DicomInputStream(dcmFile)) {
 
+            if (!jpgDir.exists()) {
+                jpgDir.mkdirs();
+            }
+
+            Attributes attributes = iis.readDataset(-1, Tag.PixelData);
+            String instanceNum = attributes.getString(Tag.InstanceNumber);
+            //logger.info("instanceNum is {}", instanceNum);
+            String destFileName = String.format("image-%05d.jpg", Integer.parseInt(instanceNum));
+            File destJpgFile = new File(jpgDir, destFileName);
+
+            if (destJpgFile.exists()) {
+                destJpgFile.delete();
+            }
+            return destJpgFile;
+        } catch (IOException e) {
+            logger.error("gen jpg error", e);
+        }
+        String dcmFileName = dcmFile.getName();
         String destFileName =
                 dcmFileName.endsWith("dcm") ? dcmFileName.replace("dcm", "jpg") : dcmFileName.concat(".jpg");
         File destJpgFile = new File(jpgDir, destFileName);
-
-        if (destJpgFile.exists()) {
-            destJpgFile.delete();
-        }
         return destJpgFile;
     }
 

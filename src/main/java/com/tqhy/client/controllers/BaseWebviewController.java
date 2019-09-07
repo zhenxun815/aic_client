@@ -31,6 +31,8 @@ import javafx.scene.image.Image;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import lombok.Getter;
+import lombok.Setter;
 import netscape.javascript.JSObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +52,8 @@ import java.util.Optional;
  * @since 1.0.0
  */
 @Component
+@Getter
+@Setter
 public class BaseWebviewController {
 
 
@@ -59,6 +63,7 @@ public class BaseWebviewController {
      * {@code jumpToLandingFlag} 进行双向绑定
      */
     BooleanProperty jumpToLandingFlag = new SimpleBooleanProperty(false);
+    public static BooleanProperty jumpToConnectionFlag = new SimpleBooleanProperty(false);
 
     @Value("${network.url.landing:''}")
     private String landingUrl;
@@ -76,6 +81,7 @@ public class BaseWebviewController {
         initWebView(webView);
         initWebAlert(webView);
         initJumpToLanding(webView);
+        initJumpToConnection(webView);
     }
 
     /**
@@ -113,7 +119,8 @@ public class BaseWebviewController {
                            int index = data.indexOf(Constants.MSG_SPLITTER);
                            String jsonStr = data.substring(index + 1);
 
-                           Optional<DownloadInfo> downloadInfoOptional = GsonUtils.parseJsonToObj(jsonStr, DownloadInfo.class);
+                           Optional<DownloadInfo> downloadInfoOptional = GsonUtils.parseJsonToObj(jsonStr,
+                                                                                                  DownloadInfo.class);
                            onDownloadOption(downloadInfoOptional);
                            break;
                        case Constants.CMD_MSG_SAVE:
@@ -156,7 +163,8 @@ public class BaseWebviewController {
                 return;
             }
 
-            Observable.fromCallable(SaveFileTask.of(SaveDataMsg.of(SaveTaskType.SAVE_REPORT_TO_CSV, saveDir, saveDatas)))
+            Observable.fromCallable(
+                    SaveFileTask.of(SaveDataMsg.of(SaveTaskType.SAVE_REPORT_TO_CSV, saveDir, saveDatas)))
                       .subscribeOn(Schedulers.io())
                       .observeOn(Schedulers.io())
                       .subscribe(saveDataMsgObservable -> {
@@ -197,7 +205,8 @@ public class BaseWebviewController {
                 return;
             }
 
-            Observable.fromCallable(DownloadTask.of(DownloadMsg.of(DownloadTaskApi.DOWNLOAD_PDF, downloadDir, downloadInfo)))
+            Observable.fromCallable(
+                    DownloadTask.of(DownloadMsg.of(DownloadTaskApi.DOWNLOAD_PDF, downloadDir, downloadInfo)))
                       .subscribeOn(Schedulers.io())
                       .observeOn(Schedulers.io())
                       .subscribe(downloadMsgObservable ->
@@ -224,9 +233,25 @@ public class BaseWebviewController {
         jumpToLandingFlag.addListener((observable, oldValue, newValue) -> {
             logger.info("jumpToLandingFlag changed,oldValue is: " + oldValue + ", newValue is: " + newValue);
             if (newValue) {
-                Platform.runLater(() -> webView.getEngine().load(Network.LOCAL_BASE_URL + landingUrl));
+                Platform.runLater(() -> {
+                    logger.info("jump to landing");
+                    webView.getEngine().load(Network.LOCAL_BASE_URL + landingUrl);
+                });
                 jumpToLandingFlag.set(false);
-                Network.TOKEN = null;
+            }
+        });
+    }
+
+    private void initJumpToConnection(WebView webView) {
+        heartBeatService.stopBeat();
+        jumpToConnectionFlag.addListener((observable, oldValue, newValue) -> {
+            logger.info("jumpToLandingFlag changed,oldValue is: " + oldValue + ", newValue is: " + newValue);
+            if (newValue) {
+                Platform.runLater(() -> {
+                    logger.info("jump to landing");
+                    webView.getEngine().load(Network.LOCAL_BASE_URL + connectionUrl);
+                });
+                jumpToConnectionFlag.setValue(false);
             }
         });
     }

@@ -1,11 +1,14 @@
 package com.tqhy.client;
 
+import com.tqhy.client.jna.GlobalKeyListener;
 import com.tqhy.client.utils.FXMLUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -18,6 +21,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URL;
+import java.util.logging.Level;
 
 /**
  * @author Yiheng
@@ -35,13 +39,33 @@ public class ClientApplication extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
         stage = primaryStage;
         stage.setOnCloseRequest(event -> {
             event.consume();
             FXMLUtils.loadPopWindow("/static/fxml/warning_onclose.fxml");
         });
+
         initPrimaryStageSize();
+       /* JIntellitype.getInstance().registerHotKey(1, JIntellitypeConstants.MOD_CONTROL, (int) 'Q');
+        JIntellitype.getInstance().addHotKeyListener(identifier -> {
+            if (1 == identifier) {
+                logger.info("ctrl+Q pressed...");
+                FXMLUtils.loadChooseModel("/static/fxml/choose_model.fxml");
+
+            }
+        });*/
+        try {
+            GlobalScreen.registerNativeHook();
+        } catch (NativeHookException ex) {
+            System.err.println("There was a problem registering the native hook.");
+            System.err.println(ex.getMessage());
+
+            System.exit(1);
+        }
+        GlobalScreen.addNativeKeyListener(new GlobalKeyListener());
     }
+
 
     /**
      * 初始最大化窗口,固定窗体大小
@@ -69,6 +93,8 @@ public class ClientApplication extends Application {
      */
     private void initSystemTray() {
         try {
+
+
             System.setProperty("java.awt.headless", "false");
             Toolkit.getDefaultToolkit();
             if (!java.awt.SystemTray.isSupported()) {
@@ -119,6 +145,8 @@ public class ClientApplication extends Application {
                 }
             });
             systemTray.add(trayIcon);
+
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (AWTException e) {
@@ -129,6 +157,8 @@ public class ClientApplication extends Application {
     @Override
     public void init() throws Exception {
         super.init();
+        java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GlobalScreen.class.getPackage().getName());
+        logger.setLevel(Level.OFF);
         Platform.setImplicitExit(false);
         springContext = SpringApplication.run(ClientApplication.class);
         initSystemTray();
@@ -148,6 +178,8 @@ public class ClientApplication extends Application {
 
     public static void main(String[] args) {
         launch(args);
+        logger.info("init hot key...");
+
     }
 
 

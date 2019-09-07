@@ -39,6 +39,7 @@ public class HeartBeatService {
 
     public void stopBeat() {
         status = CMD_MSG_STOP_BEAT;
+        Network.TOKEN = null;
     }
 
     public void startBeat(String t) {
@@ -54,7 +55,6 @@ public class HeartBeatService {
                       String serverIP = PropertyUtils.getProperty(Constants.SERVER_IP);
                       if (StringUtils.isEmpty(serverIP)) {
                           stopBeat();
-                          setJumpToLandingFlag(true);
                       } else {
                           Network.getAicApi()
                                  .heartbeat(token)
