@@ -425,6 +425,11 @@ public class UploadFileController {
         }
     }
 
+    /**
+     * 终止上传
+     *
+     * @param mouseEvent
+     */
     @FXML
     public void stopUpload(MouseEvent mouseEvent) {
         MouseButton button = mouseEvent.getButton();
@@ -432,6 +437,8 @@ public class UploadFileController {
             logger.info("into stop upload....");
             workerTask.getStopUploadFlag().set(true);
             showPanel(panel_choose.getId());
+            File temp = new File(dirToUpload, Constants.PATH_TEMP_JPG);
+            FileUtils.deleteDir(temp);
         }
     }
 

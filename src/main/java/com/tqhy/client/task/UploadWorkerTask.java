@@ -7,6 +7,7 @@ import com.tqhy.client.network.Network;
 import com.tqhy.client.utils.FileUtils;
 import com.tqhy.client.utils.GsonUtils;
 import com.tqhy.client.utils.NetworkUtils;
+import com.tqhy.client.utils.StringUtils;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
@@ -227,8 +228,6 @@ public class UploadWorkerTask extends Task {
     }
 
     private void upLoadDir(HashMap<String, String> requestParamMap) {
-
-
         for (Map.Entry<File, String> uploadFileEntry : uploadImgFileMap.entrySet()) {
             File file = uploadFileEntry.getKey();
             String caseName = uploadFileEntry.getValue();
@@ -500,6 +499,7 @@ public class UploadWorkerTask extends Task {
         public void onNext(ResponseBody responseBody) {
             ClientMsg clientMsg = GsonUtils.parseResponseToObj(responseBody);
             Integer flag = clientMsg.getFlag();
+
             logger.info("upload onnext flag is {}", flag);
             if (shouldStop()) {
                 logger.info("on next should stop..");
@@ -523,10 +523,13 @@ public class UploadWorkerTask extends Task {
                 jumpToLandFlag.set(true);
             }
             if (2 == flag) {
-                logger.info("server get file fail...{}", fileToUpload.getAbsolutePath());
+                List<String> msgs = clientMsg.getMsg();
+                String failInfo = StringUtils.join(msgs, ",", msg -> msg);
+                String resMsg = fileToUpload.getAbsolutePath() + failInfo;
+                logger.info("server get file fail...{}", resMsg);
                 failCount.incrementAndGet();
                 successCount.decrementAndGet();
-                FileUtils.appendFile(uploadInfoFile, fileToUpload.getAbsolutePath(),
+                FileUtils.appendFile(uploadInfoFile, resMsg,
                                      builder -> builder.append(Constants.NEW_LINE), true);
             }
         }
