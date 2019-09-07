@@ -524,8 +524,10 @@ public class UploadWorkerTask extends Task {
             }
             if (2 == flag) {
                 List<String> msgs = clientMsg.getMsg();
-                String failInfo = StringUtils.join(msgs, ",", msg -> msg);
-                String resMsg = fileToUpload.getAbsolutePath() + failInfo;
+
+                String failInfo = StringUtils.join(msgs, ",",
+                                                   msg -> "已存在".equals(msg) ? ";1" : msg);
+                String resMsg = fileToUpload.getAbsolutePath().concat(failInfo);
                 logger.info("server get file fail...{}", resMsg);
                 failCount.incrementAndGet();
                 successCount.decrementAndGet();
