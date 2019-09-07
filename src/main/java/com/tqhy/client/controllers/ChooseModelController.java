@@ -40,6 +40,8 @@ public class ChooseModelController {
     private WebView webView;
     @Autowired
     ReadModelController readModelController;
+    @Autowired
+    LandingController landingController;
 
     private ModelMsg<Model> modelMsg;
     private ModelMsg<Case> caseMsg;
@@ -75,14 +77,16 @@ public class ChooseModelController {
     public String getShow(@PathVariable("case") String caseId, @PathVariable("models") String modelIds) {
         logger.info("request case {}, models {}", caseId, modelIds);
         cancel();
-        Platform.runLater(() -> {
-            readModelController.show(caseId, modelIds);
-        });
         HashMap<String, String> params = new HashMap<>();
         params.put("caseId", caseId);
         params.put("modelsId", modelIds);
         String readModelUrl = NetworkUtils.createUrl(Network.SERVER_BASE_URL, "/caseimg/aiCaseImgIndex", params);
         logger.info("read model url is {}", readModelUrl);
+        Platform.runLater(() -> {
+            //readModelController.showReadModel(caseId, modelIds);
+            landingController.showPage(readModelUrl);
+            ClientApplication.stage.setIconified(false);
+        });
         return readModelUrl;
     }
 

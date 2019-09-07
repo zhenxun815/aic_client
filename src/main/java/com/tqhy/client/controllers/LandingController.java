@@ -58,6 +58,12 @@ public class LandingController extends BaseWebviewController {
 
     private boolean landingIgnore;
 
+
+    public void showPage(String url2show) {
+        logger.info("load ai case ing index page..., {}", url2show);
+        loadPage(webView, url2show);
+    }
+
     @FXML
     void initialize() {
         super.initialize(webView);

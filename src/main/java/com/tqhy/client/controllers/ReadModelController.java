@@ -50,7 +50,7 @@ public class ReadModelController extends BaseWebviewController {
         loadPage(webView, readModelUrl);
     }
 
-    public void show(String caseId, String modelIds) {
+    public void showReadModel(String caseId, String modelIds) {
         this.caseId = caseId;
         this.modelIds = modelIds;
         logger.info("read model show...case id is {}, model ids {}", caseId, modelIds);
