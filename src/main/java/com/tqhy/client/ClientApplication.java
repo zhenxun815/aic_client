@@ -47,20 +47,10 @@ public class ClientApplication extends Application {
         });
 
         initPrimaryStageSize();
-       /* JIntellitype.getInstance().registerHotKey(1, JIntellitypeConstants.MOD_CONTROL, (int) 'Q');
-        JIntellitype.getInstance().addHotKeyListener(identifier -> {
-            if (1 == identifier) {
-                logger.info("ctrl+Q pressed...");
-                FXMLUtils.loadChooseModel("/static/fxml/choose_model.fxml");
-
-            }
-        });*/
         try {
             GlobalScreen.registerNativeHook();
         } catch (NativeHookException ex) {
-            System.err.println("There was a problem registering the native hook.");
-            System.err.println(ex.getMessage());
-
+            logger.error("There was a problem registering the native hook.", ex);
             System.exit(1);
         }
         GlobalScreen.addNativeKeyListener(new GlobalKeyListener());

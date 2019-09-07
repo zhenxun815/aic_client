@@ -74,11 +74,12 @@ public class FXMLUtils {
     public static Stage loadChooseModel(String url) {
         if (null == ClientApplication.chooseModelStage) {
             ClientApplication.chooseModelStage = new Stage();
-            ClientApplication.chooseModelStage.setHeight(500D);
-            ClientApplication.chooseModelStage.setWidth(415D);
-            ClientApplication.chooseModelStage.setResizable(false);
             ClientApplication.chooseModelStage.initStyle(StageStyle.DECORATED);
         }
+        ClientApplication.chooseModelStage.setHeight(500D);
+        ClientApplication.chooseModelStage.setWidth(415D);
+        ClientApplication.chooseModelStage.setResizable(false);
+        ClientApplication.chooseModelStage.setIconified(false);
         return loadWindow(ClientApplication.chooseModelStage, url, false);
     }
 
