@@ -38,7 +38,8 @@ function get_ajax(apiName, ajaxUrl, callback, timeOut) {
 
 		},
 		complete: function (XMLHttpRequest, status) {
-			if (status.statusText == 'timeout') {
+			console.log(`status is ${status}`)
+			if (status == 'timeout' || status == 'error') {
 				xhr.abort();    // 超时中断请求
 				// 这里可以重新执行请求
 				timeOut()

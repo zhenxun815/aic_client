@@ -93,6 +93,7 @@ public class ChooseModelController {
     @GetMapping("cases/{patientId}")
     @ResponseBody
     public ModelMsg<Case> getCaseList(@PathVariable String patientId) {
+        this.caseMsg = null;
         Network.getAicApi()
                .searchCase(patientId)
                .observeOn(Schedulers.io())
@@ -118,6 +119,7 @@ public class ChooseModelController {
     @GetMapping("/models")
     @ResponseBody
     public ModelMsg<Model> getModelList() {
+        this.modelMsg = null;
         Network.getAicApi()
                .getAllModels()
                .observeOn(Schedulers.io())

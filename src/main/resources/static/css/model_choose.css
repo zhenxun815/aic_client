@@ -10,7 +10,7 @@ ol {
 
 button {
     height: 23px;
-    width: 40px;
+
     border: 1px;
     outline: none;
     border-radius: 3px;
@@ -37,11 +37,11 @@ li {
     border: 1px solid #FF7437;
     height: 190px;
     overflow-y: scroll;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .dv_bottom {
-    margin-top: 10px;
+    margin-top: 5px;
     text-align: center;
 }
 
@@ -93,12 +93,7 @@ li {
     outline: #FF965C solid thin;
 }
 
-#btn_confirm {
-    color: white;
-    background: linear-gradient(to right, #FE6225, #FF965C);
-}
-
-#btn_submit {
+.btn_highlight {
     color: white;
     background: linear-gradient(to right, #FE6225, #FF965C);
 }

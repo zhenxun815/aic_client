@@ -10,7 +10,7 @@
 <body>
 <div class="dv_top">
 	<input id="patient_id" placeholder="请输入患者id" type="text">
-	<button id="btn_confirm">确认</button>
+	<button class="btn_highlight" id="btn_confirm">确认</button>
 </div>
 <div class="tips">请选择一个病例:</div>
 <div class="dv_cases">
@@ -19,7 +19,9 @@
 		</ol>
 	</form>
 </div>
-<div class="tips">请选择模型:</div>
+<div class="tips">请选择模型:&nbsp;&nbsp;&nbsp;&nbsp;
+	<button class="btn_highlight" id="btn_check_all">选择全部</button>
+</div>
 <div class="dv_models">
 	<form id="model_form">
 		<ol id="model_list"></ol>
@@ -28,7 +30,7 @@
 </div>
 <div class="tips" id="warning_tips" style="color:white">.</div>
 <div class="dv_bottom">
-	<button id="btn_submit">提交</button>
+	<button class="btn_highlight" id="btn_submit">提交</button>
 	<button id="btn_cancel">取消</button>
 </div>
 </body>
@@ -61,6 +63,7 @@
 	}
 
 	function getCases() {
+		let patientId = $('#patient_id').val()
 		get_ajax('get_case', `/cases/${patientId}`,
 			(caseMsg) => {
 				$('#case_list').html('')
@@ -89,9 +92,26 @@
 
 	$('#btn_confirm').click(() => {
 		console.log('confirm click...')
-		let patientId = $('#patient_id').val()
 		$('#case_list').html('')
 		getCases()
+	})
+
+	let checkAll = false;
+	$('#btn_check_all').click(() => {
+		console.log('check all click...')
+		if (checkAll) {
+			$('[name=models]:checkbox').each(function () {
+				this.checked = false
+			})
+			$('#btn_check_all').html('选择全部')
+			checkAll = false
+		} else {
+			$('[name=models]:checkbox').each(function () {
+				this.checked = true
+			})
+			checkAll = true
+			$('#btn_check_all').html('取消全选')
+		}
 	})
 
 	$('#btn_submit').click(() => {
