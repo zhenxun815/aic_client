@@ -34,34 +34,64 @@
 </body>
 <script type="text/javascript">
 	$(document).ready(function () {
-		get_ajax('get_model', '/models', modelMsg => {
-			console.log(`model msg is ${JSON.stringify(modelMsg)} `)
-			let models = modelMsg.data
-			models.forEach(amodel => {
-				console.log(`model is ${amodel}`)
-				let li = `<li><input id="${amodel.id}" name="models" class="btn_check" type="checkbox" value="${amodel.id}"><label for="${amodel.id}">${amodel.name}</label></li>`
-				$('#model_list').append(li)
-			})
-		})
+		getModels()
 	})
 
+	function getModels() {
+		get_ajax('get_model', '/models',
+			modelMsg => {
+				$('#model_list').html('')
+				if (1 == modelMsg.flag) {
+					console.log(`model msg is ${JSON.stringify(modelMsg)} `)
+					let models = modelMsg.data
+					models.forEach(amodel => {
+						console.log(`model is ${amodel}`)
+						let li = `<li><input id="${amodel.id}" name="models" class="btn_check" type="checkbox" value="${amodel.id}"><label for="${amodel.id}">${amodel.name}</label></li>`
+						$('#model_list').append(li)
+					})
+				} else {
+					let li = `<li style="color:red">请求超时,请稍后重试</li>`
+					$('#model_list').append(li)
+				}
+			},
+			() => {
+				let li = `<li style="color:red">请求超时,请稍后重试</li>`
+				$('#model_list').append(li)
+			})
+	}
+
+	function getCases() {
+		get_ajax('get_case', `/cases/${patientId}`,
+			(caseMsg) => {
+				$('#case_list').html('')
+				if (1 == caseMsg.flag) {
+					console.log(`case msg is ${JSON.stringify(caseMsg)} `)
+					let cases = caseMsg.data
+					cases.forEach(acase => {
+						console.log(`acase is ${acase}`)
+						let dateTimeStr = formatDate(new Date(acase.seriesDate + acase.seriesTime))
+						let showText = acase.part ? `拍摄日期: ${dateTimeStr}, 拍摄部位: ${acase.part}` : `拍摄日期: ${dateTimeStr}`
+						let li = `<li><input id="${acase.id}" name="cases" class="btn_radio"  type="radio" value="${acase.id}"><label for="${acase.id}">${showText}</label></li>`
+						$('#case_list').append(li)
+					})
+					$('#case_list').find('input').first().attr('checked', true)
+				} else {
+					let li = `<li style="color:red">请求超时,请稍后重试</li>`
+					$('#case_list').append(li)
+				}
+
+			},
+			() => {
+				let li = `<li style="color:red">请求超时,请稍后重试</li>`
+				$('#case_list').append(li)
+			})
+	}
 
 	$('#btn_confirm').click(() => {
 		console.log('confirm click...')
 		let patientId = $('#patient_id').val()
 		$('#case_list').html('')
-		get_ajax('get_case', `/cases/${patientId}`, (caseMsg) => {
-			console.log(`case msg is ${JSON.stringify(caseMsg)} `)
-			let cases = caseMsg.data
-			cases.forEach(acase => {
-				console.log(`acase is ${acase}`)
-				let dateTimeStr = formatDate(new Date(acase.seriesDate + acase.seriesTime))
-				let showText = acase.part ? `拍摄日期: ${dateTimeStr}, 拍摄部位: ${acase.part}` : `拍摄日期: ${dateTimeStr}`
-				let li = `<li><input id="${acase.id}" name="cases" class="btn_radio"  type="radio" value="${acase.id}"><label for="${acase.id}">${showText}</label></li>`
-				$('#case_list').append(li)
-			})
-			$('#case_list').find('input').first().attr('checked', true)
-		})
+		getCases()
 	})
 
 	$('#btn_submit').click(() => {
