@@ -60,13 +60,17 @@ public class UnitTests {
         String libPath = System.getProperty("java.library.path");
         logger.info("lib path: is: " + libPath);
 
-        File dcmDir = new File("C:\\Users\\qing\\Desktop\\小结节\\ttt\\2");
+        File dcmDir = new File("C:\\Users\\qing\\Desktop\\CT异常检测泛测数据\\正常");
         File[] dcmFiles = dcmDir.listFiles(FileUtils::isDcmFile);
         logger.info("dcm count is: " + dcmFiles.length);
         Arrays.stream(dcmFiles)
               .forEach(dcmFile -> {
-                  File jpgFile = FileUtils.transToJpg(dcmFile, dcmDir).get();
-                  System.out.println("trans jpg file finish..." + jpgFile.getAbsolutePath());
+                  Optional<File> jpgOpt = FileUtils.transToJpg(dcmFile, dcmDir);
+                  if (jpgOpt.isPresent()) {
+                      File jpgFile = jpgOpt.get();
+                      System.out.println("trans jpg file finish..." + jpgFile.getAbsolutePath());
+                  }
+
               });
 
     }
