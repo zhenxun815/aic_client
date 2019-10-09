@@ -129,9 +129,11 @@ public class UploadWorkerTask extends Task {
     private boolean prepareTask() {
         successCount = new AtomicInteger(0);
         failCount = new AtomicInteger(0);
-        jpgDir = new File(dirToUpload, Constants.PATH_TEMP_JPG);
         uploadInfoFile = FileUtils.getLocalFile(localDataPath, uploadMsg.getBatchNumber() + ".txt");
-        //批次目录下图片
+        jpgDir = new File(dirToUpload, Constants.PATH_TEMP_JPG);
+        if (jpgDir.exists()) {
+            FileUtils.deleteDir(jpgDir);
+        }
 
         HashMap<File, String> tempTotalFile = collectAll(dirToUpload);
         ArrayList<String> invalisdDirPaths = new ArrayList<>();
@@ -287,8 +289,7 @@ public class UploadWorkerTask extends Task {
     private void deleteTempFiles(int completeCount) {
 
         if (completeCount == total2Upload) {
-            File temp = new File(dirToUpload, Constants.PATH_TEMP_JPG);
-            FileUtils.deleteDir(temp);
+            FileUtils.deleteDir(jpgDir);
         }
     }
 
