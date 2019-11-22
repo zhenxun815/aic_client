@@ -28,13 +28,13 @@ li {
 }
 
 .dv_cases {
-    border: 1px solid #FF7437;
+    border: 1px solid #27a0c0;
     height: 90px;
     overflow-y: scroll;
 }
 
 .dv_models {
-    border: 1px solid #FF7437;
+    border: 1px solid #27a0c0;
     height: 190px;
     overflow-y: scroll;
     margin-bottom: 5px;
@@ -56,20 +56,20 @@ li {
     border-radius: 50%;
     width: 12px;
     height: 12px;
-    border: 1px solid #FF965C;
+    border: 1px solid #27a0c0;
     transition: 0.2s all linear;
     outline: none;
 }
 
 .btn_radio:checked {
-    border: 6px solid #FE6225;
+    border: 6px solid #27a0c0;
 }
 
 .btn_check {
     -webkit-appearance: none;
     width: 12px;
     height: 12px;
-    border: 1px solid #FF965C;
+    border: 1px solid #27a0c0;
     transition: 0.1s all linear;
     outline: none;
 }
@@ -85,23 +85,23 @@ li {
     font-size: 12px;
     height: 20px;
     border: none;
-    outline: #FE6225 solid thin;
+    outline: #27a0c0 solid thin;
     width: 250px;
 }
 
 #patient_id:focus {
-    outline: #FF965C solid thin;
+    outline: #27a0c0 solid thin;
 }
 
 .btn_highlight {
     color: white;
-    background: linear-gradient(to right, #FE6225, #FF965C);
+    background: linear-gradient(to right, #27a0c0, #27a0c0);
 }
 
 #btn_cancel {
     margin-left: 25px;
-    color: #FF7437;
-    border: 1px solid #FF7437;
+    color: #27a0c0;
+    border: 1px solid #27a0c0;
     background-color: white;
 }
 
@@ -115,7 +115,7 @@ div::-webkit-scrollbar {
 
 div::-webkit-scrollbar-thumb {
     border-radius: 3px;
-    background-color: #FF7437;
+    background-color: #27a0c0;
     background-clip: padding-box;
     min-height: 15px;
 }

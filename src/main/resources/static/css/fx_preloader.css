@@ -2,7 +2,7 @@
     -fx-border-width: 1px;
     -fx-border-radius: 5px;
     -fx-border-color: rgb(208, 212, 227);
-    -fx-background-color: #FF7437;
+    -fx-background-color: #363d5a;
     -fx-background-radius: 5px;
     -fx-min-width: 680px;
     -fx-min-height: 340px;
@@ -45,7 +45,7 @@
     -fx-max-width: 400px;
     -fx-min-height: 16px;
     -fx-max-height: 16px;
-    -fx-background-color: #F34400;
+    -fx-background-color: #27a0c0;
     -fx-background-radius: 15px;
     -fx-background-insets: 1px, 1px, 1px, 1px;
     -fx-padding: 0px;

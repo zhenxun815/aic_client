@@ -26,11 +26,11 @@
     -fx-min-height: 37px;
     -fx-text-fill: #FFFFFF;
     -fx-background-radius: 5px;
-    -fx-background-color: linear-gradient(to right, #FE6225, #FF965C);
+    -fx-background-color: linear-gradient(to right, #27a0c0, #27a0c0);
 }
 
 .btn_confirm:hover {
-    -fx-effect: dropshadow(gaussian, rgba(255, 106, 28, 0.3), 24, 0.0, 0, 8);
+    -fx-effect: dropshadow(gaussian, rgba(54, 61, 90, 0.3), 24, 0.0, 0, 8);
 }
 
 .btn_cancel {
@@ -44,7 +44,7 @@
 }
 
 .btn_cancel:hover {
-    -fx-border-color: #FE6225;
-    -fx-text-fill: #FE6225;
-    -fx-effect: dropshadow(gaussian, rgba(255, 106, 28, 0.3), 24, 0.0, 0, 8);
+    -fx-border-color: #27a0c0;
+    -fx-text-fill: #27a0c0;
+    -fx-effect: dropshadow(gaussian, rgba(54, 61, 90, 0.3), 24, 0.0, 0, 8);
 }
