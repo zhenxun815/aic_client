@@ -62,7 +62,7 @@ public class UploadWorkerTask extends Task {
     String localDataPath;
 
     @NonNull
-    int maxUploadCaseCount;
+    Integer maxUploadCaseCount;
 
     /**
      * 待转换总文件数
