@@ -71,6 +71,18 @@ public class FXMLUtils {
         return loadWindow(stage, url, true);
     }
 
+    public static Stage loadSnapshot(String url) {
+        if (null == ClientApplication.snapshotStage) {
+            ClientApplication.snapshotStage = new Stage();
+            ClientApplication.snapshotStage.initStyle(StageStyle.UTILITY);
+        }
+        ClientApplication.stage.setIconified(true);
+        ClientApplication.snapshotStage.setMaximized(true);
+        ClientApplication.snapshotStage.setResizable(false);
+        ClientApplication.snapshotStage.setIconified(false);
+        return loadWindow(ClientApplication.snapshotStage, url, true);
+    }
+
     public static Stage loadChooseModel(String url) {
         if (null == ClientApplication.chooseModelStage) {
             ClientApplication.chooseModelStage = new Stage();
