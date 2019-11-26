@@ -44,7 +44,7 @@ public class GlobalKeyListener implements NativeKeyListener {
 
         if (ctrlPressed && cPressed) {
             logger.info("start snapshot...");
-            Platform.runLater(() -> FXMLUtils.loadChooseModel("/static/fxml/shanpshot.fxml"));
+            Platform.runLater(() -> FXMLUtils.loadSnapshot("/static/fxml/shanpshot.fxml"));
         } else if (ctrlPressed && qPressed) {
             logger.info("shot key fired...");
             Platform.runLater(() -> FXMLUtils.loadChooseModel("/static/fxml/choose_model.fxml"));
