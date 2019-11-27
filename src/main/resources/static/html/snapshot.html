@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Snapshot</title>
+	<script src="../js/jquery-3.3.1.min.js" type="text/javascript"></script>
+</head>
+<style>
+	#canvas {
+		background: url('../img/bg_landing.jpg') center no-repeat;
+		cursor: crosshair;
+		border: 1px solid #000000;
+	}
+</style>
+<body>
+<canvas id="canvas">
+
+</canvas>
+<div id="output"></div>
+<script type="text/javascript">
+	let canvas = document.getElementById('canvas')
+	let ctx = canvas.getContext('2d')
+
+	let canvasX = $(canvas).offset().left
+	let canvasY = $(canvas).offset().top
+	let lastMouseX = 0
+	let lastMouseY = 0
+	let mouseX = 0
+	let mouseY = 0
+	let mousedown = false
+	let dragFlag = false
+	let rect = {
+		left: 0,
+		top: 0,
+		width: 0,
+		height: 0,
+		lastLeft: 0,
+		lastTop: 0
+	}
+	canvasWidth = 900
+	canvasHeight = 500
+	canvas.width = canvasWidth
+	canvas.height = canvasHeight
+	console.log(`canvasWidth ${canvasWidth},canvasHeight ${canvasHeight}`)
+	ctx.rect(0, 0, canvasWidth, canvasHeight)
+	ctx.fillStyle = 'rgba(241,81,92,0.3)'
+	ctx.fill()
+	//Mousedown
+	$(canvas).on('mousedown', function (e) {
+		console.log(`mousedown clientX is ${e.clientX},canvasX is ${canvasX}`)
+		console.log(`mousedown clientY is ${e.clientY},canvasY is ${canvasY}`)
+		lastMouseX = parseInt(e.clientX - canvasX)
+		lastMouseY = parseInt(e.clientY - canvasY)
+		console.log(`mousedown last_mouseX is ${lastMouseX}, last_mouseY is ${lastMouseY}`)
+		mousedown = true
+		dragFlag = isMouseInRect()
+	});
+
+	//Mouseup
+	$(canvas).on('mouseup', function (e) {
+		mousedown = false;
+		rect.lastTop = rect.top
+		rect.lastLeft = rect.left
+		console.log(`mouseup rect is ${JSON.stringify(rect)}`)
+	});
+
+	//Mousemove
+	$(canvas).on('mousemove', function (e) {
+		mouseX = parseInt(e.clientX - canvasX);
+		mouseY = parseInt(e.clientY - canvasY);
+		if (mousedown) {
+			console.log('mousemove during mousedown ...')
+			//console.log(`mousemove clientX is ${e.clientX}, clientY is ${e.clientY}`)
+			//console.log(`mousemove mouseX is ${mouseX}, mouseY is ${mouseY}`)
+			//console.log(`mousemove lastMouseX is ${lastMouseX}, lastMouseY is ${lastMouseY}`)
+			if (dragFlag) {
+				let moveX = mouseX - lastMouseX
+				let moveY = mouseY - lastMouseY
+				console.log(`old left ${rect.left}, top ${rect.top}`)
+				rect.left = rect.lastLeft + moveX
+				rect.top = rect.lastTop + moveY
+				console.log(`start drag.. moveX ${moveX}, moveY ${moveY}`)
+				console.log(`new left ${rect.left}, top ${rect.top}`)
+				drawRect()
+			} else {
+				console.log('start draw..')
+				rect.left = lastMouseX
+				rect.top = lastMouseY
+				rect.width = mouseX - lastMouseX
+				rect.height = mouseY - lastMouseY
+				drawRect()
+			}
+
+
+		}
+		//Output
+		$('#output').html('current: ' + mouseX + ', ' + mouseY + '<br/>last: ' + lastMouseX + ', ' + lastMouseY + '<br/>mousedown: ' + mousedown)
+	});
+
+	function isMouseInRect() {
+		xDiff = mouseX - rect.left
+		yDiff = mouseY - rect.top
+		if (xDiff < rect.width && yDiff < rect.height) {
+			return xDiff > 0 && yDiff > 0
+		}
+		return false
+	}
+
+	function drawRect() {
+		ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+		ctx.fill()
+		console.log(`draw rect is ${JSON.stringify(rect)}`)
+		ctx.clearRect(rect.left, rect.top, rect.width, rect.height)
+	}
+</script>
+</body>
+</html>
