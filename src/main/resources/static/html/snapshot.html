@@ -11,12 +11,35 @@
 		cursor: crosshair;
 		border: 1px solid #000000;
 	}
+
+	span {
+		width: 16px;
+		height: 16px;
+		background-size: 100% 100%;
+		background-position: center;
+		background-repeat: no-repeat;
+	}
+
+	#remove {
+		background-image: url('../img/remove.png');
+	}
+
+	#resize {
+		background-image: url('../img/resize.png');
+	}
+
+	.hide {
+		display: none;
+	}
+
 </style>
 <body>
 <canvas id="canvas">
-
 </canvas>
+<span class="hide" id="remove" onclick="remove()" style="position:absolute"></span>
+<span class="hide" id="resize" style="position:absolute"></span>
 <div id="output"></div>
+
 <script type="text/javascript">
 	let canvas = document.getElementById('canvas')
 	let ctx = canvas.getContext('2d')
@@ -37,18 +60,19 @@
 		lastLeft: 0,
 		lastTop: 0
 	}
-	canvasWidth = 900
-	canvasHeight = 500
+	canvasWidth = 800
+	canvasHeight = 600
 	canvas.width = canvasWidth
 	canvas.height = canvasHeight
 	console.log(`canvasWidth ${canvasWidth},canvasHeight ${canvasHeight}`)
 	ctx.rect(0, 0, canvasWidth, canvasHeight)
 	ctx.fillStyle = 'rgba(241,81,92,0.3)'
 	ctx.fill()
+
 	//Mousedown
 	$(canvas).on('mousedown', function (e) {
-		console.log(`mousedown clientX is ${e.clientX},canvasX is ${canvasX}`)
-		console.log(`mousedown clientY is ${e.clientY},canvasY is ${canvasY}`)
+		//console.log(`mousedown clientX is ${e.clientX},canvasX is ${canvasX}`)
+		//console.log(`mousedown clientY is ${e.clientY},canvasY is ${canvasY}`)
 		lastMouseX = parseInt(e.clientX - canvasX)
 		lastMouseY = parseInt(e.clientY - canvasY)
 		console.log(`mousedown last_mouseX is ${lastMouseX}, last_mouseY is ${lastMouseY}`)
@@ -68,6 +92,11 @@
 	$(canvas).on('mousemove', function (e) {
 		mouseX = parseInt(e.clientX - canvasX);
 		mouseY = parseInt(e.clientY - canvasY);
+		if (isMouseInRect()) {
+			$('#canvas').css('cursor', 'move')
+		} else {
+			$('#canvas').css('cursor', 'crosshair')
+		}
 		if (mousedown) {
 			console.log('mousemove during mousedown ...')
 			//console.log(`mousemove clientX is ${e.clientX}, clientY is ${e.clientY}`)
@@ -90,8 +119,6 @@
 				rect.height = mouseY - lastMouseY
 				drawRect()
 			}
-
-
 		}
 		//Output
 		$('#output').html('current: ' + mouseX + ', ' + mouseY + '<br/>last: ' + lastMouseX + ', ' + lastMouseY + '<br/>mousedown: ' + mousedown)
@@ -111,6 +138,21 @@
 		ctx.fill()
 		console.log(`draw rect is ${JSON.stringify(rect)}`)
 		ctx.clearRect(rect.left, rect.top, rect.width, rect.height)
+		$('#remove').removeClass('hide')
+		$('#remove').css('top', rect.top + 10)
+		$('#remove').css('left', rect.left + rect.width + 15)
+
+		$('#resize').removeClass('hide')
+		$('#resize').css('top', rect.top + rect.height - 10)
+		$('#resize').css('left', rect.left + rect.width + 15)
+	}
+
+	function remove() {
+		ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+		ctx.fill()
+		$('#remove').addClass("hide")
+		$('#resize').addClass("hide")
+		dragFlag = false
 	}
 </script>
 </body>
