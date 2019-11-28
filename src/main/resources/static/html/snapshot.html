@@ -50,15 +50,18 @@
 	let lastMouseY = 0
 	let mouseX = 0
 	let mouseY = 0
-	let mousedown = false
+	let drawFlag = false
 	let dragFlag = false
+	let resizeFlag = false
 	let rect = {
 		left: 0,
 		top: 0,
 		width: 0,
 		height: 0,
 		lastLeft: 0,
-		lastTop: 0
+		lastTop: 0,
+		lastWidth: 0,
+		lastHeight: 0
 	}
 	canvasWidth = 800
 	canvasHeight = 600
@@ -70,34 +73,36 @@
 	ctx.fill()
 
 	//Mousedown
-	$(canvas).on('mousedown', function (e) {
+	$(canvas).on('mousedown', e => {
 		//console.log(`mousedown clientX is ${e.clientX},canvasX is ${canvasX}`)
 		//console.log(`mousedown clientY is ${e.clientY},canvasY is ${canvasY}`)
 		lastMouseX = parseInt(e.clientX - canvasX)
 		lastMouseY = parseInt(e.clientY - canvasY)
 		console.log(`mousedown last_mouseX is ${lastMouseX}, last_mouseY is ${lastMouseY}`)
-		mousedown = true
+		drawFlag = true
 		dragFlag = isMouseInRect()
+		console.log(`dragFlag: ${dragFlag}, drawFlag: ${drawFlag}`)
 	});
 
 	//Mouseup
-	$(canvas).on('mouseup', function (e) {
-		mousedown = false;
+	$(canvas).on('mouseup', e => {
+		drawFlag = false
+		resizeFlag = false
 		rect.lastTop = rect.top
 		rect.lastLeft = rect.left
 		console.log(`mouseup rect is ${JSON.stringify(rect)}`)
 	});
 
 	//Mousemove
-	$(canvas).on('mousemove', function (e) {
-		mouseX = parseInt(e.clientX - canvasX);
-		mouseY = parseInt(e.clientY - canvasY);
+	$(canvas).on('mousemove', e => {
+		mouseX = parseInt(e.clientX - canvasX)
+		mouseY = parseInt(e.clientY - canvasY)
 		if (isMouseInRect()) {
 			$('#canvas').css('cursor', 'move')
 		} else {
 			$('#canvas').css('cursor', 'crosshair')
 		}
-		if (mousedown) {
+		if (drawFlag) {
 			console.log('mousemove during mousedown ...')
 			//console.log(`mousemove clientX is ${e.clientX}, clientY is ${e.clientY}`)
 			//console.log(`mousemove mouseX is ${mouseX}, mouseY is ${mouseY}`)
@@ -113,7 +118,6 @@
 				drawRect()
 			} else {
 				console.log('start draw..')
-
 				rect.left = mouseX > lastMouseX ? lastMouseX : mouseX
 				rect.top = mouseY > lastMouseY ? lastMouseY : mouseY
 				rect.width = Math.abs(mouseX - lastMouseX)
@@ -122,12 +126,37 @@
 			}
 		}
 		//Output
-		$('#output').html('current: ' + mouseX + ', ' + mouseY + '<br/>last: ' + lastMouseX + ', ' + lastMouseY + '<br/>mousedown: ' + mousedown)
+		$('#output').html('current: ' + mouseX + ', ' + mouseY + '<br/>last: ' + lastMouseX + ', ' + lastMouseY + '<br/>mousedown: ' + drawFlag)
 	});
 
+	$('#resize').on('mousedown', e => {
+		console.log(`mousedown resize, lastMouseX: ${lastMouseX}, lastMouseY: ${lastMouseY}`)
+		lastMouseX = e.clientX
+		lastMouseY = e.clientY
+		rect.lastWidth = rect.width
+		rect.lastHeight = rect.height
+		resizeFlag = true
+	})
+
+	$('#resize').on('mouseup', e => {
+		console.log('mouseup resize...')
+		resizeFlag = false
+	})
+
+	$('#resize').on('mousemove', e => {
+		mouseX = e.clientX
+		mouseY = e.clientY
+		if (resizeFlag) {
+			console.log(`start resize, xDiff is: ${mouseX - lastMouseX}, yDiff is: ${mouseY - lastMouseY}`)
+			rect.width = Math.abs(rect.lastWidth + mouseX - lastMouseX)
+			rect.height = Math.abs(rect.lastHeight + mouseY - lastMouseY)
+			drawRect()
+		}
+	})
+
 	function isMouseInRect() {
-		xDiff = mouseX - rect.left
-		yDiff = mouseY - rect.top
+		let xDiff = mouseX - rect.left
+		let yDiff = mouseY - rect.top
 		if (xDiff < rect.width && yDiff < rect.height) {
 			return xDiff > 0 && yDiff > 0
 		}
@@ -140,12 +169,12 @@
 		console.log(`draw rect is ${JSON.stringify(rect)}`)
 		ctx.clearRect(rect.left, rect.top, rect.width, rect.height)
 		$('#remove').removeClass('hide')
-		$('#remove').css('top', rect.top + 10)
 		$('#remove').css('left', rect.left + rect.width + 15)
+		$('#remove').css('top', rect.top + 10)
 
 		$('#resize').removeClass('hide')
-		$('#resize').css('top', rect.top + rect.height - 10)
 		$('#resize').css('left', rect.left + rect.width + 15)
+		$('#resize').css('top', rect.top + rect.height - 10)
 	}
 
 	function remove() {
