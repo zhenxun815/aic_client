@@ -1,5 +1,6 @@
 package com.tqhy.client.controllers;
 
+import com.tqhy.client.network.Network;
 import javafx.fxml.FXML;
 import javafx.scene.web.WebView;
 import org.slf4j.Logger;
@@ -18,4 +19,11 @@ public class SnapshotController extends BaseWebviewController {
 
     @FXML
     private WebView webView;
+
+    @FXML
+    void initialize() {
+        super.initialize(webView);
+        loadPage(webView, Network.LOCAL_BASE_URL + "html/snapshot.html");
+
+    }
 }
