@@ -16,7 +16,7 @@ public class GlobalKeyListener implements NativeKeyListener {
 
     boolean ctrlPressed = false;
     boolean qPressed = false;
-    boolean cPressed = false;
+    boolean sPressed = false;
 
     Logger logger = LoggerFactory.getLogger(GlobalKeyListener.class);
 
@@ -38,13 +38,13 @@ public class GlobalKeyListener implements NativeKeyListener {
             //logger.info("q Pressed2: {}", qPressed);
         }
 
-        if (event.getKeyCode() == NativeKeyEvent.VC_C) {
-            cPressed = true;
+        if (event.getKeyCode() == NativeKeyEvent.VC_S) {
+            sPressed = true;
         }
 
-        if (ctrlPressed && cPressed) {
+        if (ctrlPressed && sPressed) {
             logger.info("start snapshot...");
-            Platform.runLater(() -> FXMLUtils.loadSnapshot("/static/fxml/shanpshot.fxml"));
+            Platform.runLater(() -> FXMLUtils.loadSnapshot("/static/fxml/snapshot.fxml"));
         } else if (ctrlPressed && qPressed) {
             logger.info("shot key fired...");
             Platform.runLater(() -> FXMLUtils.loadChooseModel("/static/fxml/choose_model.fxml"));
@@ -61,8 +61,8 @@ public class GlobalKeyListener implements NativeKeyListener {
             qPressed = false;
         }
 
-        if (event.getKeyCode() == NativeKeyEvent.VC_C) {
-            cPressed = false;
+        if (event.getKeyCode() == NativeKeyEvent.VC_S) {
+            sPressed = false;
         }
     }
 }
