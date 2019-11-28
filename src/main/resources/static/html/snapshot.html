@@ -38,7 +38,6 @@
 </canvas>
 <span class="hide" id="remove" onclick="remove()" style="position:absolute"></span>
 <span class="hide" id="resize" style="position:absolute"></span>
-<div id="output"></div>
 
 <script type="text/javascript">
 	let canvas = document.getElementById('canvas')
@@ -63,8 +62,8 @@
 		lastWidth: 0,
 		lastHeight: 0
 	}
-	canvasWidth = 800
-	canvasHeight = 600
+	canvasWidth = 1319
+	canvasHeight = 784
 	canvas.width = canvasWidth
 	canvas.height = canvasHeight
 	console.log(`canvasWidth ${canvasWidth},canvasHeight ${canvasHeight}`)
@@ -125,8 +124,6 @@
 				drawRect()
 			}
 		}
-		//Output
-		$('#output').html('current: ' + mouseX + ', ' + mouseY + '<br/>last: ' + lastMouseX + ', ' + lastMouseY + '<br/>mousedown: ' + drawFlag)
 	});
 
 	$('#resize').on('mousedown', e => {
