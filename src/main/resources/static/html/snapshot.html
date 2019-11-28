@@ -113,10 +113,11 @@
 				drawRect()
 			} else {
 				console.log('start draw..')
-				rect.left = lastMouseX
-				rect.top = lastMouseY
-				rect.width = mouseX - lastMouseX
-				rect.height = mouseY - lastMouseY
+
+				rect.left = mouseX > lastMouseX ? lastMouseX : mouseX
+				rect.top = mouseY > lastMouseY ? lastMouseY : mouseY
+				rect.width = Math.abs(mouseX - lastMouseX)
+				rect.height = Math.abs(mouseY - lastMouseY)
 				drawRect()
 			}
 		}
@@ -148,11 +149,22 @@
 	}
 
 	function remove() {
+		initRect()
 		ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 		ctx.fill()
 		$('#remove').addClass("hide")
 		$('#resize').addClass("hide")
 		dragFlag = false
+	}
+
+	function initRect() {
+		rect.left = 0
+		rect.top = 0
+		rect.height = 0
+		rect.width = 0
+		rect.lastLeft = 0
+		rect.lastTop = 0
+
 	}
 </script>
 </body>
