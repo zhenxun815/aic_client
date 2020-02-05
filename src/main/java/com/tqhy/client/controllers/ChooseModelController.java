@@ -93,10 +93,16 @@ public class ChooseModelController {
     @GetMapping("cases/{patientId}")
     @ResponseBody
     public ModelMsg<Case> getCaseList(@PathVariable String patientId) {
+        this.caseMsg = null;
         Network.getAicApi()
                .searchCase(patientId)
                .observeOn(Schedulers.io())
                .subscribeOn(Schedulers.trampoline())
+               .doOnError(err -> {
+                   this.caseMsg = new ModelMsg<>();
+                   this.caseMsg.setFlag(BaseMsg.FAIL);
+                   logger.error("get models failed!", err);
+               })
                .blockingSubscribe(responseBody -> {
                    String json = responseBody.string();
                    logger.info("get all cases res is {}", json);
@@ -113,10 +119,16 @@ public class ChooseModelController {
     @GetMapping("/models")
     @ResponseBody
     public ModelMsg<Model> getModelList() {
+        this.modelMsg = null;
         Network.getAicApi()
                .getAllModels()
                .observeOn(Schedulers.io())
                .subscribeOn(Schedulers.trampoline())
+               .doOnError(err -> {
+                   this.modelMsg = new ModelMsg<>();
+                   this.modelMsg.setFlag(BaseMsg.FAIL);
+                   logger.error("get models failed!", err);
+               })
                .blockingSubscribe(responseBody -> {
                    String json = responseBody.string();
                    logger.info("get all models res is {}", json);

@@ -109,8 +109,9 @@ public class Dcm2JpgUtil {
 
             Attributes attributes = iis.readDataset(-1, Tag.PixelData);
             String instanceNum = attributes.getString(Tag.InstanceNumber);
+            String patientId = attributes.getString(Tag.PatientID);
             //logger.info("instanceNum is {}", instanceNum);
-            String destFileName = String.format("image-%05d.jpg", Integer.parseInt(instanceNum));
+            String destFileName = String.format("%s-%05d.jpg", patientId, Integer.parseInt(instanceNum));
             File destJpgFile = new File(jpgDir, destFileName);
 
             if (destJpgFile.exists()) {

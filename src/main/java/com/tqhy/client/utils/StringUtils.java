@@ -1,5 +1,8 @@
 package com.tqhy.client.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
@@ -10,6 +13,8 @@ import java.util.function.Function;
  * @since 1.0.0
  */
 public class StringUtils {
+
+    static Logger logger = LoggerFactory.getLogger(StringUtils.class);
 
     /**
      * 使用指定分隔符拼接字符串

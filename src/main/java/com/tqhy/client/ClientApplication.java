@@ -47,23 +47,7 @@ public class ClientApplication extends Application {
         });
 
         initPrimaryStageSize();
-       /* JIntellitype.getInstance().registerHotKey(1, JIntellitypeConstants.MOD_CONTROL, (int) 'Q');
-        JIntellitype.getInstance().addHotKeyListener(identifier -> {
-            if (1 == identifier) {
-                logger.info("ctrl+Q pressed...");
-                FXMLUtils.loadChooseModel("/static/fxml/choose_model.fxml");
 
-            }
-        });*/
-        try {
-            GlobalScreen.registerNativeHook();
-        } catch (NativeHookException ex) {
-            System.err.println("There was a problem registering the native hook.");
-            System.err.println(ex.getMessage());
-
-            System.exit(1);
-        }
-        GlobalScreen.addNativeKeyListener(new GlobalKeyListener());
     }
 
 
@@ -93,8 +77,6 @@ public class ClientApplication extends Application {
      */
     private void initSystemTray() {
         try {
-
-
             System.setProperty("java.awt.headless", "false");
             Toolkit.getDefaultToolkit();
             if (!java.awt.SystemTray.isSupported()) {
@@ -157,10 +139,19 @@ public class ClientApplication extends Application {
     @Override
     public void init() throws Exception {
         super.init();
-        java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GlobalScreen.class.getPackage().getName());
-        logger.setLevel(Level.OFF);
-        Platform.setImplicitExit(false);
         springContext = SpringApplication.run(ClientApplication.class);
+        java.util.logging.Logger globalScreenLogger = java.util.logging.Logger.getLogger(
+                GlobalScreen.class.getPackage().getName());
+        globalScreenLogger.setLevel(Level.OFF);
+        Platform.setImplicitExit(false);
+        try {
+            GlobalScreen.registerNativeHook();
+        } catch (NativeHookException ex) {
+            logger.error("There was a problem registering the native hook.", ex);
+            System.exit(1);
+        }
+
+        GlobalScreen.addNativeKeyListener(new GlobalKeyListener());
         initSystemTray();
     }
 

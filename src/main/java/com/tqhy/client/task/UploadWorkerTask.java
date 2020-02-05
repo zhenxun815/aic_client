@@ -7,6 +7,7 @@ import com.tqhy.client.network.Network;
 import com.tqhy.client.utils.FileUtils;
 import com.tqhy.client.utils.GsonUtils;
 import com.tqhy.client.utils.NetworkUtils;
+import com.tqhy.client.utils.StringUtils;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
@@ -61,7 +62,7 @@ public class UploadWorkerTask extends Task {
     String localDataPath;
 
     @NonNull
-    int maxUploadCaseCount;
+    Integer maxUploadCaseCount;
 
     /**
      * 待转换总文件数
@@ -128,9 +129,11 @@ public class UploadWorkerTask extends Task {
     private boolean prepareTask() {
         successCount = new AtomicInteger(0);
         failCount = new AtomicInteger(0);
-        jpgDir = new File(dirToUpload, Constants.PATH_TEMP_JPG);
         uploadInfoFile = FileUtils.getLocalFile(localDataPath, uploadMsg.getBatchNumber() + ".txt");
-        //批次目录下图片
+        jpgDir = new File(dirToUpload, Constants.PATH_TEMP_JPG);
+        if (jpgDir.exists()) {
+            FileUtils.deleteDir(jpgDir);
+        }
 
         HashMap<File, String> tempTotalFile = collectAll(dirToUpload);
         ArrayList<String> invalisdDirPaths = new ArrayList<>();
@@ -227,8 +230,6 @@ public class UploadWorkerTask extends Task {
     }
 
     private void upLoadDir(HashMap<String, String> requestParamMap) {
-
-
         for (Map.Entry<File, String> uploadFileEntry : uploadImgFileMap.entrySet()) {
             File file = uploadFileEntry.getKey();
             String caseName = uploadFileEntry.getValue();
@@ -288,8 +289,7 @@ public class UploadWorkerTask extends Task {
     private void deleteTempFiles(int completeCount) {
 
         if (completeCount == total2Upload) {
-            File temp = new File(dirToUpload, Constants.PATH_TEMP_JPG);
-            FileUtils.deleteDir(temp);
+            FileUtils.deleteDir(jpgDir);
         }
     }
 
@@ -500,6 +500,7 @@ public class UploadWorkerTask extends Task {
         public void onNext(ResponseBody responseBody) {
             ClientMsg clientMsg = GsonUtils.parseResponseToObj(responseBody);
             Integer flag = clientMsg.getFlag();
+
             logger.info("upload onnext flag is {}", flag);
             if (shouldStop()) {
                 logger.info("on next should stop..");
@@ -523,10 +524,15 @@ public class UploadWorkerTask extends Task {
                 jumpToLandFlag.set(true);
             }
             if (2 == flag) {
-                logger.info("server get file fail...{}", fileToUpload.getAbsolutePath());
+                List<String> msgs = clientMsg.getMsg();
+
+                String failInfo = StringUtils.join(msgs, ",",
+                                                   msg -> "已存在".equals(msg) ? ";1" : msg);
+                String resMsg = fileToUpload.getAbsolutePath().concat(failInfo);
+                logger.info("server get file fail...{}", resMsg);
                 failCount.incrementAndGet();
                 successCount.decrementAndGet();
-                FileUtils.appendFile(uploadInfoFile, fileToUpload.getAbsolutePath(),
+                FileUtils.appendFile(uploadInfoFile, resMsg,
                                      builder -> builder.append(Constants.NEW_LINE), true);
             }
         }

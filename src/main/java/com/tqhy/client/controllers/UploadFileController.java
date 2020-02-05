@@ -412,12 +412,25 @@ public class UploadFileController {
             String batchNumber = uploadMsg.getBatchNumber();
             File uploadInfoFile = FileUtils.getLocalFile(localDataPath, batchNumber + ".txt");
             if (uploadInfoFile.exists()) {
-                String failedInfos = FileUtils.readLine(uploadInfoFile, line -> line.concat(Constants.NEW_LINE))
+                String failedInfos = FileUtils.readLine(uploadInfoFile,
+                                                        line -> {
+                                                            String[] split = line.split(";");
+                                                            if (null != split && split.length > 1) {
+                                                                int errorCode = Integer.parseInt(split[1]);
+                                                                if (1 == errorCode) {
+                                                                    return split[0].concat("已存在")
+                                                                                   .concat(Constants.NEW_LINE);
+                                                                }
+                                                            }
+                                                            return line.concat(Constants.NEW_LINE);
+                                                        })
                                               .stream()
                                               .collect(StringBuilder::new,
                                                        StringBuilder::append,
                                                        StringBuilder::append)
                                               .toString();
+
+                logger.info("failedInfos: {}", failedInfos);
                 text_fail_title.setText("以下文件上传失败");
                 label_fail_desc.setText(failedInfos);
             }
@@ -425,6 +438,11 @@ public class UploadFileController {
         }
     }
 
+    /**
+     * 终止上传
+     *
+     * @param mouseEvent
+     */
     @FXML
     public void stopUpload(MouseEvent mouseEvent) {
         MouseButton button = mouseEvent.getButton();
@@ -432,6 +450,8 @@ public class UploadFileController {
             logger.info("into stop upload....");
             workerTask.getStopUploadFlag().set(true);
             showPanel(panel_choose.getId());
+            File temp = new File(dirToUpload, Constants.PATH_TEMP_JPG);
+            FileUtils.deleteDir(temp);
         }
     }
 

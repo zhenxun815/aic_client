@@ -68,7 +68,7 @@ public class LandingController extends BaseWebviewController {
     void initialize() {
         super.initialize(webView);
         String landingIgnoreConfig = PropertyUtils.getProperty(Constants.LANDING_IGNORE);
-        landingIgnore = StringUtils.isEmpty(landingIgnoreConfig) ? false : Boolean.parseBoolean(landingIgnoreConfig);
+        landingIgnore = !StringUtils.isEmpty(landingIgnoreConfig) && Boolean.parseBoolean(landingIgnoreConfig);
         if (StringUtils.isEmpty(Network.SERVER_IP)) {
             logger.info("init load url is connection");
             loadConnectionPage();

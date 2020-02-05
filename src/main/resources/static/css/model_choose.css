@@ -37,11 +37,11 @@ li {
     border: 1px solid #FF7437;
     height: 190px;
     overflow-y: scroll;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .dv_bottom {
-    margin-top: 10px;
+    margin-top: 5px;
     text-align: center;
 }
 

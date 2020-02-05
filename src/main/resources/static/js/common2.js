@@ -29,16 +29,22 @@ function post_ajax(apiName, ajaxUrl, request, callback) {
 	})
 }
 
-function get_ajax(apiName, ajaxUrl, callback) {
-	$.ajax({
+function get_ajax(apiName, ajaxUrl, callback, timeOut) {
+	var xhr = $.ajax({
 		type: "GET",
 		url: ajaxUrl,
 		async: true,
+		timeout: 3000,
 		beforeSend: function () {
 
 		},
-		complete: function () {
-
+		complete: function (XMLHttpRequest, status) {
+			console.log(`status is ${status}`)
+			if (status == 'timeout' || status == 'error') {
+				xhr.abort();    // 超时中断请求
+				// 这里可以重新执行请求
+				timeOut()
+			}
 		},
 		success: function (response) {
 
@@ -49,8 +55,9 @@ function get_ajax(apiName, ajaxUrl, callback) {
 				return false;
 			}
 		},
-		error: function (response) {
+		error: function (err) {
 			//alert("问题接口：" + apiName + "\n异常错误" + JSON.stringify(response));
+
 			return false;
 		}
 	})
