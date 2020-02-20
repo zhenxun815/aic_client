@@ -66,6 +66,14 @@ public class PropertyUtils {
         return getProperty(Constants.USERNAME);
     }
 
+    public static void setServerIP(String serverIP) {
+        setProperty(Constants.SERVER_IP, serverIP);
+    }
+
+    public static String getServerIP() {
+        return getProperty(Constants.SERVER_IP);
+    }
+
 
     public static float getWindowCenter() {
         String windowCenterProperty = getProperty(Constants.WINDOW_CENTTER);
