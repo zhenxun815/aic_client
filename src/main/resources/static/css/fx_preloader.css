@@ -18,7 +18,7 @@
     -fx-background-repeat: no-repeat;
     -fx-background-size: contain;
     -fx-background-position: center;
-    -fx-background-image: url("/static/img/logo.png");
+    -fx-background-image: url("/static/img/aic_logo.png");
 }
 
 .text_title {

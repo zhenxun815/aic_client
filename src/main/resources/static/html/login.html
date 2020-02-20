@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta content="width=device-width, initial-scale=1.0" name="viewport">
+	<title>登陆</title>
+</head>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/vue.js"></script>
+<script src="../js/torem.js"></script>
+
+<style>
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
+
+	html, body {
+		height: 100%;
+	}
+
+	body {
+		margin: 0;
+		padding: 0;
+		background: url('../img/index_bg.jpg') no-repeat;
+		background-size: 100% 100%;
+	}
+
+	.callback-message {
+		color: #fff31e;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		display: none;
+	}
+
+	.callback-message.show {
+		display: block;
+	}
+
+	.top {
+		width: 10rem;
+		margin: 0 auto;
+		height: .572917rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-left: .364583rem;
+		padding-right: .208333rem;
+	}
+
+	.top .logo {
+		width: .671875rem;
+		height: .572917rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.top .logo img {
+		width: .671875rem;
+		height: .140625rem;
+	}
+
+	.top .txt {
+		color: #fff;
+		font-size: .114583rem;
+		cursor: pointer;
+	}
+
+	.txt1 {
+		width: 10rem;
+		margin: 0 auto;
+		margin-top: .791667rem;
+		color: #fff;
+		font-size: .161458rem;
+		padding-left: 1.083333rem;
+		height: .354167rem;
+		display: flex;
+		align-items: center;
+	}
+
+	.txt2 {
+		width: 10rem;
+		margin: 0 auto;
+		margin-bottom: .3125rem;
+		color: #fff;
+		font-size: .234375rem;
+		padding-left: 1.083333rem;
+		height: .354167rem;
+		display: flex;
+		align-items: center;
+	}
+
+	.input-list {
+		width: 10rem;
+		margin: 0 auto;
+		padding-left: 1.083333rem;
+	}
+
+	.input-list input {
+		width: 2.203125rem;
+		margin-right: 5rem;
+		height: .4rem;
+		border: solid 1px #fff;
+		border-radius: .2rem;
+		background: no-repeat;
+		margin-bottom: .109375rem;
+		outline: none;
+		color: #a1a1a1;
+		text-align: center;
+		font-size: .130208rem;
+	}
+
+	.input-list input::placeholder {
+		color: #a1a1a1;
+		text-align: center;
+		font-size: .130208rem;
+	}
+
+	.sub {
+		width: 10rem;
+		margin: 0 auto;
+		margin-top: .078125rem;
+	}
+
+	.sub .btn {
+		width: .973958rem;
+		height: .3125rem;
+		background: #2d97b2;
+		font-size: .145833rem;
+		color: #fff;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		border-radius: .155rem;
+		margin-left: 1.635417rem;
+		cursor: pointer;
+	}
+
+	.foot {
+		width: 100%;
+		color: #fff;
+		text-align: center;
+		font-size: .114583rem;
+		position: fixed;
+		bottom: .1rem;
+	}
+
+	.alertDiv {
+		width: 7.6rem;
+		height: 4rem;
+		position: fixed;
+		left: 1.2rem;
+		top: .5rem;
+		z-index: 99;
+		background: #d2d2d2;
+		font-size: .114583rem;
+		color: #000;
+		padding: .15625rem;
+		overflow: auto;
+	}
+
+	.alertDiv .close {
+		width: .182292rem;
+		height: .182292rem;
+		position: fixed;
+		left: 8.5rem;
+		top: .6rem;
+		line-height: .182292rem;
+		text-align: center;
+		color: #000;
+		cursor: pointer;
+	}
+
+	.alertDiv .title {
+		height: .489583rem;
+		width: 100%;
+		text-align: center;
+		margin-top: .432292rem;
+	}
+
+	.alertDiv .c-row {
+		margin-bottom: .130208rem;
+	}
+</style>
+
+<script type="text/javascript">
+
+	window.onload = () => {
+		get_ajax("getUserName", "/user/name", (response) => {
+			console.log(`user name is: ${response}`)
+			if (response) {
+				$('#user_name').val(response)
+			}
+		});
+
+		get_ajax("getServerIP", "/serverIP", (response) => {
+			console.log(`serverIP is: ${response}`)
+			if (response) {
+				$('#server_ip').val(response)
+			}
+		});
+	};
+	baseUrlLocal = 'http://localhost:59527/html'
+	serverIPValid = false
+	$(document).ready(function () {
+
+	})
+
+	function connection(serverIP) {
+		if (checkServerIP(serverIP)) {
+			$('.callback-message').removeClass("show")
+			if (serverIP.indexOf(':') == -1) {
+				serverIP = serverIP + ":8080"
+			}
+			let requestData = {serverIP: serverIP}
+			post_ajax('connTest', '/verify/connection', false, requestData, (response) => {
+				//console.log(`response data is: ${JSON.stringify(response)}`)
+				flag = response.flag
+				console.log(`flag is: ${flag}`)
+				serverIPValid = flag == 1
+				console.log(`serverIP valid is ${serverIPValid}`)
+			})
+		}
+	}
+
+	function userLand(userName, userPwd) {
+		let landInfo = {userName: userName, userPwd: userPwd}
+		console.log(`userName is: ${userName}, userPwd is: ${userPwd}`)
+		if (checkUserInfo(userName, userPwd)) {
+			post_ajax('land', '/landing', true, landInfo, (response) => {
+				let flag = response.flag
+				let token = response.token
+				console.log(`flag is: ${flag}`)
+				if (1 == flag) {
+					let localIP = response.localIP
+					//window.location.href = baseUrlLocal + '/html/test_upload.html'
+					let serverIP = response.serverIP
+					//alert('server ip: '+serverIP)
+					//window.location.href = 'http://' + serverIP + '/index.html?token=' + token + '&localIP=' + localIP
+					// jsp version
+					window.location.href = 'http://' + serverIP + '/testBatch/list?token=' + token
+				} else {
+					$('.callback-message').html(token)
+					$('.callback-message').addClass("show")
+				}
+			})
+		}
+	}
+
+	function landing() {
+		console.log("into landing...")
+		flag = 0
+		let userName = $("#user_name").val()
+		let userPwd = $("#user_pwd").val()
+		let serverIP = $("#server_ip").val()
+		connection(serverIP)
+		if (serverIPValid) {
+			console.log("valid")
+			userLand(userName, userPwd)
+		} else {
+			console.log("invalid")
+			$('.callback-message').html('无法连接到服务器')
+			$('.callback-message').addClass("show")
+		}
+	}
+
+	function post_ajax(apiName, ajaxUrl, async, request, callback) {
+		$.ajax({
+			type: "POST",
+			url: ajaxUrl,
+			async: async,
+			dataType: "json",
+			contentType: "application/json;charset=utf-8",
+			data: JSON.stringify(request),
+			beforeSend: function () {
+
+			},
+			complete: function () {
+
+			},
+			success: function (response) {
+
+				if (response) {
+					callback(response);
+				} else {
+					//alert("问题接口：" + apiName + "\n失败----" + response.desc + response.flag);
+					return false;
+				}
+			},
+			error: function (response) {
+				//alert("问题接口：" + apiName + "\n异常错误" + JSON.stringify(response));
+				return false;
+			}
+		})
+	}
+
+	function get_ajax(apiName, ajaxUrl, callback) {
+		$.ajax({
+			type: "GET",
+			url: ajaxUrl,
+			async: true,
+			success: function (response) {
+				if (response) {
+					callback(response);
+				} else {
+					//alert("问题接口：" + apiName + "\n失败----" + response.desc + response.flag);
+					return false;
+				}
+			},
+			error: function (response) {
+				//alert("问题接口：" + apiName + "\n异常错误" + JSON.stringify(response));
+				return false;
+			}
+		})
+	}
+
+	function checkServerIP(serverIP) {
+		console.log(`server ip is ${server_ip}`)
+		if (!server_ip) {
+			$('.callback-message').html('服务器ip不能为空')
+			$('.callback-message').addClass("show")
+			return false
+		}
+
+		let ip_pattern = /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\:[0-9]+)?/g
+		let reg = new RegExp(ip_pattern)
+		let ipValid = reg.test(serverIP)
+		console.log(`server ip to connect is: ${serverIP},valid is: ${ipValid}`)
+		if (!ipValid) {
+			$('.callback-message').html('服务器ip地址不合法')
+			$('.callback-message').addClass("show")
+			return false
+		}
+		return true
+	}
+
+	function checkUserInfo(userName, userPwd) {
+
+		console.log(`user name is ${userName}`)
+		if (!userName) {
+			$('.callback-message').html('登录账号不能为空')
+			$('.callback-message').addClass("show")
+			return false
+		}
+
+		console.log(`user pwd is ${userPwd}`)
+		if (!userPwd) {
+			$('.callback-message').html('登录密码不能为空')
+			$('.callback-message').addClass("show")
+			return false
+		}
+
+		return true
+
+	}
+</script>
+<body>
+<div class="top">
+	<div class="logo">
+		<img alt="" src="../img/logo.png">
+	</div>
+	<div class="txt" onclick="showDiv()">平台说明</div>
+</div>
+<div class="txt1">欢迎使用</div>
+<div class="txt2">新冠肺炎公益筛查平台</div>
+<div class="input-list">
+	<input id="user_name" placeholder="请输入你的登陆帐号" type="text">
+	<input id="user_pwd" placeholder="请输入你的登陆密码" type="password">
+	<input id="server_ip" placeholder="请配置ip" type="text">
+	<p class="callback-message">IP地址不能为空</p>
+</div>
+<div class="sub">
+	<div class="btn" onclick="landing()">
+		登陆
+	</div>
+</div>
+
+<div class="foot">
+	天启慧眼（北京）信息技术有限公司
+</div>
+<div class="alertDiv" id="shuoming" style="display: none;">
+	<div class="close" onclick="hideDiv()">
+		X
+	</div>
+	<div class="title">
+		《天启慧眼关于新冠肺炎人工智能CT快速辅助诊断系统方案》
+	</div>
+	<div class="content">
+		<div class="c-title">
+			【核心系统模块】
+		</div>
+		<div class="c-row">
+			随着全国疫情发展，2月2日，武汉市新冠肺炎防控指挥部发布第10号通告
+			，宣布诊断有肺炎症状的发热病人将集中隔离。湖北省特别是武汉市患者数量巨大，而这些患者中很多人既不在疑似也不在新冠肺炎确诊人数中，没有得到隔离或者治疗。
+			因目前确诊新冠肺炎核酸检测受限。全国也已经启动CT影像检测作为同步诊断依据。相比核酸检查的种种受限，CT检查及时、准确、快捷、阳性率高。
+			病毒密集、变异快和传播速度惊人，是现在的研究人员难以想象的，天启AI人工智能可以配合迅速诊断疑似确诊。
+		</div>
+		<div class="c-title">
+			【核心系统模块】
+		</div>
+		<div class="c-row">
+			随着全国疫情发展，2月2日，武汉市新冠肺炎防控指挥部发布第10号通告
+			，宣布诊断有肺炎症状的发热病人将集中隔离。湖北省特别是武汉市患者数量巨大，而这些患者中很多人既不在疑似也不在新冠肺炎确诊人数中，没有得到隔离或者治疗。
+			因目前确诊新冠肺炎核酸检测受限。全国也已经启动CT影像检测作为同步诊断依据。相比核酸检查的种种受限，CT检查及时、准确、快捷、阳性率高。
+			病毒密集、变异快和传播速度惊人，是现在的研究人员难以想象的，天启AI人工智能可以配合迅速诊断疑似确诊。
+		</div>
+		<div class="c-title">
+			【核心系统模块】
+		</div>
+		<div class="c-row">
+			随着全国疫情发展，2月2日，武汉市新冠肺炎防控指挥部发布第10号通告
+			，宣布诊断有肺炎症状的发热病人将集中隔离。湖北省特别是武汉市患者数量巨大，而这些患者中很多人既不在疑似也不在新冠肺炎确诊人数中，没有得到隔离或者治疗。
+			因目前确诊新冠肺炎核酸检测受限。全国也已经启动CT影像检测作为同步诊断依据。相比核酸检查的种种受限，CT检查及时、准确、快捷、阳性率高。
+			病毒密集、变异快和传播速度惊人，是现在的研究人员难以想象的，天启AI人工智能可以配合迅速诊断疑似确诊。
+		</div>
+		<div class="c-title">
+			【核心系统模块】
+		</div>
+		<div class="c-row">
+			随着全国疫情发展，2月2日，武汉市新冠肺炎防控指挥部发布第10号通告
+			，宣布诊断有肺炎症状的发热病人将集中隔离。湖北省特别是武汉市患者数量巨大，而这些患者中很多人既不在疑似也不在新冠肺炎确诊人数中，没有得到隔离或者治疗。
+			因目前确诊新冠肺炎核酸检测受限。全国也已经启动CT影像检测作为同步诊断依据。相比核酸检查的种种受限，CT检查及时、准确、快捷、阳性率高。
+			病毒密集、变异快和传播速度惊人，是现在的研究人员难以想象的，天启AI人工智能可以配合迅速诊断疑似确诊。
+		</div>
+		<div class="c-title">
+			【核心系统模块】
+		</div>
+		<div class="c-row">
+			随着全国疫情发展，2月2日，武汉市新冠肺炎防控指挥部发布第10号通告
+			，宣布诊断有肺炎症状的发热病人将集中隔离。湖北省特别是武汉市患者数量巨大，而这些患者中很多人既不在疑似也不在新冠肺炎确诊人数中，没有得到隔离或者治疗。
+			因目前确诊新冠肺炎核酸检测受限。全国也已经启动CT影像检测作为同步诊断依据。相比核酸检查的种种受限，CT检查及时、准确、快捷、阳性率高。
+			病毒密集、变异快和传播速度惊人，是现在的研究人员难以想象的，天启AI人工智能可以配合迅速诊断疑似确诊。
+		</div>
+		<div class="c-title">
+			【核心系统模块】
+		</div>
+		<div class="c-row">
+			随着全国疫情发展，2月2日，武汉市新冠肺炎防控指挥部发布第10号通告
+			，宣布诊断有肺炎症状的发热病人将集中隔离。湖北省特别是武汉市患者数量巨大，而这些患者中很多人既不在疑似也不在新冠肺炎确诊人数中，没有得到隔离或者治疗。
+			因目前确诊新冠肺炎核酸检测受限。全国也已经启动CT影像检测作为同步诊断依据。相比核酸检查的种种受限，CT检查及时、准确、快捷、阳性率高。
+			病毒密集、变异快和传播速度惊人，是现在的研究人员难以想象的，天启AI人工智能可以配合迅速诊断疑似确诊。
+		</div>
+		<div class="c-title">
+			【核心系统模块】
+		</div>
+		<div class="c-row">
+			随着全国疫情发展，2月2日，武汉市新冠肺炎防控指挥部发布第10号通告
+			，宣布诊断有肺炎症状的发热病人将集中隔离。湖北省特别是武汉市患者数量巨大，而这些患者中很多人既不在疑似也不在新冠肺炎确诊人数中，没有得到隔离或者治疗。
+			因目前确诊新冠肺炎核酸检测受限。全国也已经启动CT影像检测作为同步诊断依据。相比核酸检查的种种受限，CT检查及时、准确、快捷、阳性率高。
+			病毒密集、变异快和传播速度惊人，是现在的研究人员难以想象的，天启AI人工智能可以配合迅速诊断疑似确诊。
+		</div>
+	</div>
+</div>
+<script>
+	function showDiv() {
+		document.getElementById("shuoming").style.display = ""
+	}
+
+	function hideDiv() {
+		document.getElementById("shuoming").style.display = "none"
+	}
+</script>
+</body>
+</html>
