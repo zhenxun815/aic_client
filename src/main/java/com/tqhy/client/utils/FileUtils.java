@@ -333,7 +333,7 @@ public class FileUtils {
         String rootPath = getAppPath();
         String localFilePath = rootPath + relativePath;
 
-        logger.info("localFilePath is: " + localFilePath);
+        //logger.info("localFilePath is: " + localFilePath);
         File localFile = new File(localFilePath, fileName);
         return localFile;
     }

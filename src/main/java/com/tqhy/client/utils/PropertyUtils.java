@@ -65,4 +65,15 @@ public class PropertyUtils {
     public static String getUserName() {
         return getProperty(Constants.USERNAME);
     }
+
+
+    public static float getWindowCenter() {
+        String windowCenterProperty = getProperty(Constants.WINDOW_CENTTER);
+        return StringUtils.isEmpty(windowCenterProperty) ? 0F : Float.parseFloat(windowCenterProperty);
+    }
+
+    public static float getWindowWidth() {
+        String windowCenterProperty = getProperty(Constants.WINDOW_WIDTH);
+        return StringUtils.isEmpty(windowCenterProperty) ? 0F : Float.parseFloat(windowCenterProperty);
+    }
 }
