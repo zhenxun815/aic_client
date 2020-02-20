@@ -23,18 +23,6 @@ public class UploadMsg extends BaseMsg {
     @NonNull
     private String uploadType;
 
-    /**
-     * 上传类型为病例数据则向后台传参为projectId,为测试数据则为taskId
-     */
-    @NonNull
-    private String uploadId;
-
-    /**
-     * 上传类型为病例数据则为projectName
-     */
-    @NonNull
-    private String uploadTargetName;
-
     private String token;
 
     private String batchNumber;

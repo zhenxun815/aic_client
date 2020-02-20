@@ -109,10 +109,7 @@ public class BaseWebviewController {
                            //alert('upload;case;' + projectId + ';' + projectName)
                            //alert('upload;test;' + taskId + ';' + projectName)
 
-                           String uploadType = split[1];
-                           String uploadId = split[2];
-                           String uploadTargetName = split[3];
-                           uploadFileController.openUpload(UploadMsg.with(uploadType, uploadId, uploadTargetName));
+                           uploadFileController.openUpload(UploadMsg.with(UploadMsg.UPLOAD_TYPE_TEST));
                            break;
                        case Constants.CMD_MSG_DOWNLOAD:
                            //download;{"fileName":"taskName","imgUrlString":"imgUrl1,imgUrl2"}

@@ -39,12 +39,6 @@ public class LandingController extends BaseWebviewController {
     @FXML
     private WebView webView;
 
-    @Value("${network.url.connection:''}")
-    private String connectionUrl;
-
-    @Value("${network.url.activating:''}")
-    private String activatingUrl;
-
     @Value("${network.url.landing:''}")
     private String landingUrl;
 
@@ -69,20 +63,13 @@ public class LandingController extends BaseWebviewController {
         super.initialize(webView);
         String landingIgnoreConfig = PropertyUtils.getProperty(Constants.LANDING_IGNORE);
         landingIgnore = !StringUtils.isEmpty(landingIgnoreConfig) && Boolean.parseBoolean(landingIgnoreConfig);
-        if (StringUtils.isEmpty(Network.SERVER_IP)) {
-            logger.info("init load url is connection");
-            loadConnectionPage();
-        } else if (landingIgnore) {
+        if (landingIgnore) {
             loadPage(webView, Network.SERVER_BASE_URL + "/case/release");
         } else {
             loadPage(webView, Network.LOCAL_BASE_URL + landingUrl);
         }
 
         //webEngine.load("https://www.baidu.com");
-    }
-
-    public void loadConnectionPage() {
-        loadPage(webView, Network.LOCAL_BASE_URL + connectionUrl);
     }
 
     @PostMapping("/landing")
@@ -140,7 +127,15 @@ public class LandingController extends BaseWebviewController {
     @GetMapping("/user/name")
     @ResponseBody
     public String getUserName() throws IOException {
+        logger.info("into get user name..");
         return PropertyUtils.getUserName();
+    }
+
+    @GetMapping("/serverIP")
+    @ResponseBody
+    public String getServerIP() throws IOException {
+        logger.info("into get server ip..");
+        return PropertyUtils.getServerIP();
     }
 
 
@@ -172,7 +167,7 @@ public class LandingController extends BaseWebviewController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        response.setFlag(1);
         return response;
     }
 

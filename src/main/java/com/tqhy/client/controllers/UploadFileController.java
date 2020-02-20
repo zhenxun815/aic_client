@@ -504,7 +504,6 @@ public class UploadFileController {
         // String batchNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
         // uploadMsg.setBatchNumber(batchNumber);
         uploadMsg.setToken(Network.TOKEN);
-        logger.info("uploadTargetName to upload is: {}", uploadMsg.getUploadTargetName());
         Platform.runLater(() -> {
             if (null == stage) {
                 stage = new Stage();

@@ -200,7 +200,6 @@ public class UploadWorkerTask extends Task {
         HashMap<String, String> requestParamMap = new HashMap<>();
         requestParamMap.put("token", token);
         requestParamMap.put("batchNumber", batchNumber);
-        requestParamMap.put("taskId", uploadMsg.getUploadId());
         requestParamMap.put("name", dirToUpload.getName());
 
         logger.info("upload token: {}, dirToUpload: {}, batchNumber: {}", token, dirPathToUpload, batchNumber);
@@ -221,7 +220,6 @@ public class UploadWorkerTask extends Task {
         HashMap<String, String> requestParamMap = new HashMap<>();
         requestParamMap.put("token", uploadMsg.getToken());
         requestParamMap.put("batchNumber", uploadMsg.getBatchNumber());
-        requestParamMap.put("projectId", uploadMsg.getUploadId());
         requestParamMap.put("remarks", uploadMsg.getRemarks());
         requestParamMap.put("name", dirToUpload.getName());
 
