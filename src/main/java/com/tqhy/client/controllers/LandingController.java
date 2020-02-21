@@ -18,7 +18,6 @@ import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -61,10 +60,8 @@ public class LandingController extends BaseWebviewController {
     @FXML
     void initialize() {
         super.initialize(webView);
-        String landingIgnoreConfig = PropertyUtils.getProperty(Constants.LANDING_IGNORE);
-        landingIgnore = !StringUtils.isEmpty(landingIgnoreConfig) && Boolean.parseBoolean(landingIgnoreConfig);
-        if (landingIgnore) {
-            loadPage(webView, Network.SERVER_BASE_URL + "/case/release");
+        if (true) {
+            loadPage(webView, Network.LOCAL_BASE_URL + "html/test_upload.html");
         } else {
             loadPage(webView, Network.LOCAL_BASE_URL + landingUrl);
         }

@@ -27,8 +27,8 @@ public interface AicApi {
      */
     @Streaming
     @Headers("Authorization: admin")
-    @GET("util/getDownload")
-    Observable<Response<ResponseBody>> download(@Query("imgUrlString") String imgUrlString);
+    @GET("download/excel")
+    Observable<Response<ResponseBody>> download(@Query("excelPath") String excelPath);
 
     /**
      * 单个参数,单个文件上传

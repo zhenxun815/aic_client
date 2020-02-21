@@ -31,7 +31,6 @@ public class DownloadTask implements Callable<Observable<DownloadMsg>> {
 
     Logger logger = LoggerFactory.getLogger(DownloadMsg.class);
 
-
     @NonNull
     private DownloadMsg downloadMsg;
 
@@ -40,20 +39,20 @@ public class DownloadTask implements Callable<Observable<DownloadMsg>> {
         DownloadInfo downloadInfo = downloadMsg.getDownloadInfo();
         File downloadDir = downloadMsg.getDownloadDir();
         switch (downloadMsg.getDownloadTaskApi()) {
-            case DOWNLOAD_PDF:
-                return downloadPdf(downloadDir, downloadInfo);
+            case DOWNLOAD_EXCEL:
+                return downloadExcel(downloadDir, downloadInfo);
             default:
                 return Observable.just(downloadMsg);
         }
     }
 
-    private Observable<DownloadMsg> downloadPdf(File downloadDir, DownloadInfo downloadInfo) {
-        String imgUrlStr = downloadInfo.getImgUrlString();
+    private Observable<DownloadMsg> downloadExcel(File downloadDir, DownloadInfo downloadInfo) {
+        String imgUrlStr = downloadInfo.getExcelUrlString();
         String saveFileName = downloadInfo.getFileName();
         return Network.getAicApi()
                       .download(imgUrlStr)
                       .map(response -> {
-                          File file = new File(downloadDir, saveFileName + ".pdf");
+                          File file = new File(downloadDir, saveFileName);
                           BufferedSink sink = null;
                           try {
                               sink = Okio.buffer(Okio.sink(file));

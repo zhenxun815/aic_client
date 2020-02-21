@@ -19,5 +19,5 @@ public class DownloadInfo implements Serializable {
 
     private String fileName;
 
-    private String imgUrlString;
+    private String excelUrlString;
 }

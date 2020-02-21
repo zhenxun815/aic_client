@@ -6,5 +6,5 @@ package com.tqhy.client.models.enums;
  * @since 1.0.0
  */
 public enum DownloadTaskApi {
-    DOWNLOAD_PDF
+    DOWNLOAD_EXCEL
 }

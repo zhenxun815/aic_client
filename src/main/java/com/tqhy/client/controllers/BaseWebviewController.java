@@ -90,6 +90,7 @@ public class BaseWebviewController {
     public void initWebView(WebView webView) {
         logger.info("into init webEngine..");
         webView.setCache(true);
+        webView.setContextMenuEnabled(false);
         webView.setCacheHint(CacheHint.SPEED);
         logger.info("init webView complete..");
     }
@@ -112,10 +113,9 @@ public class BaseWebviewController {
                            uploadFileController.openUpload(UploadMsg.with(UploadMsg.UPLOAD_TYPE_TEST));
                            break;
                        case Constants.CMD_MSG_DOWNLOAD:
-                           //download;{"fileName":"taskName","imgUrlString":"imgUrl1,imgUrl2"}
+                           //download;{"fileName":"fileName","excelUrlString":"pdfUrl"}
                            int index = data.indexOf(Constants.MSG_SPLITTER);
                            String jsonStr = data.substring(index + 1);
-
                            Optional<DownloadInfo> downloadInfoOptional = GsonUtils.parseJsonToObj(jsonStr,
                                                                                                   DownloadInfo.class);
                            onDownloadOption(downloadInfoOptional);
@@ -191,7 +191,7 @@ public class BaseWebviewController {
 
         if (downloadInfoOptional.isPresent()) {
             DownloadInfo downloadInfo = downloadInfoOptional.get();
-            String imgUrlString = downloadInfo.getImgUrlString();
+            String imgUrlString = downloadInfo.getExcelUrlString();
             if (StringUtils.isEmpty(imgUrlString)) {
                 logger.info("download img url is empty");
                 return;
@@ -203,7 +203,7 @@ public class BaseWebviewController {
             }
 
             Observable.fromCallable(
-                    DownloadTask.of(DownloadMsg.of(DownloadTaskApi.DOWNLOAD_PDF, downloadDir, downloadInfo)))
+                    DownloadTask.of(DownloadMsg.of(DownloadTaskApi.DOWNLOAD_EXCEL, downloadDir, downloadInfo)))
                       .subscribeOn(Schedulers.io())
                       .observeOn(Schedulers.io())
                       .subscribe(downloadMsgObservable ->
