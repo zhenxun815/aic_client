@@ -188,6 +188,10 @@
 
 <script type="text/javascript">
 
+	document.oncontextmenu = function () {
+		return false;
+	}
+
 	window.onload = () => {
 		get_ajax("getUserName", "/user/name", (response) => {
 			console.log(`user name is: ${response}`)
@@ -367,9 +371,12 @@
 <div class="txt1">欢迎使用</div>
 <div class="txt2">新冠肺炎公益筛查平台</div>
 <div class="input-list">
-	<input id="user_name" placeholder="请输入你的登陆帐号" type="text">
-	<input id="user_pwd" placeholder="请输入你的登陆密码" type="password">
-	<input id="server_ip" placeholder="请配置ip" type="text">
+	<input id="user_name" placeholder="请输入你的登陆帐号" type="text" onfocus="this.placeholder=''"
+	       onblur="this.placeholder='请输入你的登陆帐号'">
+	<input id="user_pwd" placeholder="请输入你的登陆密码" type="password" onfocus="this.placeholder=''"
+	       onblur="this.placeholder='请输入你的登陆密码'">
+	<input id="server_ip" placeholder="请配置ip" type="text" onfocus="this.placeholder=''"
+	       onblur="this.placeholder='请配置ip'">
 	<p class="callback-message">IP地址不能为空</p>
 </div>
 <div class="sub">
