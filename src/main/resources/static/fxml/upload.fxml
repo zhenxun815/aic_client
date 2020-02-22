@@ -48,13 +48,6 @@
                                         </Insets>
                                     </VBox.margin>
                                 </Text>
-                                <Text fx:id="text_choose_remark">备注信息
-                                    <VBox.margin>
-                                        <Insets>
-                                            <top>20</top>
-                                        </Insets>
-                                    </VBox.margin>
-                                </Text>
                             </VBox>
                             <VBox fx:id="choose_right" minWidth="393" style="-fx-alignment: top-left;"
                                   styleClass="choose_right">
@@ -94,10 +87,6 @@
                                     </VBox.margin>
                                 </TextField>
 
-                                <TextArea fx:id="text_field_remarks" promptText="请为这批数据添加至少一个关键词，以便在使用过程中对其进行检索"
-                                          styleClass="text_remark">
-
-                                </TextArea>
                             </VBox>
                         </HBox>
                         <HBox styleClass="confirm_btn_container">

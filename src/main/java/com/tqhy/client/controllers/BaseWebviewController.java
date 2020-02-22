@@ -90,7 +90,7 @@ public class BaseWebviewController {
     public void initWebView(WebView webView) {
         logger.info("into init webEngine..");
         webView.setCache(true);
-        webView.setContextMenuEnabled(false);
+        //webView.setContextMenuEnabled(false);
         webView.setCacheHint(CacheHint.SPEED);
         logger.info("init webView complete..");
     }

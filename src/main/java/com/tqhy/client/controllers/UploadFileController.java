@@ -22,7 +22,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,11 +118,6 @@ public class UploadFileController {
     @FXML
     public Label label_fail_desc;
     /**
-     * 上传备注信息
-     */
-    @FXML
-    TextArea text_field_remarks;
-    /**
      * 上传进度百分比
      */
     @FXML
@@ -210,13 +204,6 @@ public class UploadFileController {
                                });
 
         text_field_max.setFocusTraversable(false);
-        text_field_remarks.setOnKeyPressed(event -> {
-            int length = text_field_remarks.getLength();
-            if (length >= 50) {
-                String remarks = text_field_remarks.getText().substring(0, 50);
-                text_field_remarks.setText(remarks);
-            }
-        });
 
         scrollPane.setFitToWidth(true);
         label_fail_desc.setWrapText(true);
@@ -284,11 +271,7 @@ public class UploadFileController {
             //显示上传中界面
             showPanel(panel_progress.getId());
             text_progress_info.setText(0.00 + "%");
-            String remarksText = text_field_remarks.getText() == null ? "" : text_field_remarks.getText();
-            logger.info("remark is: {}", remarksText);
-            String remarks = UploadMsg.UPLOAD_TYPE_CASE.equals(uploadMsg.getUploadType()) ? remarksText : "";
-            remarks = remarks.length() > 50 ? remarks.substring(0, 50) : remarks;
-            uploadMsg.setRemarks(remarks);
+            uploadMsg.setRemarks("");
             workerTask = UploadWorkerTask.with(dirToUpload, uploadMsg, localDataPath, maxUploadCaseCount);
 
             workerTask.messageProperty()
@@ -362,18 +345,6 @@ public class UploadFileController {
                                  .findFirst()
                                  .get();
         if (panelToShow.getId().equals(panel_choose.getId())) {
-            if (UploadMsg.UPLOAD_TYPE_CASE.equals(uploadMsg.getUploadType())) {
-                FXMLUtils.displayChildNode(choose_right, text_field_remarks, true);
-                text_choose_remark.setText("");
-                //text_choose_desc.setText("将数据导入至: " + uploadMsg.getUploadTargetName());
-                //text_choose_desc.setVisible(true);
-                //logger.info("upload case...target name is: [{}]",uploadMsg.getUploadTargetName());
-            } else if (UploadMsg.UPLOAD_TYPE_TEST.equals(uploadMsg.getUploadType())) {
-                FXMLUtils.displayChildNode(choose_right, text_field_remarks, false);
-                text_choose_remark.setText("备注信息");
-                //text_choose_desc.setVisible(false);
-                logger.info("upload test...");
-            }
         } else {
             container_pane.setMinHeight(300);
         }
@@ -513,17 +484,6 @@ public class UploadFileController {
                 stage.show();
             }
             // text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
-
-            @NonNull String uploadType = uploadMsg.getUploadType();
-            if (UploadMsg.UPLOAD_TYPE_CASE.equals(uploadType)) {
-                FXMLUtils.displayChildNode(choose_right, text_field_remarks, true);
-                //text_choose_desc.setVisible(true);
-                //logger.info("upload case...target name is: [{}]",uploadMsg.getUploadTargetName());
-            } else if (UploadMsg.UPLOAD_TYPE_TEST.equals(uploadType)) {
-                FXMLUtils.displayChildNode(choose_right, text_field_remarks, false);
-                //text_choose_desc.setVisible(false);
-                logger.info("upload test...");
-            }
         });
     }
 }
