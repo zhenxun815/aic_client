@@ -135,16 +135,8 @@ public class Dcm2JpgUtil {
      */
     private static ImageReadParam readParam() {
         DicomImageReadParam param = (DicomImageReadParam) imageReader.getDefaultReadParam();
-        float windowCenter = PropertyUtils.getWindowCenter();
-        if (windowCenter != 0) {
-            param.setWindowCenter(windowCenter);
-            logger.info("trans dcm to jpg set windowCenter {}", windowCenter);
-        }
-        float windowWidth = PropertyUtils.getWindowWidth();
-        if (windowWidth != 0) {
-            param.setWindowWidth(windowWidth);
-            logger.info("trans dcm to jpg set windowWidth {}", windowWidth);
-        }
+        param.setWindowCenter(-400);
+        param.setWindowWidth(1500);
         param.setAutoWindowing(autoWindowing);
         param.setPreferWindow(preferWindow);
         param.setOverlayActivationMask(overlayActivationMask);
