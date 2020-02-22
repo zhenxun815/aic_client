@@ -60,13 +60,9 @@ public class LandingController extends BaseWebviewController {
     @FXML
     void initialize() {
         super.initialize(webView);
-        if (true) {
-            loadPage(webView, Network.LOCAL_BASE_URL + "html/test_upload.html");
-        } else {
-            loadPage(webView, Network.LOCAL_BASE_URL + landingUrl);
-        }
-
         //webEngine.load("https://www.baidu.com");
+        //loadPage(webView, Network.LOCAL_BASE_URL + "html/test_upload.html");
+        loadPage(webView, Network.LOCAL_BASE_URL + landingUrl);
     }
 
     @PostMapping("/landing")
