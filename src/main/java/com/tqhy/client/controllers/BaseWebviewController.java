@@ -262,6 +262,7 @@ public class BaseWebviewController {
         Platform.runLater(() -> {
             Dialog<ButtonType> alert = new Dialog<>();
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+            stage.setAlwaysOnTop(true);
             stage.getIcons().add(new Image(NetworkUtils.toExternalForm("/static/img/logo_title_light.png")));
             alert.getDialogPane().setContentText(message);
             alert.getDialogPane().getButtonTypes().add(ButtonType.OK);
