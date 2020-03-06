@@ -9,7 +9,6 @@ import com.tqhy.client.utils.GsonUtils;
 import com.tqhy.client.utils.NetworkUtils;
 import com.tqhy.client.utils.StringUtils;
 import io.reactivex.Observable;
-import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -24,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -291,62 +289,6 @@ public class UploadWorkerTask extends Task {
         }
     }
 
-    private AtomicInteger fakeUpload(File caseDir) {
-        String libPath = System.getProperty("java.library.path");
-        logger.info("lib path: is: " + libPath);
-
-        HashMap<File, String> filesMapInDir = FileUtils.getFilesMapInRootDir(caseDir, file -> FileUtils.isJpgFile(
-                file) || isDcmFile(file));
-        HashMap<File, String> transformedFilesMap = transAllToJpg(filesMapInDir, jpgDir);
-        logger.info("into fakeUpload...");
-        AtomicInteger completeCount = new AtomicInteger(0);
-        int total = transformedFilesMap.values().size();
-
-        transformedFilesMap.forEach((file, caseName) ->
-                                            Observable.create((ObservableOnSubscribe<File>) emitter -> {
-                                                                  emitter.onNext(file);
-                                                                  emitter.onComplete();
-                                                              }
-                                                             ).observeOn(Schedulers.io())
-                                                      .subscribeOn(Schedulers.single())
-                                                      .blockingSubscribe(new Observer<File>() {
-                                                          @Override
-                                                          public void onSubscribe(Disposable d) {
-                                                              logger.info("Disposable: " + d);
-                                                          }
-
-                                                          @Override
-                                                          public void onNext(File file) {
-                                                              try {
-                                                                  Thread.sleep(2000);
-                                                                  logger.info(file.getAbsolutePath() + " uploading...");
-                                                              } catch (InterruptedException e) {
-                                                                  e.printStackTrace();
-                                                              }
-                                                          }
-
-                                                          @Override
-                                                          public void onError(Throwable e) {
-                                                              failCount.incrementAndGet();
-                                                              e.printStackTrace();
-                                                          }
-
-                                                          @Override
-                                                          public void onComplete() {
-                                                              completeCount.incrementAndGet();
-                                                              updateProgress(completeCount.get(), total);
-                                                              double progress = (completeCount.get() + failCount.get() + 0D) / total * 100;
-                                                              logger.info(
-                                                                      "complete count is: " + completeCount.get() + ", progress is: " + progress);
-                                                              updateMessage(
-                                                                      progress == 100.0D ? PROGRESS_MSG_COMPLETE : DecimalFormat
-                                                                              .getInstance()
-                                                                              .format(progress));
-                                                          }
-                                                      }));
-
-        return completeCount;
-    }
 
     /**
      * 收集全部文件信息并更新进度条状态

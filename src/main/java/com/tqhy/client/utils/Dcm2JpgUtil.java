@@ -16,7 +16,10 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * 将Dicom文件转换为Jpg文件
@@ -94,6 +97,33 @@ public class Dcm2JpgUtil {
     }
 
     /**
+     * 获取dcm tag值
+     *
+     * @param dcmFile
+     * @param tags
+     * @return
+     */
+    public static Map<Integer, String> getDcmTags(File dcmFile, Integer... tags) {
+        try (DicomInputStream iis = new DicomInputStream(dcmFile)) {
+
+
+            Attributes attributes = iis.readDataset(-1, Tag.PixelData);
+            return Arrays.stream(tags)
+                         .collect(HashMap::new,
+                                  (map, tag) -> {
+                                      String tagVal = attributes.getString(tag);
+                                      logger.info("get dcm tag {} val {}", tag, tagVal);
+                                      map.put(tag, tagVal);
+                                  },
+                                  HashMap::putAll);
+
+        } catch (IOException e) {
+            logger.error("get dcm file tag fail..", e);
+        }
+        return null;
+    }
+
+    /**
      * 生成待写入jpg文件 {@link File File}对象并返回,若已存在则删除已有文件
      *
      * @param dcmFile 原始dcm文件
@@ -110,7 +140,8 @@ public class Dcm2JpgUtil {
             Attributes attributes = iis.readDataset(-1, Tag.PixelData);
             String instanceNum = attributes.getString(Tag.InstanceNumber);
             String patientId = attributes.getString(Tag.PatientID);
-            //logger.info("instanceNum is {}", instanceNum);
+            String seriesDescription = attributes.getString(Tag.SeriesDescription);
+            logger.info("instanceNum is {},seriesDescription is {}", instanceNum, seriesDescription);
             String destFileName = String.format("%s-%05d.jpg", patientId, Integer.parseInt(instanceNum));
             File destJpgFile = new File(jpgDir, destFileName);
 

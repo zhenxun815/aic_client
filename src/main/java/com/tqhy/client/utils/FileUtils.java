@@ -1,6 +1,7 @@
 package com.tqhy.client.utils;
 
 import com.tqhy.client.config.Constants;
+import org.dcm4che3.data.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
@@ -30,28 +31,15 @@ public class FileUtils {
      * 生成病例名,若为根目录下文件则以文件名为病例名,否则以文件夹名作为病例名
      *
      * @param file
-     * @param rootDir 是否是根目录下图片文件
      * @return
      */
-    public static String generateCaseName(File file, File rootDir) {
+    public static String generateCaseName(File file) {
         File parentFile = file.getParentFile();
         //logger.info("parent file is {}", parentFile.getName());
-        String caseName;
-        if (parentFile.equals(rootDir)) {
-            String fileFullName = file.getName().toLowerCase();
-            if (fileFullName.endsWith(".dcm") || fileFullName.endsWith(
-                    ".jpg") || fileFullName.endsWith(".jpeg")) {
-                int lastIndex = fileFullName.lastIndexOf(".");
-                caseName = fileFullName.substring(0, lastIndex);
-            } else {
-                caseName = fileFullName;
-            }
-        } else {
-            String absolutePath = parentFile.getAbsolutePath();
-            String rootDirName = rootDir.getName();
-            int beginIndex = absolutePath.indexOf(rootDirName);
-            caseName = absolutePath.substring(beginIndex).replace("\\", "_");
-        }
+        Map<Integer, String> dcmTags = Dcm2JpgUtil.getDcmTags(file, Tag.PatientID, Tag.SeriesDescription);
+        String patientID = dcmTags.get(Tag.PatientID);
+        String seriesDescription = dcmTags.get(Tag.SeriesDescription);
+        String caseName = patientID + "_" + seriesDescription;
         byte[] bytes = caseName.getBytes();
 
         return bytes.length > 256 ? Constants.CASE_NAME_INVALID : caseName;
@@ -72,7 +60,7 @@ public class FileUtils {
                      .filter(file -> filter.test(file))
                      .collect(HashMap::new,
                               (map, file) -> {
-                                  map.put(file, generateCaseName(file, dir));
+                                  map.put(file, generateCaseName(file));
                                   //logger.info("add file map key: {}, value: {}", file.getAbsolutePath(), name);
                               },
                               HashMap::putAll);
@@ -94,7 +82,7 @@ public class FileUtils {
                      .collect(HashMap::new,
                               (map, file) -> {
                                   if (filter.test(file) && !file.getParentFile().equals(rootDir)) {
-                                      map.put(file, generateCaseName(file, rootDir));
+                                      map.put(file, generateCaseName(file));
                                   } else {
                                       map.putAll(getFilesMapInSubDir(file, filter, rootDir));
                                   }
@@ -147,6 +135,10 @@ public class FileUtils {
      */
     public static boolean isDcmFile(File fileToJudge) {
         logger.info("into judge file is dcm...");
+        if (fileToJudge.getName().endsWith("dcm")) {
+            return true;
+        }
+
         byte[] bytes = new byte[132];
         try (FileInputStream in = new FileInputStream(fileToJudge)) {
             int len = readAvailable(in, bytes, 0, 132);
