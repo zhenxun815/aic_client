@@ -43,6 +43,7 @@ public class FileUtils {
         String seriesDescription = dcmTags.get(Tag.SeriesDescription);
         String seriesTime = dcmTags.get(Tag.SeriesTime).replace('.', '_');
         String caseName = patientID + "_" + seriesDescription + "_" + seriesTime;
+        //logger.info("case name is {}",caseName);
         byte[] bytes = caseName.getBytes();
 
         return bytes.length > 256 ? Constants.CASE_NAME_INVALID : caseName;

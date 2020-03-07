@@ -70,7 +70,7 @@
                                     </Text>
 
                                 </HBox>
-                                <Text fx:id="text_choose_tip" styleClass="text_tips">仅支持DICOM/JPG格式文件
+                                <Text fx:id="text_choose_tip" styleClass="text_tips">仅支持DICOM格式文件
                                     <VBox.margin>
                                         <Insets>
                                             <top>5</top>
