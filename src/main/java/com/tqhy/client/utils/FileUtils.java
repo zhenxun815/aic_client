@@ -36,10 +36,13 @@ public class FileUtils {
     public static String generateCaseName(File file) {
         File parentFile = file.getParentFile();
         //logger.info("parent file is {}", parentFile.getName());
-        Map<Integer, String> dcmTags = Dcm2JpgUtil.getDcmTags(file, Tag.PatientID, Tag.SeriesDescription);
+
+        Map<Integer, String> dcmTags = Dcm2JpgUtil.getDcmTags(file, Tag.PatientID, Tag.SeriesDescription,
+                                                              Tag.SeriesTime);
         String patientID = dcmTags.get(Tag.PatientID);
         String seriesDescription = dcmTags.get(Tag.SeriesDescription);
-        String caseName = patientID + "_" + seriesDescription;
+        String seriesTime = dcmTags.get(Tag.SeriesTime).replace('.', '_');
+        String caseName = patientID + "_" + seriesDescription + "_" + seriesTime;
         byte[] bytes = caseName.getBytes();
 
         return bytes.length > 256 ? Constants.CASE_NAME_INVALID : caseName;

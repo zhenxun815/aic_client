@@ -323,7 +323,7 @@ public class UploadWorkerTask extends Task {
      * @return
      */
     private boolean filesFilter(AtomicInteger completeCount, AtomicInteger maxCount, File file) {
-        boolean fileValid = isDcmFile(file) || FileUtils.isJpgFile(file);
+        boolean fileValid = isDcmFile(file);
         updateCollectAllStatus(completeCount, maxCount);
         return fileValid;
     }
