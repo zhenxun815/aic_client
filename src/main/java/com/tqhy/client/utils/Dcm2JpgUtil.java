@@ -113,7 +113,7 @@ public class Dcm2JpgUtil {
                                   (map, tag) -> {
                                       String tagVal = attributes.getString(tag);
                                       logger.info("get dcm tag {} val {}", tag, tagVal);
-                                      map.put(tag, tagVal);
+                                      map.put(tag, null == tagVal ? "null" : tagVal.replace('/', '_'));
                                   },
                                   HashMap::putAll);
 

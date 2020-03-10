@@ -35,14 +35,19 @@ public class FileUtils {
      */
     public static String generateCaseName(File file) {
         File parentFile = file.getParentFile();
+        String parentFileName = parentFile.getName();
+
         //logger.info("parent file is {}", parentFile.getName());
 
         Map<Integer, String> dcmTags = Dcm2JpgUtil.getDcmTags(file, Tag.PatientID, Tag.SeriesDescription,
                                                               Tag.SeriesTime);
         String patientID = dcmTags.get(Tag.PatientID);
         String seriesDescription = dcmTags.get(Tag.SeriesDescription);
-        String seriesTime = dcmTags.get(Tag.SeriesTime).replace('.', '_');
-        String caseName = patientID + "_" + seriesDescription + "_" + seriesTime;
+        String seriesTime = dcmTags.get(Tag.SeriesTime);
+        if (!"null".equals(seriesTime)) {
+            seriesTime = seriesTime.replace('.', '_');
+        }
+        String caseName = patientID + "_" + parentFileName + "_" + seriesDescription + "_" + seriesTime;
         //logger.info("case name is {}",caseName);
         byte[] bytes = caseName.getBytes();
 
@@ -139,8 +144,12 @@ public class FileUtils {
      */
     public static boolean isDcmFile(File fileToJudge) {
         logger.info("into judge file is dcm...");
-        if (fileToJudge.getName().endsWith("dcm")) {
+        if (fileToJudge.getName().toLowerCase().endsWith("dcm")) {
             return true;
+        }
+
+        if (fileToJudge.isDirectory()) {
+            return false;
         }
 
         byte[] bytes = new byte[132];
