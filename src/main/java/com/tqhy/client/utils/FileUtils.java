@@ -42,6 +42,9 @@ public class FileUtils {
         Map<Integer, String> dcmTags = Dcm2JpgUtil.getDcmTags(file, Tag.PatientID, Tag.SeriesDescription,
                                                               Tag.SeriesTime);
         String patientID = dcmTags.get(Tag.PatientID);
+        if ("null" == patientID) {
+            return Constants.CASE_NAME_INVALID;
+        }
         String seriesDescription = dcmTags.get(Tag.SeriesDescription);
         String seriesTime = dcmTags.get(Tag.SeriesTime);
         if (!"null".equals(seriesTime)) {
@@ -69,7 +72,10 @@ public class FileUtils {
                      .filter(file -> filter.test(file))
                      .collect(HashMap::new,
                               (map, file) -> {
-                                  map.put(file, generateCaseName(file));
+                                  String caseName = generateCaseName(file);
+                                  if (!Constants.CASE_NAME_INVALID.equals(caseName)) {
+                                      map.put(file, caseName);
+                                  }
                                   //logger.info("add file map key: {}, value: {}", file.getAbsolutePath(), name);
                               },
                               HashMap::putAll);
@@ -91,7 +97,11 @@ public class FileUtils {
                      .collect(HashMap::new,
                               (map, file) -> {
                                   if (filter.test(file) && !file.getParentFile().equals(rootDir)) {
-                                      map.put(file, generateCaseName(file));
+                                      String caseName = generateCaseName(file);
+                                      if (!Constants.CASE_NAME_INVALID.equals(caseName)) {
+
+                                          map.put(file, caseName);
+                                      }
                                   } else {
                                       map.putAll(getFilesMapInSubDir(file, filter, rootDir));
                                   }
