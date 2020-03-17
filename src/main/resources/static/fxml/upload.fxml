@@ -58,10 +58,10 @@
                                 </HBox.margin>
                                 <HBox styleClass="small_btn_container">
                                     <Button fx:id="btn_choose" onMouseClicked="#chooseDirectory" styleClass="btn_small">
-                                        选择文件
+                                        选择文件夹
                                     </Button>
 
-                                    <Text fx:id="text_choose_info">未选择任何文件
+                                    <Text fx:id="text_choose_info">未选择任何文件夹
                                         <HBox.margin>
                                             <Insets>
                                                 <left>10</left>

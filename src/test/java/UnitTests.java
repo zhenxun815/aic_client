@@ -13,6 +13,9 @@ import com.tqhy.client.utils.GsonUtils;
 import okhttp3.ResponseBody;
 import okio.BufferedSink;
 import okio.Okio;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.io.DicomInputStream;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,15 +41,18 @@ public class UnitTests {
 
     @Test
     public void testOther() {
-        String str = "中文";
-        byte[] bytes = str.getBytes();
-        logger.info("length is {}", bytes.length);
+        String dirPath = "C:\\Users\\qing\\Desktop\\tmp\\应城\\test";
+        String dcmName = "3-15_1_00AE118B.DCM";
+        File dcmFile = new File(dirPath, dcmName);
+        //String parent = dcmFile.getParent();
+        String name = dcmFile.getParentFile().getName();
+        logger.info("parent is {}", name);
     }
 
     @Test
     public void testJudgeDcm() {
-        String dirPath = "H:\\肺结节整理\\35";
-        String dcmName = "1.3.6.1.4.1.25403.127846690305080.3884.20190725093946.3.dcm";
+        String dirPath = "F:\\dicom\\赤壁";
+        String dcmName = "IMG-0001-00001.dcm";
         boolean isDcm = FileUtils.isDcmFile(new File(dirPath, dcmName));
         logger.info("is dcm {}", isDcm);
 
@@ -60,11 +66,25 @@ public class UnitTests {
         String libPath = System.getProperty("java.library.path");
         logger.info("lib path: is: " + libPath);
 
-        File dcmDir = new File("C:\\Users\\qing\\Desktop\\小结节\\ttt\\2");
+        File dcmDir = new File(
+                "F:\\dicom\\右玉县\\YANG_A_LONG_2020_03_13\\THORAX_1_THORAXROUTINE_(ADULT)_20200313_191534_796000\\DOSE_REPORT_0502");
         File[] dcmFiles = dcmDir.listFiles(FileUtils::isDcmFile);
         logger.info("dcm count is: " + dcmFiles.length);
+
+
         Arrays.stream(dcmFiles)
               .forEach(dcmFile -> {
+                  try (DicomInputStream iis = new DicomInputStream(dcmFile)) {
+
+                      Attributes attributes = iis.readDataset(-1, -1);
+                      byte[] bytes = attributes.getBytes(Tag.PixelData);
+                      if (null == bytes) {
+                          logger.info("no pixel data!");
+                          return;
+                      }
+                  } catch (IOException e) {
+                      logger.error("get dcm file tag fail..", e);
+                  }
                   File jpgFile = FileUtils.transToJpg(dcmFile, dcmDir).get();
                   System.out.println("trans jpg file finish..." + jpgFile.getAbsolutePath());
               });

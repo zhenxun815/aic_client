@@ -1,7 +1,9 @@
 package com.tqhy.client.utils;
 
 import com.tqhy.client.config.Constants;
+import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.dcm4che3.io.DicomInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
@@ -48,10 +50,11 @@ public class FileUtils {
         String seriesDescription = dcmTags.get(Tag.SeriesDescription);
         String seriesTime = dcmTags.get(Tag.SeriesTime);
         if (!"null".equals(seriesTime)) {
-            seriesTime = seriesTime.replace('.', '_');
+            seriesTime = seriesTime.replace('.', '_').replace('/', '_');
+            logger.info("seriesTime is {}", seriesTime);
         }
         String caseName = patientID + "_" + parentFileName + "_" + seriesDescription + "_" + seriesTime;
-        //logger.info("case name is {}",caseName);
+        logger.info("case name is {}", caseName);
         byte[] bytes = caseName.getBytes();
 
         return bytes.length > 256 ? Constants.CASE_NAME_INVALID : caseName;
@@ -162,15 +165,15 @@ public class FileUtils {
             return false;
         }
 
-        byte[] bytes = new byte[132];
-        try (FileInputStream in = new FileInputStream(fileToJudge)) {
-            int len = readAvailable(in, bytes, 0, 132);
-            return 132 == len && bytes[128] == 'D' && bytes[129] == 'I' && bytes[130] == 'C' && bytes[131] == 'M';
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        try (DicomInputStream iis = new DicomInputStream(fileToJudge)) {
+
+            Attributes attributes = iis.readDataset(-1, -1);
+            byte[] bytes = attributes.getBytes(Tag.PixelData);
+            return null != bytes;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("judge dcm file fail..", e);
         }
+
         return false;
     }
 

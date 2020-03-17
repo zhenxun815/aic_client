@@ -58,7 +58,7 @@ public class Dcm2JpgUtil {
      */
     public static File convert(File dcmFile, File jpgDir) {
         logger.info("start convert dicom to jpg: " + dcmFile.getAbsolutePath());
-
+        logger.info("jpg dir is {}", jpgDir.getAbsolutePath());
         if (null == dcmFile) {
             return null;
         }
@@ -140,10 +140,11 @@ public class Dcm2JpgUtil {
 
             Attributes attributes = iis.readDataset(-1, Tag.PixelData);
             String instanceNum = attributes.getString(Tag.InstanceNumber);
-            String patientId = attributes.getString(Tag.PatientID);
-            String seriesDescription = attributes.getString(Tag.SeriesDescription);
-            logger.info("instanceNum is {},seriesDescription is {}", instanceNum, seriesDescription);
+            String patientId = attributes.getString(Tag.PatientID).replace('/', '_');
+
+            //String seriesDescription = attributes.getString(Tag.SeriesDescription);
             String destFileName = String.format("%s-%05d.jpg", patientId, Integer.parseInt(instanceNum));
+            logger.info("destFileName is {}", destFileName);
             File destJpgFile = new File(jpgDir, destFileName);
 
             if (destJpgFile.exists()) {
