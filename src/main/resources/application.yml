@@ -3,8 +3,10 @@ server:
 
 #db
 spring:
-    datasource:
-        driver-class-name:
+    messages:
+        basename: i18n.messages
+        cache-duration: 3600
+        encoding: UTF-8
 #network
 network:
     url:
