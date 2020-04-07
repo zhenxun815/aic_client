@@ -7,6 +7,7 @@ import com.tqhy.client.network.Network;
 import com.tqhy.client.task.UploadWorkerTask;
 import com.tqhy.client.utils.FXMLUtils;
 import com.tqhy.client.utils.FileUtils;
+import com.tqhy.client.utils.PropertyUtils;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -273,12 +274,13 @@ public class UploadFileController {
             text_progress_info.setText(0.00 + "%");
             uploadMsg.setRemarks("");
             workerTask = UploadWorkerTask.with(dirToUpload, uploadMsg, localDataPath, maxUploadCaseCount);
-
+            String language = PropertyUtils.getLanguage();
             workerTask.messageProperty()
                       .addListener((observable, oldVal, newVal) -> {
                           DecimalFormat decimalFormat = new DecimalFormat("#0.0");
                           logger.info("upload progress msg..." + newVal);
                           String[] msgSplit = newVal.split(";");
+
                           switch (msgSplit[0]) {
                               case UploadWorkerTask.PROGRESS_MSG_COMPLETE:
                                   //显示上传成功页面
@@ -286,13 +288,22 @@ public class UploadFileController {
 
                                   String completeCount = msgSplit[1];
                                   String errorCount = msgSplit[2];
-                                  String completeMsg = "上传完毕,成功: " + completeCount + " 条, 失败: " + errorCount + " 条!";
+                                  String completeMsg = null;
+                                  if (Constants.LANGUAGE_EN.equals(language)) {
+                                      completeMsg = "Upload completed, success: " + completeCount + " , failure: " + errorCount + " .";
+                                  } else {
+                                      completeMsg = "上传完毕,成功: " + completeCount + " 条, 失败: " + errorCount + " 条!";
+                                  }
                                   FXMLUtils.displayChildNode(box_complete, btn_failed_check,
                                                              Integer.parseInt(errorCount) > 0);
                                   text_success_desc.setText(completeMsg);
                                   break;
                               case UploadWorkerTask.PROGRESS_MSG_COLLECT:
-                                  text_progress_desc.setText("文件信息采集中,请耐心等待..");
+                                  if (Constants.LANGUAGE_EN.equals(language)) {
+                                      text_progress_desc.setText("Collecting file information…Please wait.");
+                                  } else {
+                                      text_progress_desc.setText("文件信息采集中,请耐心等待..");
+                                  }
                                   String infoType = msgSplit[1];
                                   if (infoType.equals("progress")) {
                                       text_progress_info.setText(
@@ -314,7 +325,13 @@ public class UploadFileController {
                                   }
                                   break;
                               case UploadWorkerTask.PROGRESS_MSG_UPLOAD:
-                                  text_progress_desc.setText("文件上传中,请耐心等待..");
+
+                                  if (Constants.LANGUAGE_EN.equals(language)) {
+                                      text_progress_desc.setText("Importing...Please wait.");
+                                  } else {
+                                      text_progress_desc.setText("文件上传中,请耐心等待..");
+                                  }
+
                                   logger.info("upload progress msg..." + newVal);
                                   text_progress_info.setText(
                                           decimalFormat.format(Double.parseDouble(msgSplit[1])) + "%");

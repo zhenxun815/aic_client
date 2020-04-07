@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ResourceBundle;
 
 import static com.tqhy.client.ClientApplication.springContext;
 
@@ -50,6 +51,7 @@ public class FXMLUtils {
         ClientApplication.menuStage.setY(popY);
         try {
             FXMLLoader loader = new FXMLLoader(FXMLUtils.class.getResource(url));
+            loader.setResources(ResourceBundleUtil.getBundle());
             Parent parentNode = loader.load();
             loadScene(ClientApplication.menuStage, parentNode, false);
             ClientApplication.menuStage.show();
@@ -93,6 +95,8 @@ public class FXMLUtils {
     public static Stage loadWindow(Stage stage, String url, boolean fullScreen) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(FXMLUtils.class.getResource(url));
+            ResourceBundle bundle = ResourceBundleUtil.getBundle();
+            fxmlLoader.setResources(bundle);
             fxmlLoader.setControllerFactory(springContext::getBean);
             Parent parentNode = fxmlLoader.load();
             loadScene(stage, parentNode, fullScreen);

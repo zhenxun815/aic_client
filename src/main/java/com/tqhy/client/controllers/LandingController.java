@@ -131,6 +131,20 @@ public class LandingController extends BaseWebviewController {
         return PropertyUtils.getServerIP();
     }
 
+    @GetMapping("/language")
+    @ResponseBody
+    public String getLanguage() throws IOException {
+        logger.info("into get language..");
+        return PropertyUtils.getLanguage();
+    }
+
+    @PostMapping("/language")
+    @ResponseBody
+    public void setLanguage(@RequestBody VerifyMsg msg) throws IOException {
+        logger.info("into set language..to {}", msg.getLanguage());
+        PropertyUtils.setLanguage(msg.getLanguage());
+    }
+
 
     @PostMapping("/verify/connection")
     public VerifyMsg activateClient(@RequestBody VerifyMsg msg) {

@@ -1,14 +1,12 @@
 package com.tqhy.client;
 
 import com.sun.javafx.application.LauncherImpl;
+import com.tqhy.client.config.Constants;
 import com.tqhy.client.controllers.PreloaderController;
 import com.tqhy.client.network.Network;
 import com.tqhy.client.unique.AlreadyLockedException;
 import com.tqhy.client.unique.JUnique;
-import com.tqhy.client.utils.FXMLUtils;
-import com.tqhy.client.utils.FileUtils;
-import com.tqhy.client.utils.NetworkUtils;
-import com.tqhy.client.utils.SystemUtils;
+import com.tqhy.client.utils.*;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import javafx.application.Platform;
@@ -109,6 +107,7 @@ public class ClientPreloader extends Preloader {
 
     @Override
     public void handleStateChangeNotification(StateChangeNotification notification) {
+        String language = PropertyUtils.getLanguage();
         switch (notification.getType()) {
             case BEFORE_LOAD:
                 preloaderController.setPreloadProgress(0);
@@ -119,7 +118,11 @@ public class ClientPreloader extends Preloader {
                 break;
             case BEFORE_INIT:
                 AtomicInteger integer = new AtomicInteger();
-                preloaderController.setPreloadMessage("资源加载中...");
+                if (Constants.LANGUAGE_EN.equals(language)) {
+                    preloaderController.setPreloadMessage("Loading...");
+                } else {
+                    preloaderController.setPreloadMessage("资源加载中...");
+                }
                 Observable.interval(300, TimeUnit.MILLISECONDS)
                           .map(aLong -> aLong)
                           .observeOn(Schedulers.trampoline())
@@ -135,7 +138,11 @@ public class ClientPreloader extends Preloader {
                 logger.info("before start...");
                 preloaderFlag = true;
                 preloaderController.setPreloadProgress(100D);
-                preloaderController.setPreloadMessage("资源加载完毕...");
+                if (Constants.LANGUAGE_EN.equals(language)) {
+                    preloaderController.setPreloadMessage("Ready...");
+                } else {
+                    preloaderController.setPreloadMessage("资源加载完毕...");
+                }
                 preloaderStage.hide();
                 break;
 

@@ -48,6 +48,15 @@ public class Constants {
     public static final String USERNAME = "username";
 
     public static final String LANDING_IGNORE = "landingIgnore";
+
     public static final String WINDOW_CENTTER = "windowCenter";
+
     public static final String WINDOW_WIDTH = "windowWidth";
+
+    public static final String LANGUAGE = "language";
+
+    public static final String LANGUAGE_ZH = "zh";
+
+    public static final String LANGUAGE_EN = "en";
+
 }

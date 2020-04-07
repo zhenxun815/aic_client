@@ -58,6 +58,14 @@ public class PropertyUtils {
         }
     }
 
+    public static void setLanguage(String language) {
+        setProperty(Constants.LANGUAGE, language);
+    }
+
+    public static String getLanguage() {
+        return getProperty(Constants.LANGUAGE);
+    }
+
     public static void setUserName(String name) {
         setProperty(Constants.USERNAME, name);
     }

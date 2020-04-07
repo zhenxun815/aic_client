@@ -10,7 +10,7 @@
 
     <VBox fx:id="base_pane" styleClass="base_pane" minWidth="600" minHeight="228">
         <children>
-            <Text fx:id="text_success_desc" styleClass="text_title">确定退出吗?
+            <Text fx:id="text_success_desc" styleClass="text_title" text="%quit.tips">确定退出吗?
                 <VBox.margin>
                     <Insets>
                         <top>55</top>
@@ -24,7 +24,8 @@
                     </Insets>
                 </VBox.margin>
 
-                <Button fx:id="btn_close_confirm" onMouseClicked="#closeConfirm" styleClass="btn_confirm">确认
+                <Button fx:id="btn_close_confirm" onMouseClicked="#closeConfirm" styleClass="btn_confirm"
+                        text="%quit.confirm">确认
                     <HBox.margin>
                         <Insets>
                             <left>15</left>
@@ -32,14 +33,16 @@
                     </HBox.margin>
                 </Button>
 
-                <Button fx:id="btn_close_cancel" onMouseClicked="#closeCancel" styleClass="btn_cancel">取消
+                <Button fx:id="btn_close_cancel" onMouseClicked="#closeCancel" styleClass="btn_cancel"
+                        text="%quit.cancel">取消
                     <HBox.margin>
                         <Insets>
                             <left>15</left>
                         </Insets>
                     </HBox.margin>
                 </Button>
-                <Button fx:id="btn_stage_minimum" onMouseClicked="#stageMinimum" styleClass="btn_cancel">最小化
+                <Button fx:id="btn_stage_minimum" onMouseClicked="#stageMinimum" styleClass="btn_cancel"
+                        text="%quit.min">最小化
                     <HBox.margin>
                         <Insets>
                             <left>15</left>

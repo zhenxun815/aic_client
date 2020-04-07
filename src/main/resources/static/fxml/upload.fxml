@@ -19,7 +19,7 @@
             <VBox fx:id="panels_parent">
                 <VBox fx:id="panel_choose" styleClass="pane">
                     <children>
-                        <Text styleClass="text_title">添加数据
+                        <Text styleClass="text_title" text="%upload.add">添加数据
                             <VBox.margin>
                                 <Insets>
                                     <top>30</top>
@@ -34,14 +34,14 @@
                                 </Insets>
                             </VBox.margin>
                             <VBox minWidth="197" style="-fx-alignment: top-right;" styleClass="choose_left">
-                                <Text>选择数据
+                                <Text text="%upload.select_data">选择数据
                                     <VBox.margin>
                                         <Insets>
                                             <top>5</top>
                                         </Insets>
                                     </VBox.margin>
                                 </Text>
-                                <Text>最大上传数量
+                                <Text text="%upload.max_number">最大上传数量
                                     <VBox.margin>
                                         <Insets>
                                             <top>52</top>
@@ -57,11 +57,12 @@
                                     </Insets>
                                 </HBox.margin>
                                 <HBox styleClass="small_btn_container">
-                                    <Button fx:id="btn_choose" onMouseClicked="#chooseDirectory" styleClass="btn_small">
+                                    <Button fx:id="btn_choose" text="%upload.select_folder"
+                                            onMouseClicked="#chooseDirectory" styleClass="btn_small">
                                         选择文件夹
                                     </Button>
 
-                                    <Text fx:id="text_choose_info">未选择任何文件夹
+                                    <Text fx:id="text_choose_info" text="%upload.select_tip">未选择任何文件夹
                                         <HBox.margin>
                                             <Insets>
                                                 <left>10</left>
@@ -70,14 +71,15 @@
                                     </Text>
 
                                 </HBox>
-                                <Text fx:id="text_choose_tip" styleClass="text_tips">仅支持DICOM格式文件
+                                <Text fx:id="text_choose_tip" styleClass="text_tips" text="%upload.select_warning">
+                                    仅支持DICOM格式文件
                                     <VBox.margin>
                                         <Insets>
                                             <top>5</top>
                                         </Insets>
                                     </VBox.margin>
                                 </Text>
-                                <TextField fx:id="text_field_max" promptText="请输入希望上传的数据数量，不填代表全部上传"
+                                <TextField fx:id="text_field_max" promptText="%upload.select_max_tip"
                                            styleClass="text_max">
                                     <VBox.margin>
                                         <Insets>
@@ -95,9 +97,11 @@
                                     <top>25</top>
                                 </Insets>
                             </VBox.margin>
-                            <Button fx:id="btn_cancel_upload" onMouseClicked="#cancelUpload" styleClass="btn_cancel">取消
+                            <Button fx:id="btn_cancel_upload" onMouseClicked="#cancelUpload" styleClass="btn_cancel"
+                                    text="%upload.cancel">取消
                             </Button>
-                            <Button fx:id="btn_start_upload" onMouseClicked="#startUpload" styleClass="btn_confirm">
+                            <Button fx:id="btn_start_upload" onMouseClicked="#startUpload" styleClass="btn_confirm"
+                                    text="%upload.start">
                                 开始导入
                                 <HBox.margin>
                                     <Insets>
@@ -113,7 +117,7 @@
                 <!--上传中显示页面-->
                 <VBox fx:id="panel_progress" styleClass="pane" stylesheets="@../css/fx_upload_progress.css">
                     <children>
-                        <Text fx:id="text_progress_title" styleClass="text_title">导入数据
+                        <Text fx:id="text_progress_title" styleClass="text_title" text="%upload.importing">导入数据
                             <VBox.margin>
                                 <Insets>
                                     <top>30</top>
@@ -136,7 +140,7 @@
                                 </ProgressBar>
                             </children>
                         </HBox>
-                        <Text fx:id="text_progress_info">准备中..
+                        <Text fx:id="text_progress_info" text="%upload.waiting">准备中...
                             <VBox.margin>
                                 <Insets>
                                     <top>10</top>
@@ -150,7 +154,8 @@
                                 </Insets>
                             </VBox.margin>
                         </Text>
-                        <Button fx:id="btn_stop_upload" onMouseClicked="#stopUpload" styleClass="btn_cancel">终止上传
+                        <Button fx:id="btn_stop_upload" onMouseClicked="#stopUpload" styleClass="btn_cancel"
+                                text="%upload.terminate">终止上传
                             <VBox.margin>
                                 <Insets>
                                     <top>30</top>
@@ -180,10 +185,11 @@
                                     <top>30</top>
                                 </Insets>
                             </VBox.margin>
-                            <Text fx:id="text_success_desc">数据导入完毕
+                            <Text fx:id="text_success_desc" text="%upload.complete">数据导入完毕
 
                             </Text>
-                            <Button fx:id="btn_failed_check" onMouseClicked="#checkFailed" styleClass="btn_small">查看失败文件
+                            <Button fx:id="btn_failed_check" onMouseClicked="#checkFailed" styleClass="btn_small"
+                                    text="%upload.check_fail">查看失败文件
                                 <HBox.margin>
                                     <Insets>
                                         <left>10</left>
@@ -192,14 +198,15 @@
                             </Button>
                         </HBox>
 
-                        <Text fx:id="text_success_info">导入批次:
+                        <Text fx:id="text_success_info" text="%upload.batch">导入批次:
                             <VBox.margin>
                                 <Insets>
                                     <top>30</top>
                                 </Insets>
                             </VBox.margin>
                         </Text>
-                        <Button fx:id="btn_success_confirm" onMouseClicked="#cancelUpload" styleClass="btn_confirm">确认
+                        <Button fx:id="btn_success_confirm" onMouseClicked="#cancelUpload" styleClass="btn_confirm"
+                                text="%upload.comfirm">确认
                             <VBox.margin>
                                 <Insets>
                                     <top>35</top>

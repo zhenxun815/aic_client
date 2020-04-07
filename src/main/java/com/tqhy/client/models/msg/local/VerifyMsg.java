@@ -34,4 +34,9 @@ public class VerifyMsg extends BaseMsg {
      * 是否跳过登录
      */
     private Boolean landingIgnore;
+
+    /**
+     * 客户端语言
+     */
+    private String language;
 }

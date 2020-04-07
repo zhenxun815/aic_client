@@ -192,6 +192,8 @@
 		return false;
 	}
 
+	let lang
+
 	window.onload = () => {
 		get_ajax("getUserName", "/user/name", (response) => {
 			console.log(`user name is: ${response}`)
@@ -206,12 +208,43 @@
 				$('#server_ip').val(response)
 			}
 		});
+
+		get_ajax("getLanguage", "/language", (response) => {
+			console.log(`language is: ${response}`)
+			if (response) {
+				lang = response
+
+				$.i18n.properties({
+					name: 'strings',    //属性文件名     命名格式： 文件名_国家代号.properties
+					path: '/i18n/',   //注意这里路径是你属性文件的所在文件夹
+					mode: 'map',
+					language: response,     //这就是国家代号 name+language刚好组成属性文件名：strings+zh -> strings_zh.properties
+					callback: function () {
+						$("[data-locale]").each(function () {
+							$(this).html($.i18n.prop($(this).data("locale")))
+						});
+					}
+				});
+			}
+
+			$("#user_name").attr("placeholder", $.i18n.prop('login.username'))
+			$("#user_name").blur(() => {
+				$("#user_name").attr("placeholder", $.i18n.prop('login.username'))
+			})
+
+			$("#user_pwd").attr("placeholder", $.i18n.prop('login.password'))
+			$("#user_pwd").blur(() => {
+				$("#user_pwd").attr("placeholder", $.i18n.prop('login.password'))
+			})
+
+			$("#server_ip").attr("placeholder", $.i18n.prop('login.ip'))
+			$("#server_ip").blur(() => {
+				$("#server_ip").attr("placeholder", $.i18n.prop('login.ip'))
+			})
+		});
 	};
 	baseUrlLocal = 'http://localhost:59527/html'
 	serverIPValid = false
-	$(document).ready(function () {
-
-	})
 
 	function connection(serverIP) {
 		if (checkServerIP(serverIP)) {
@@ -245,7 +278,7 @@
 					//alert('server ip: '+serverIP)
 					//window.location.href = 'http://' + serverIP + '/index.html?token=' + token + '&localIP=' + localIP
 					// jsp version
-					window.location.href = 'http://' + serverIP + '/testBatch/list?token=' + token
+					window.location.href = 'http://' + serverIP + '/testBatch/list?token=' + token + '&lang=' + lang
 				} else {
 					$('.callback-message').html(token)
 					$('.callback-message').addClass("show")
@@ -266,7 +299,7 @@
 			userLand(userName, userPwd)
 		} else {
 			console.log("invalid")
-			$('.callback-message').html('无法连接到服务器')
+			$('.callback-message').html($.i18n.prop('login.ip_wrong_tip'))
 			$('.callback-message').addClass("show")
 		}
 	}
@@ -324,7 +357,7 @@
 	function checkServerIP(serverIP) {
 		console.log(`server ip is ${server_ip}`)
 		if (!server_ip) {
-			$('.callback-message').html('服务器ip不能为空')
+			$('.callback-message').html($.i18n.prop('login.ip_wrong_tip'))
 			$('.callback-message').addClass("show")
 			return false
 		}
@@ -334,7 +367,7 @@
 		let ipValid = reg.test(serverIP)
 		console.log(`server ip to connect is: ${serverIP},valid is: ${ipValid}`)
 		if (!ipValid) {
-			$('.callback-message').html('服务器ip地址不合法')
+			$('.callback-message').html($.i18n.prop('login.ip_wrong_tip'))
 			$('.callback-message').addClass("show")
 			return false
 		}
@@ -345,14 +378,14 @@
 
 		console.log(`user name is ${userName}`)
 		if (!userName) {
-			$('.callback-message').html('登录账号不能为空')
+			$('.callback-message').html($.i18n.prop('login.name_empty_tip'))
 			$('.callback-message').addClass("show")
 			return false
 		}
 
 		console.log(`user pwd is ${userPwd}`)
 		if (!userPwd) {
-			$('.callback-message').html('登录密码不能为空')
+			$('.callback-message').html($.i18n.prop('login.password_empty_tip'))
 			$('.callback-message').addClass("show")
 			return false
 		}
@@ -361,18 +394,26 @@
 
 	}
 
-	function loadProperties(lang) {
+
+	function changeLanguage(lang2load) {
+		lang = lang2load
 		$.i18n.properties({
 			name: 'strings',    //属性文件名     命名格式： 文件名_国家代号.properties
 			path: '/i18n/',   //注意这里路径是你属性文件的所在文件夹
 			mode: 'map',
-			language: lang,     //这就是国家代号 name+language刚好组成属性文件名：strings+zh -> strings_zh.properties
+			language: lang2load,     //这就是国家代号 name+language刚好组成属性文件名：strings+zh -> strings_zh.properties
 			callback: function () {
 				$("[data-locale]").each(function () {
 					$(this).html($.i18n.prop($(this).data("locale")))
 				});
+
+				$("#user_name").attr("placeholder", $.i18n.prop('login.username'))
+				$("#user_pwd").attr("placeholder", $.i18n.prop('login.password'))
+				$("#server_ip").attr("placeholder", $.i18n.prop('login.ip'))
 			}
 		});
+
+		post_ajax("setLang", "/language", true, {language: lang})
 	}
 </script>
 <body>
@@ -380,28 +421,30 @@
 	<div class="logo">
 		<img alt="" src="../img/logo.png">
 	</div>
-	<div class="txt" onclick="showDiv()">平台说明</div>
-	<a href="javascript:;" onclick="loadProperties('zh')"> 中文 </a>
-	<a href="javascript:;" onclick="loadProperties('en')"> english </a>
+	<div>
+		<span onclick="showDiv()" class="txt" data-locale="login.platform_info">平台说明</span>&nbsp;&nbsp;
+		<a href="javascript:;" onclick="changeLanguage('zh')" class="txt"> 中文 </a>&nbsp;&nbsp;
+		<a href="javascript:;" onclick="changeLanguage('en')" class="txt"> English </a>
+	</div>
 </div>
-<div class="txt1">欢迎使用</div>
-<div class="txt2">新冠肺炎公益筛查平台</div>
+<div class="txt1" data-locale="login.welcome">欢迎使用</div>
+<div class="txt2" data-locale="login.platform_name">新冠肺炎公益筛查平台</div>
 <div class="input-list">
-	<input id="user_name" onblur="this.placeholder='请输入你的登录帐号'" onfocus="this.placeholder=''" placeholder="请输入你的登录帐号"
+	<input id="user_name" onfocus="this.placeholder=''" placeholder="请输入你的登录帐号"
 	       type="text">
-	<input id="user_pwd" onblur="this.placeholder='请输入你的登录密码'" onfocus="this.placeholder=''" placeholder="请输入你的登录密码"
+	<input id="user_pwd" onfocus="this.placeholder=''" placeholder="请输入你的登录密码"
 	       type="password">
-	<input id="server_ip" onblur="this.placeholder='请配置ip'" onfocus="this.placeholder=''" placeholder="请配置ip"
+	<input id="server_ip" onfocus="this.placeholder=''" placeholder="请配置ip"
 	       type="text">
 	<p class="callback-message">IP地址不能为空</p>
 </div>
 <div class="sub">
-	<div class="btn" onclick="landing()" data-locale="Login">
+	<div class="btn" data-locale="login.login" onclick="landing()">
 		登录
 	</div>
 </div>
 
-<div class="foot">
+<div class="foot" data-locale="login.company_name">
 	天启慧眼（北京）信息技术有限公司
 </div>
 <div class="alertDiv" id="shuoming" style="display: none;">
