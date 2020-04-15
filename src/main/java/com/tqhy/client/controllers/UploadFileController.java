@@ -260,9 +260,14 @@ public class UploadFileController {
             if (null == dirToUpload) {
                 return;
             }
+            String language = PropertyUtils.getLanguage();
             String batchNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
             uploadMsg.setBatchNumber(batchNumber + "a");
-            text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
+            if (Constants.LANGUAGE_EN.equals(language)) {
+                text_success_info.setText("Import batch: " + uploadMsg.getBatchNumber());
+            } else {
+                text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
+            }
             logger.info("upload batch number is {}", batchNumber);
 
             String max = text_field_max.getText();
@@ -274,7 +279,7 @@ public class UploadFileController {
             text_progress_info.setText(0.00 + "%");
             uploadMsg.setRemarks("");
             workerTask = UploadWorkerTask.with(dirToUpload, uploadMsg, localDataPath, maxUploadCaseCount);
-            String language = PropertyUtils.getLanguage();
+
             workerTask.messageProperty()
                       .addListener((observable, oldVal, newVal) -> {
                           DecimalFormat decimalFormat = new DecimalFormat("#0.0");
@@ -493,13 +498,15 @@ public class UploadFileController {
         // uploadMsg.setBatchNumber(batchNumber);
         uploadMsg.setToken(Network.TOKEN);
         Platform.runLater(() -> {
-            if (null == stage) {
+            stage = new Stage();
+            FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml", false);
+            /*if (null == stage) {
                 stage = new Stage();
                 FXMLUtils.loadWindow(stage, "/static/fxml/upload.fxml", false);
             } else {
                 showPanel(panel_choose.getId());
                 stage.show();
-            }
+            }*/
             // text_success_info.setText("导入批次: " + uploadMsg.getBatchNumber());
         });
     }

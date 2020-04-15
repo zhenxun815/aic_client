@@ -113,8 +113,10 @@ public class Dcm2JpgUtil {
                                   (map, tag) -> {
                                       String tagVal = attributes.getString(tag);
                                       logger.info("get dcm tag {} val {}", tag, tagVal);
+
                                       map.put(tag,
-                                              null == tagVal ? "null" : tagVal.replace('/', '_').replace(':', '_'));
+                                              null == tagVal ? "null" : tagVal.replaceAll(
+                                                      "[^(a-zA-Z0-9\\u4e00-\\u9fa5)]", ""));
                                   },
                                   HashMap::putAll);
 
@@ -139,8 +141,9 @@ public class Dcm2JpgUtil {
             }
 
             Attributes attributes = iis.readDataset(-1, Tag.PixelData);
-            String instanceNum = attributes.getString(Tag.InstanceNumber);
-            String patientId = attributes.getString(Tag.PatientID).replace('/', '_');
+            String instanceNum = attributes.getString(Tag.InstanceNumber)
+                                           .replaceAll("[^(a-zA-Z0-9\\u4e00-\\u9fa5)]", "");
+            String patientId = attributes.getString(Tag.PatientID).replaceAll("[^(a-zA-Z0-9\\u4e00-\\u9fa5)]", "");
 
             //String seriesDescription = attributes.getString(Tag.SeriesDescription);
             String destFileName = String.format("%s-%05d.jpg", patientId, Integer.parseInt(instanceNum));

@@ -72,12 +72,6 @@ public class LandingController extends BaseWebviewController {
         VerifyMsg response = new VerifyMsg();
 
         String localIp = NetworkUtils.getLocalIp();
-        if (!NetworkUtils.isIP(localIp)) {
-            response.setFlag(BaseMsg.FAIL);
-            response.setDesc("IP地址获取失败!");
-            return response;
-        }
-
         String userName = landingMsg.getUserName().trim();
         String userPwd = landingMsg.getUserPwd().trim();
         PropertyUtils.setUserName(userName);
@@ -94,6 +88,12 @@ public class LandingController extends BaseWebviewController {
                    response.setDesc(clientMsg.getDesc());
                    List<String> msg = clientMsg.getMsg();
                    String token = msg.get(0);
+                   if (token.startsWith("用户")) {
+                       String language = PropertyUtils.getLanguage();
+                       if (Constants.LANGUAGE_EN.equals(language)) {
+                           token = "Wrong username or password!";
+                       }
+                   }
                    logger.info("map token is: " + token);
                    response.setToken(token);
                    response.setLocalIP(localIp);
